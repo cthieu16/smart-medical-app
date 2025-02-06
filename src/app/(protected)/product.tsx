@@ -81,56 +81,56 @@ const ProductScreen = () => {
 
   if (isLoading || !product) {
     return (
-      <View className='flex-1 bg-[#121212] items-center justify-center'>
-        <Text className='text-white'>Loading...</Text>
+      <View className="flex-1 bg-[#121212] items-center justify-center">
+        <Text className="text-white">Đang chờ...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className='flex-1 bg-[#121212]'>
+    <ScrollView className="flex-1 bg-[#121212]">
       {/* Header */}
-      <View className='flex-row items-center justify-between p-4 border-b border-gray-800'>
-        <View className='flex-row items-center'>
-          <Pressable onPress={() => router.back()} className='mr-4'>
-            <AntDesign name='left' size={24} color='white' />
+      <View className="flex-row items-center justify-between p-4 border-b border-gray-800">
+        <View className="flex-row items-center">
+          <Pressable onPress={() => router.back()} className="mr-4">
+            <AntDesign name="left" size={24} color="white" />
           </Pressable>
-          <Text className='text-xl font-bold text-white'>{product.name}</Text>
+          <Text className="text-xl font-bold text-white">{product.name}</Text>
         </View>
       </View>
 
       {/* Product Image */}
-      <View className='relative'>
+      <View className="relative">
         <Image
           source={
             product.imageUrl
               ? { uri: product.imageUrl }
               : require("../../assets/images/no-image-available.jpg")
           }
-          className='w-full h-[500px]'
-          resizeMode='cover'
+          className="w-full h-[500px]"
+          resizeMode="cover"
         />
         <Pressable
-          className='absolute p-2 bg-black bg-opacity-50 rounded-full top-4 right-4'
+          className="absolute p-2 bg-black bg-opacity-50 rounded-full top-4 right-4"
           onPress={handleFavoriteToggle}
         >
           <AntDesign
             name={product.isFavorite ? "heart" : "hearto"}
             size={24}
-            color='white'
+            color="white"
           />
         </Pressable>
       </View>
 
       {/* Product Info */}
-      <View className='p-4'>
-        <Text className='mb-4 text-2xl font-bold text-white'>
+      <View className="p-4">
+        <Text className="mb-4 text-2xl font-bold text-white">
           {product.name}
         </Text>
-        <Text className='mb-6 text-gray-400'>{product.description}</Text>
+        <Text className="mb-6 text-gray-400">{product.description}</Text>
 
         {/* Sellers List */}
-        <Text className='mb-4 text-lg text-white'>Choose a Seller</Text>
+        <Text className="mb-4 text-lg text-white">Choose a Seller</Text>
         {product.listings.map((listing, index) => (
           <Pressable
             key={index}
@@ -143,7 +143,7 @@ const ProductScreen = () => {
             disabled={listing.stock === 0}
           >
             <View>
-              <Text className='text-base text-white'>{listing.sellerName}</Text>
+              <Text className="text-base text-white">{listing.sellerName}</Text>
               <Text
                 className={`text-sm ${
                   listing.stock === 0 ? "text-red-500" : "text-gray-400"
@@ -154,35 +154,35 @@ const ProductScreen = () => {
                   : `Stock: ${listing.stock} units`}
               </Text>
             </View>
-            <View className='items-end'>
-              <Text className='text-[#4A90E2] text-lg'>
+            <View className="items-end">
+              <Text className="text-[#4A90E2] text-lg">
                 ${listing.price.toFixed(2)}
               </Text>
               {selectedSeller === index && (
-                <View className='flex-row items-center mt-2'>
+                <View className="flex-row items-center mt-2">
                   <Pressable
                     onPress={() =>
                       handleQuantityChange((parseInt(quantity) - 1).toString())
                     }
                     disabled={quantity === "1"}
-                    className='items-center justify-center w-8 h-8 bg-gray-800 rounded-l'
+                    className="items-center justify-center w-8 h-8 bg-gray-800 rounded-l"
                   >
-                    <AntDesign name='minus' size={16} color='white' />
+                    <AntDesign name="minus" size={16} color="white" />
                   </Pressable>
                   <TextInput
                     value={quantity}
                     onChangeText={handleQuantityChange}
-                    keyboardType='numeric'
-                    className='w-12 h-8 text-center text-white bg-gray-800'
+                    keyboardType="numeric"
+                    className="w-12 h-8 text-center text-white bg-gray-800"
                   />
                   <Pressable
                     onPress={() =>
                       handleQuantityChange((parseInt(quantity) + 1).toString())
                     }
                     disabled={parseInt(quantity) >= listing.stock}
-                    className='items-center justify-center w-8 h-8 bg-gray-800 rounded-r'
+                    className="items-center justify-center w-8 h-8 bg-gray-800 rounded-r"
                   >
-                    <AntDesign name='plus' size={16} color='white' />
+                    <AntDesign name="plus" size={16} color="white" />
                   </Pressable>
                 </View>
               )}
@@ -200,7 +200,7 @@ const ProductScreen = () => {
           onPress={handleAddToCart}
           disabled={selectedSeller === null || isAddingToCart}
         >
-          <Text className='font-semibold text-center text-white'>
+          <Text className="font-semibold text-center text-white">
             {isAddingToCart
               ? "Adding to Cart..."
               : selectedSeller === null
@@ -223,13 +223,13 @@ const ProductScreen = () => {
 
       {/* Related Products */}
       {relatedProducts && relatedProducts.length > 0 && (
-        <View className='p-4 border-t border-gray-800'>
-          <Text className='mb-4 text-lg text-white'>You may also like</Text>
+        <View className="p-4 border-t border-gray-800">
+          <Text className="mb-4 text-lg text-white">You may also like</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {relatedProducts.map((relatedProduct) => (
               <View
                 key={relatedProduct.id}
-                className='mr-4'
+                className="mr-4"
                 style={{ width: 150 }}
               >
                 <ProductGridItem

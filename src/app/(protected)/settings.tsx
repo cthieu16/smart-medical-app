@@ -66,164 +66,164 @@ const SettingsScreen = () => {
 
   if (!user) {
     return (
-      <View className='flex-1 bg-[#121212] items-center justify-center'>
-        <Text className='text-white'>Loading...</Text>
+      <View className="flex-1 bg-[#121212] items-center justify-center">
+        <Text className="text-white">Đang chờ...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className='flex-1 bg-[#121212]'>
-      <View className='flex-row items-center justify-between p-4'>
-        <Pressable onPress={() => router.back()} className='mr-4'>
-          <AntDesign name='left' size={24} color='white' />
+    <ScrollView className="flex-1 bg-[#121212]">
+      <View className="flex-row items-center justify-between p-4">
+        <Pressable onPress={() => router.back()} className="mr-4">
+          <AntDesign name="left" size={24} color="white" />
         </Pressable>
-        <Text className='text-2xl font-bold text-white'>Settings</Text>
+        <Text className="text-2xl font-bold text-white">Cài đặt</Text>
         <Pressable onPress={() => console.log("Search")}>
-          <AntDesign name='search1' size={24} color='white' />
+          <AntDesign name="search1" size={24} color="white" />
         </Pressable>
       </View>
 
-      <View className='px-4 mt-4'>
-        <Text className='mb-4 text-xl text-white'>Personal Information</Text>
-        <View className='gap-3 space-y-4'>
+      <View className="px-4 mt-4">
+        <Text className="mb-4 text-xl text-white">Thông tin cá nhân</Text>
+        <View className="gap-3 space-y-4">
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='First Name'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Họ"
+            placeholderTextColor="#666"
             value={formData.firstName}
             onChangeText={(value) => handleChange("firstName", value)}
           />
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='Last Name'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Tên"
+            placeholderTextColor="#666"
             value={formData.lastName}
             onChangeText={(value) => handleChange("lastName", value)}
           />
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='Email'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Email"
+            placeholderTextColor="#666"
             value={formData.email}
             onChangeText={(value) => handleChange("email", value)}
-            keyboardType='email-address'
+            keyboardType="email-address"
           />
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='Phone'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Số điện thoại"
+            placeholderTextColor="#666"
             value={formData.phone}
             onChangeText={(value) => handleChange("phone", value)}
-            keyboardType='phone-pad'
+            keyboardType="phone-pad"
           />
         </View>
 
-        <Text className='mt-8 mb-4 text-xl text-white'>Address</Text>
-        <View className='gap-3 space-y-4'>
+        <Text className="mt-8 mb-4 text-xl text-white">Địa chỉ</Text>
+        <View className="gap-3 space-y-4">
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='Street'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Đường, phố"
+            placeholderTextColor="#666"
             value={formData.street}
             onChangeText={(value) => handleChange("street", value)}
           />
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='City'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Thành phố"
+            placeholderTextColor="#666"
             value={formData.city}
             onChangeText={(value) => handleChange("city", value)}
           />
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='State'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Bang, tiểu bang (hoặc tỉnh, tùy theo quốc gia)"
+            placeholderTextColor="#666"
             value={formData.state}
             onChangeText={(value) => handleChange("state", value)}
           />
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='Postal Code'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Mã bưu điện"
+            placeholderTextColor="#666"
             value={formData.postalCode}
             onChangeText={(value) => handleChange("postalCode", value)}
           />
           <TextInput
-            className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg'
-            placeholder='Country'
-            placeholderTextColor='#666'
+            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            placeholder="Quốc gia"
+            placeholderTextColor="#666"
             value={formData.country}
             onChangeText={(value) => handleChange("country", value)}
           />
         </View>
 
         <Pressable
-          className='bg-[#4A90E2] mt-8 py-3 px-6 rounded-lg'
+          className="bg-[#4A90E2] mt-8 py-3 px-6 rounded-lg"
           onPress={handleSubmit}
           disabled={isUpdating}
         >
-          <Text className='font-semibold text-center text-white'>
-            {isUpdating ? "Saving..." : "Save Changes"}
+          <Text className="font-semibold text-center text-white">
+            {isUpdating ? "Đang lưu..." : "Lưu"}
           </Text>
         </Pressable>
 
         <Pressable
-          className='mt-8 py-3 px-6 rounded-lg border border-[#4A90E2] mb-4'
+          className="mt-8 py-3 px-6 rounded-lg border border-[#4A90E2] mb-4"
           onPress={() => setIsPasswordModalVisible(true)}
         >
-          <Text className='text-[#4A90E2] text-center font-semibold'>
-            Change Password
+          <Text className="text-[#4A90E2] text-center font-semibold">
+            Đổi mật khẩu
           </Text>
         </Pressable>
       </View>
 
       <Modal
-        animationType='slide'
+        animationType="slide"
         transparent={true}
         visible={isPasswordModalVisible}
         onRequestClose={() => setIsPasswordModalVisible(false)}
       >
         <Pressable
-          className='justify-end flex-1 bg-black bg-opacity-50'
+          className="justify-end flex-1 bg-black bg-opacity-50"
           onPress={() => setIsPasswordModalVisible(false)}
         >
           <Pressable onPress={(e) => e.stopPropagation()}>
-            <View className='bg-[#121212] p-6 rounded-t-3xl'>
-              <Text className='mb-6 text-2xl font-bold text-white'>
-                Password Change
+            <View className="bg-[#121212] p-6 rounded-t-3xl">
+              <Text className="mb-6 text-2xl font-bold text-white">
+                Đổi mật khẩu
               </Text>
               <TextInput
-                className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4'
-                placeholder='Old Password'
-                placeholderTextColor='#666'
+                className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
+                placeholder="Mật khẩu cũ"
+                placeholderTextColor="#666"
                 secureTextEntry
               />
               <TextInput
-                className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4'
-                placeholder='New Password'
-                placeholderTextColor='#666'
+                className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
+                placeholder="Mật khẩu mới"
+                placeholderTextColor="#666"
                 secureTextEntry
               />
               <TextInput
-                className='bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4'
-                placeholder='Repeat New Password'
-                placeholderTextColor='#666'
+                className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
+                placeholder="Nhập lại mật khẩu mới"
+                placeholderTextColor="#666"
                 secureTextEntry
               />
               <Pressable
-                className='bg-[#E63946] py-3 px-6 rounded-lg mb-4'
+                className="bg-[#E63946] py-3 px-6 rounded-lg mb-4"
                 onPress={() => {
                   // Implement password change logic here
                   setIsPasswordModalVisible(false);
                 }}
               >
-                <Text className='font-semibold text-center text-white'>
-                  SAVE PASSWORD
+                <Text className="font-semibold text-center text-white">
+                  Lưu
                 </Text>
               </Pressable>
               <Pressable onPress={() => setIsPasswordModalVisible(false)}>
-                <Text className='text-[#4A90E2] text-center'>Cancel</Text>
+                <Text className="text-[#4A90E2] text-center">Huỷ bỏ</Text>
               </Pressable>
             </View>
           </Pressable>

@@ -45,42 +45,40 @@ const Home = () => {
 
   if (categoriesLoading || productsLoading) {
     return (
-      <View className='flex-1 bg-[#121212] items-center justify-center'>
-        <Text className='text-white'>Loading...</Text>
+      <View className="flex-1 bg-[#121212] items-center justify-center">
+        <Text className="text-white">Đang chờ...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className='flex-1 bg-[#121212]'>
+    <ScrollView className="flex-1 bg-[#121212]">
       {/* Hero Section */}
-      <View className='relative h-[400px]'>
+      <View className="relative h-[400px]">
         <Image
-          source={require("../../assets/images/computer-hero.png")}
-          className='w-full h-full'
-          resizeMode='cover'
+          source={require("../../assets/images/bg-medical.jpg")}
+          className="w-full h-full"
+          resizeMode="cover"
         />
-        <View className='absolute bottom-8 left-4'>
-          <Text className='mb-4 text-4xl font-bold text-white'>
-            Electronics sale
-          </Text>
+        <View className="absolute bottom-8 left-4">
+          <Text className="mb-4 text-4xl font-bold text-white">Medicals</Text>
         </View>
       </View>
 
       {/* New Products Section */}
-      <View className='px-4 mt-6'>
+      <View className="px-4 mt-6">
         <SectionTitle
-          title='New'
+          title="Mới"
           viewAll
           onViewAll={() => console.log("View all new items")}
         />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className='mt-4'
+          className="mt-4"
         >
           {newProducts?.map((product) => (
-            <View key={product.id} className='mr-4' style={{ width: 150 }}>
+            <View key={product.id} className="mr-4" style={{ width: 150 }}>
               <ProductGridItem
                 product={product}
                 onPress={() =>
@@ -106,11 +104,11 @@ const Home = () => {
 
       {/* View More Categories Button */}
       <Pressable
-        className='mx-4 my-8 bg-[#4A90E2] py-3 rounded-lg'
+        className="mx-4 my-8 bg-[#4A90E2] py-3 rounded-lg"
         onPress={() => router.push("/(protected)/categories")}
       >
-        <Text className='font-semibold text-center text-white'>
-          View More Categories
+        <Text className="font-semibold text-center text-white">
+          Xem bệnh án
         </Text>
       </Pressable>
     </ScrollView>
@@ -146,7 +144,7 @@ const CategoryProductSection = ({
   }
 
   return (
-    <View key={category.id} className='px-4 mt-8'>
+    <View key={category.id} className="px-4 mt-8">
       <SectionTitle
         title={category.name}
         viewAll
@@ -160,10 +158,10 @@ const CategoryProductSection = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className='mt-4'
+        className="mt-4"
       >
         {sortedCategoryProducts.map((product) => (
-          <View key={product.id} className='mr-4' style={{ width: 150 }}>
+          <View key={product.id} className="mr-4" style={{ width: 150 }}>
             <ProductGridItem
               product={product}
               onPress={() =>

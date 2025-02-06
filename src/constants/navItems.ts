@@ -10,28 +10,33 @@ export type NavItem = {
 };
 
 export const NAV_ITEMS: NavItem[] = [
-  { id: "home", name: "Home", icon: "home", routes: ["/(protected)/home"] },
+  {
+    id: "home",
+    name: "Trang chủ",
+    icon: "home",
+    routes: ["/(protected)/home"],
+  },
   {
     id: "shop",
-    name: "Shop",
-    icon: "shopping-bag",
+    name: "Bệnh án",
+    icon: "file-text",
     routes: ["/(protected)/categories", "/(protected)/product-list"],
   },
   {
     id: "cart",
-    name: "Cart",
-    icon: "shopping-cart",
+    name: "Lịch hẹn",
+    icon: "calendar",
     routes: ["/(protected)/cart"],
   },
   {
     id: "favorites",
-    name: "Favorites",
-    icon: "heart",
+    name: "Thông báo",
+    icon: "bell",
     routes: ["/(protected)/favorites"],
   },
   {
     id: "profile",
-    name: "Profile",
+    name: "Trang cá nhân",
     icon: "user",
     routes: ["/(protected)/profile"],
   },
