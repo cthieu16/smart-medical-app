@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 type HeroSectionProps = {
   imageUrl: string;

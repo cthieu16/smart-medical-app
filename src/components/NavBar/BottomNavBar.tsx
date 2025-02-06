@@ -1,6 +1,6 @@
-import { View, Text, Pressable } from "react-native";
-import { usePathname, useRouter } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
+import { usePathname, useRouter } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 import { NAV_ITEMS, NavItem } from "../../constants/navItems";
 
 type NavItemProps = NavItem & {

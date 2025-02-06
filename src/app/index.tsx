@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, ImageBackground } from "react-native";
-import { useRouter } from "expo-router";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withDelay,
-} from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React, { useEffect } from "react";
+import { Image, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
 import { SecondaryButton } from "../components/Buttons/SecondaryButton";
 import { SocialButton } from "../components/Buttons/SocialButton";
-import { useGoogleAuth } from "../hooks/useGoogleAuth";
 import { useFacebookAuth } from "../hooks/useFacebookAuth";
+import { useGoogleAuth } from "../hooks/useGoogleAuth";
 
 type AppRoutes = "/register" | "/login";
 

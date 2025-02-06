@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { View, Text, Image, Pressable } from "react-native";
-import { ProductInfo } from "../../hooks/useProducts";
 import { AntDesign } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { Image, Pressable, Text, View } from "react-native";
 import { useFavorites } from "../../hooks/useFavorites";
+import { ProductInfo } from "../../hooks/useProducts";
 
 type ProductGridItemProps = {
   product: ProductInfo;

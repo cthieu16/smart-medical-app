@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  TextInput,
-  Modal,
-} from "react-native";
-import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useUser } from "../../hooks/useUser";
 
 const SettingsScreen = () => {

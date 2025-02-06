@@ -1,7 +1,7 @@
-import React from "react";
-import { View, Text, Pressable } from "react-native";
-import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Pressable, Text, View } from "react-native";
 
 const SuccessScreen = () => {
   const router = useRouter();

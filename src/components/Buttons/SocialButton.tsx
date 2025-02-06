@@ -1,6 +1,6 @@
-import React from "react";
-import { Pressable, Text, View } from "react-native";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import React from "react";
+import { Pressable, Text } from "react-native";
 
 type SocialButtonProps = {
   onPress: () => void;

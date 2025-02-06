@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { View, Text, Pressable } from "react-native";
-import { Link, useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
+import { Link, useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
+import { PrimaryButton } from "../components/Buttons/PrimaryButton";
 import { FormTitle } from "../components/Form/FormTitle";
 import { TextInput } from "../components/TextInput/TextInput";
-import { PrimaryButton } from "../components/Buttons/PrimaryButton";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {

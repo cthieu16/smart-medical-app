@@ -1,10 +1,8 @@
-import { Stack, Redirect } from "expo-router";
-import { View } from "react-native";
-import * as Font from "expo-font";
-import { SplashScreen } from "expo-router";
-import "../styles/index.css";
-import { AuthProvider, useAuth } from "../context/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Font from "expo-font";
+import { SplashScreen, Stack } from "expo-router";
+import { AuthProvider } from "../context/AuthContext";
+import "../styles/index.css";
 
 Font.loadAsync({
   "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),

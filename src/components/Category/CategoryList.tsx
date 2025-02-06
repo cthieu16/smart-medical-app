@@ -1,6 +1,6 @@
-import { View, Text, ScrollView } from "react-native";
-import { CategoryItem } from "./CategoryItem";
+import { ScrollView, View } from "react-native";
 import { SectionTitle } from "../Section/SectionTitle";
+import { CategoryItem } from "./CategoryItem";
 
 type Category = {
   id: string;
