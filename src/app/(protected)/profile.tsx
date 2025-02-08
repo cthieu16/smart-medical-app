@@ -13,10 +13,10 @@ const ProfileScreen = () => {
   const menuItems = [
     {
       id: "orders",
-      title: "Đơn hàng",
-      subtitle: `${orders?.length || 0} orders`,
+      title: "Bệnh án",
+      subtitle: `Số lượng: ${orders?.length || 0}`,
       icon: "shopping-bag",
-      onPress: () => router.push("/orders"),
+      onPress: () => router.push("/"),
     },
     {
       id: "payment",
@@ -44,7 +44,6 @@ const ProfileScreen = () => {
         </Pressable>
       </View>
 
-      {/* Profile Info */}
       <View className="px-4 py-6">
         <Text className="text-xl font-semibold text-white">
           {user?.firstName} {user?.lastName}
@@ -52,7 +51,6 @@ const ProfileScreen = () => {
         <Text className="text-gray-400">{user?.email}</Text>
       </View>
 
-      {/* Menu Items */}
       <View className="px-4 mt-4">
         {menuItems.map((item) => (
           <Pressable

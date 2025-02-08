@@ -144,7 +144,6 @@ const CheckoutScreen = () => {
           </View>
         </View>
 
-        {/* Order Summary */}
         <View className='px-4 mb-6'>
           <View className='flex-row justify-between mb-4'>
             <Text className='text-gray-400'>Total:</Text>

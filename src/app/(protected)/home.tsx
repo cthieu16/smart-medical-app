@@ -1,180 +1,68 @@
 import React from "react";
-import { ScrollView, View, Text, Pressable, Image } from "react-native";
-import { useRouter, Router } from "expo-router";
-import { SectionTitle } from "../../components/Section/SectionTitle";
-import { ProductGridItem } from "../../components/Product/ProductGridItem";
-import { useCategories } from "../../hooks/useCategories";
-import {
-  useProducts,
-  useProductsByCategory,
-  ProductInfo,
-} from "../../hooks/useProducts";
+import { ScrollView, View, Text, Pressable, Image, Dimensions } from "react-native";
+import { useRouter } from "expo-router";
+import Carousel from "react-native-reanimated-carousel";
+import { useAuth } from "@/src/context/AuthContext";
 
-interface Category {
-  id: string;
-  name: string;
-  updatedAt: string;
-}
+const { width } = Dimensions.get("window");
+
+const images = [
+  require("../../assets/images/slider/slider3.jpg"),
+  require("../../assets/images/slider/slider2.jpg"),
+  require("../../assets/images/slider/slider1.jpg"),
+];
 
 const Home = () => {
+  const { user } = useAuth();
   const router = useRouter();
-  const { data: categories, isLoading: categoriesLoading } = useCategories();
-  const { data: allProducts, isLoading: productsLoading } = useProducts();
-
-  const sortedProducts = React.useMemo(
-    () =>
-      allProducts?.sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      ),
-    [allProducts]
-  );
-
-  const newProducts = sortedProducts?.slice(0, 10);
-
-  const sortedCategories = React.useMemo(
-    () =>
-      categories?.sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      ),
-    [categories]
-  );
-
-  const topCategories = sortedCategories?.slice(0, 3);
-
-  if (categoriesLoading || productsLoading) {
-    return (
-      <View className="flex-1 bg-[#121212] items-center justify-center">
-        <Text className="text-white">Đang chờ...</Text>
-      </View>
-    );
-  }
 
   return (
     <ScrollView className="flex-1 bg-[#121212]">
-      {/* Hero Section */}
-      <View className="relative h-[400px]">
+      <View className="flex-row items-center space-x-4 mx-4 gap-2">
         <Image
-          source={require("../../assets/images/bg-medical.jpg")}
-          className="w-full h-full"
+          source={require('../../assets/images/user.png')}
+          className="w-14 h-14 rounded-full"
           resizeMode="cover"
         />
-        <View className="absolute bottom-8 left-4">
-          <Text className="mb-4 text-4xl font-bold text-white">Medicals</Text>
+        <Text className="font-semibold text-center text-white">
+          Xin chào {user?.firstName} {user?.lastName}
+        </Text>
+      </View>
+      <View className="relative mt-8">
+        <Carousel
+          loop
+          width={width}
+          height={200}
+          autoPlay
+          data={images}
+          renderItem={({ item }) => (
+            <View style={{ flex: 1 }}>
+              <Image source={item} style={{ width: "100%", height: "100%", borderRadius: 10 }} />
+            </View>
+          )}
+        />
+      </View>
+
+      <View className="flex-col gap-4 mt-8 mx-4">
+        <View className="flex-row gap-2">
+          <Text className="font-semibold text-center text-white">Lịch hẹn gần đây:</Text>
+          <Text className="font-semibold text-center text-white">15:00 16/06/2025</Text>
+        </View>
+        <View className="flex-row gap-2">
+          <Text className="font-semibold text-center text-white">Bệnh án mới nhất:</Text>
+          <Text className="font-semibold text-center text-[#4A90E2]">Xem ngay</Text>
         </View>
       </View>
 
-      {/* New Products Section */}
-      <View className="px-4 mt-6">
-        <SectionTitle
-          title="Mới"
-          viewAll
-          onViewAll={() => console.log("View all new items")}
-        />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mt-4"
-        >
-          {newProducts?.map((product) => (
-            <View key={product.id} className="mr-4" style={{ width: 150 }}>
-              <ProductGridItem
-                product={product}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(protected)/product",
-                    params: { id: product.id },
-                  })
-                }
-              />
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Category Sections */}
-      {topCategories?.map((category) => (
-        <CategoryProductSection
-          key={category.id}
-          category={category}
-          router={router}
-        />
-      ))}
-
-      {/* View More Categories Button */}
       <Pressable
         className="mx-4 my-8 bg-[#4A90E2] py-3 rounded-lg"
-        onPress={() => router.push("/(protected)/categories")}
+        onPress={() => router.push("/")}
       >
         <Text className="font-semibold text-center text-white">
           Xem bệnh án
         </Text>
       </Pressable>
     </ScrollView>
-  );
-};
-
-interface CategoryProductSectionProps {
-  category: Category;
-  router: Router;
-}
-
-const CategoryProductSection = ({
-  category,
-  router,
-}: CategoryProductSectionProps) => {
-  const { data: categoryProducts, isLoading } = useProductsByCategory(
-    category.id
-  );
-
-  const sortedCategoryProducts = React.useMemo(
-    () =>
-      categoryProducts
-        ?.sort(
-          (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        )
-        .slice(0, 5) ?? [],
-    [categoryProducts]
-  );
-
-  if (isLoading || !categoryProducts) {
-    return null;
-  }
-
-  return (
-    <View key={category.id} className="px-4 mt-8">
-      <SectionTitle
-        title={category.name}
-        viewAll
-        onViewAll={() =>
-          router.push({
-            pathname: "/(protected)/product-list",
-            params: { categoryId: category.id },
-          })
-        }
-      />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="mt-4"
-      >
-        {sortedCategoryProducts.map((product) => (
-          <View key={product.id} className="mr-4" style={{ width: 150 }}>
-            <ProductGridItem
-              product={product}
-              onPress={() =>
-                router.push({
-                  pathname: "/(protected)/product",
-                  params: { id: product.id },
-                })
-              }
-            />
-          </View>
-        ))}
-      </ScrollView>
-    </View>
   );
 };
 

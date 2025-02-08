@@ -214,7 +214,6 @@ const SettingsScreen = () => {
               <Pressable
                 className="bg-[#E63946] py-3 px-6 rounded-lg mb-4"
                 onPress={() => {
-                  // Implement password change logic here
                   setIsPasswordModalVisible(false);
                 }}
               >

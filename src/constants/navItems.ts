@@ -17,22 +17,22 @@ export const NAV_ITEMS: NavItem[] = [
     routes: ["/(protected)/home"],
   },
   {
-    id: "shop",
-    name: "Bệnh án",
-    icon: "file-text",
-    routes: ["/(protected)/categories", "/(protected)/product-list"],
-  },
-  {
-    id: "cart",
+    id: "appointments",
     name: "Lịch hẹn",
     icon: "calendar",
-    routes: ["/(protected)/cart"],
+    routes: ["/(protected)/appointments"],
   },
   {
-    id: "favorites",
+    id: "medical-records",
+    name: "Bệnh án",
+    icon: "file-text",
+    routes: ["/(protected)/medical-records"],
+  },
+  {
+    id: "notifications",
     name: "Thông báo",
     icon: "bell",
-    routes: ["/(protected)/favorites"],
+    routes: ["/(protected)/notifications"],
   },
   {
     id: "profile",

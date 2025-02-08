@@ -33,7 +33,7 @@ const ForgotPassword = () => {
             autoCapitalize="none"
           />
 
-          <PrimaryButton title="Gửi" onPress={() => {}} />
+          <PrimaryButton title="Gửi" onPress={() => { }} />
 
           <Pressable className="py-2" onPress={() => router.push("/login")}>
             <Text className="text-[#4A90E2] text-center text-base">
