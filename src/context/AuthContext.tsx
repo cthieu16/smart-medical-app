@@ -52,10 +52,11 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (
-    firstName: string,
-    lastName: string,
+    fullName: string,
     email: string,
-    password: string
+    username: string,
+    password: string,
+    confirmPassword: string
   ) => Promise<void>;
   authenticateWithGoogle: (token: string) => Promise<void>;
   authenticateWithFacebook: (token: string) => Promise<void>;
@@ -108,16 +109,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loginMutation = useMutation({
     mutationFn: async ({
-      email,
+      username,
       password,
     }: {
-      email: string;
+      username: string;
       password: string;
     }) => {
-      const response = await fetch(`${ApiURL}/api/users/login`, {
+      const response = await fetch(`${ApiURL}/Auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
       if (!response.ok) {
         throw new Error("Error al iniciar sesión");
@@ -158,31 +159,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const registerMutation = useMutation({
     mutationFn: async ({
-      firstName,
-      lastName,
+      fullName,
       email,
+      username,
       password,
+      confirmPassword
     }: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      password: string;
+      fullName: string,
+      email: string,
+      username: string,
+      password: string,
+      confirmPassword: string
     }) => {
-      const response = await fetch(`${ApiURL}/api/users/register`, {
+      const response = await fetch(`${ApiURL}/Auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName,
-          lastName,
+          fullName,
           email,
+          username,
           password,
-          role: "BUYER",
+          confirmPassword
         }),
       });
       if (!response.ok) {
         throw new Error("Error al registrar");
       }
-      await loginMutation.mutateAsync({ email, password });
+      await loginMutation.mutateAsync({ username, password });
     },
   });
 
@@ -200,16 +203,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const email = googleUserInfo.email;
       const password = googleUserInfo.id;
 
-      try {
-        await loginMutation.mutateAsync({ email, password });
-      } catch (loginError) {
-        await registerMutation.mutateAsync({
-          firstName: googleUserInfo.given_name,
-          lastName: googleUserInfo.family_name,
-          email,
-          password,
-        });
-      }
+      // try {
+      //   await loginMutation.mutateAsync({ email, password });
+      // } catch (loginError) {
+      //   await registerMutation.mutateAsync({
+      //     firstName: googleUserInfo.given_name,
+      //     lastName: googleUserInfo.family_name,
+      //     email,
+      //     password,
+      //   });
+      // }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["googleUser"] });
@@ -230,24 +233,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const email = facebookUserInfo.email;
       const password = facebookUserInfo.id;
 
-      try {
-        await loginMutation.mutateAsync({ email, password });
-      } catch (loginError) {
-        await registerMutation.mutateAsync({
-          firstName: facebookUserInfo.first_name,
-          lastName: facebookUserInfo.last_name,
-          email,
-          password,
-        });
-      }
+      // try {
+      //   await loginMutation.mutateAsync({ email, password });
+      // } catch (loginError) {
+      //   await registerMutation.mutateAsync({
+      //     firstName: facebookUserInfo.first_name,
+      //     lastName: facebookUserInfo.last_name,
+      //     email,
+      //     password,
+      //   });
+      // }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facebookUser"] });
     },
   });
 
-  const login = async (email: string, password: string) => {
-    if (email === "admin@example.com" && password === "password123") {
+  const login = async (username: string, password: string) => {
+    if (username === "admin" && password === "password123") {
       const defaultUser: User = {
         firstName: "Admin",
         lastName: "User",
@@ -264,7 +267,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    await loginMutation.mutateAsync({ email, password });
+    await loginMutation.mutateAsync({ username, password });
   };
 
   const logout = async () => {
@@ -272,16 +275,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const register = async (
-    firstName: string,
-    lastName: string,
+    fullName: string,
     email: string,
-    password: string
+    username: string,
+    password: string,
+    confirmPassword: string
   ) => {
     await registerMutation.mutateAsync({
-      firstName,
-      lastName,
+      fullName,
       email,
+      username,
       password,
+      confirmPassword
     });
   };
 

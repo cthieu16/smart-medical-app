@@ -12,15 +12,17 @@ import { useAuth } from "../context/AuthContext";
 const Register = () => {
   const router = useRouter();
   const { register, login } = useAuth();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+
 
   const handleRegister = async () => {
     try {
-      await register(firstName, lastName, email, password);
+      await register(fullName, email, username, password, confirmPassword);
       await login(email, password);
       router.replace("/home");
     } catch (err) {
@@ -39,17 +41,10 @@ const Register = () => {
 
         <View className="gap-3 space-y-4">
           <TextInput
-            label="Họ"
-            placeholder="Họ"
-            value={firstName}
-            onChangeText={setFirstName}
-          />
-
-          <TextInput
-            label="Tên"
-            placeholder="Tên"
-            value={lastName}
-            onChangeText={setLastName}
+            label="Họ và tên"
+            placeholder="Họ và tên"
+            value={fullName}
+            onChangeText={setFullName}
           />
 
           <TextInput
@@ -62,10 +57,25 @@ const Register = () => {
           />
 
           <TextInput
+            label="Tên đăng nhập"
+            placeholder="Tên đăng nhập"
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <TextInput
             label="Mật khẩu"
             placeholder="Mật khẩu"
             value={password}
             onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <TextInput
+            label="Nhập lại mật khẩu"
+            placeholder="Nhập lại mật khẩu"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             secureTextEntry
           />
 

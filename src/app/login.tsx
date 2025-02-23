@@ -12,13 +12,13 @@ import { useAuth } from "../context/AuthContext";
 const Login = () => {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
     try {
-      await login(email, password);
+      await login(username, password);
       router.replace("/home");
     } catch (err) {
       setError("Lỗi khi đăng nhập. Vui lòng kiểm tra lại.");
@@ -36,12 +36,10 @@ const Login = () => {
 
         <View className="gap-3 space-y-4">
           <TextInput
-            label="Email"
-            placeholder="example@email.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            label="Tài khoản"
+            placeholder="example"
+            value={username}
+            onChangeText={setUsername}
           />
 
           <TextInput
