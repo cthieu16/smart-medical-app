@@ -46,7 +46,7 @@ type FacebookUser = {
 
 type AuthContextType = {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
   googleUser: GoogleUser | null;
   facebookUser: FacebookUser | null;
   login: (email: string, password: string) => Promise<void>;
@@ -58,8 +58,8 @@ type AuthContextType = {
     password: string,
     confirmPassword: string
   ) => Promise<void>;
-  authenticateWithGoogle: (token: string) => Promise<void>;
-  authenticateWithFacebook: (token: string) => Promise<void>;
+  authenticateWithGoogle: (accessToken: string) => Promise<void>;
+  authenticateWithFacebook: (accessToken: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,9 +69,9 @@ const ApiURL = process.env.EXPO_PUBLIC_API_BACKEND_URL;
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
-  const { data: token } = useQuery<string | null>({
-    queryKey: ["token"],
-    queryFn: () => AsyncStorage.getItem("@token"),
+  const { data: accessToken } = useQuery<string | null>({
+    queryKey: ["accessToken"],
+    queryFn: () => AsyncStorage.getItem("@accessToken"),
   });
 
   const { data: googleUser } = useQuery<GoogleUser | null>({
@@ -93,10 +93,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: user } = useQuery<User | null>({
     queryKey: ["user"],
     queryFn: async () => {
-      if (!token) return null;
+      if (!accessToken) return null;
       const response = await fetch(`${ApiURL}/api/users/me`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       if (!response.ok) {
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       return response.json();
     },
-    enabled: !!token,
+    enabled: !!accessToken,
   });
 
   const loginMutation = useMutation({
@@ -123,24 +123,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!response.ok) {
         throw new Error("Error al iniciar sesión");
       }
-      const { token: authToken } = await response.json();
-      await AsyncStorage.setItem("@token", authToken);
+      const { accessToken: authToken } = await response.json();
+      await AsyncStorage.setItem("@accessToken", authToken);
       return authToken;
     },
     onSuccess: (authToken) => {
-      queryClient.setQueryData(["token"], authToken);
+      queryClient.setQueryData(["accessToken"], authToken);
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      if (token) {
+      if (accessToken) {
         await fetch(`${ApiURL}/api/users/logout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         });
       }
@@ -302,7 +302,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider
       value={{
         user: user ?? null,
-        token: token ?? null,
+        accessToken: accessToken ?? null,
         googleUser: googleUser ?? null,
         facebookUser: facebookUser ?? null,
         login,
