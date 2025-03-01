@@ -1,21 +1,11 @@
-import React, { createContext, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-type Address = {
-  street: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-};
+import React, { createContext, useContext } from "react";
 
 type User = {
-  firstName: string;
-  lastName: string;
+  fullName: string | null;
   email: string;
-  phone: string | null;
-  address: Address | null;
+  userName: string;
 };
 
 type GoogleUser = {
@@ -60,6 +50,7 @@ type AuthContextType = {
   ) => Promise<void>;
   authenticateWithGoogle: (accessToken: string) => Promise<void>;
   authenticateWithFacebook: (accessToken: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     queryKey: ["user"],
     queryFn: async () => {
       if (!accessToken) return null;
-      const response = await fetch(`${ApiURL}/api/users/me`, {
+      const response = await fetch(`${ApiURL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -115,7 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       username: string;
       password: string;
     }) => {
-      const response = await fetch(`${ApiURL}/Auth/login`, {
+      const response = await fetch(`${ApiURL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -136,7 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       if (accessToken) {
-        await fetch(`${ApiURL}/api/users/logout`, {
+        await fetch(`${ApiURL}/auth/logout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -171,7 +162,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       password: string,
       confirmPassword: string
     }) => {
-      const response = await fetch(`${ApiURL}/Auth/register`, {
+      const response = await fetch(`${ApiURL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -182,6 +173,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           confirmPassword
         }),
       });
+      console.log(response);
+
       if (!response.ok) {
         throw new Error("Error al registrar");
       }
@@ -249,14 +242,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     },
   });
 
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await fetch(`${ApiURL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể gửi yêu cầu đặt lại mật khẩu");
+      }
+    },
+  });
+
   const login = async (username: string, password: string) => {
     if (username === "admin" && password === "password123") {
       const defaultUser: User = {
-        firstName: "Admin",
-        lastName: "User",
+        fullName: "User",
         email: "admin@example.com",
-        phone: null,
-        address: null,
+        userName: "admin",
       };
 
       await AsyncStorage.setItem("@token", "default_token");
@@ -298,6 +303,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await authenticateWithFacebookMutation.mutateAsync(token);
   };
 
+  const forgotPassword = async (email: string) => {
+    await forgotPasswordMutation.mutateAsync(email);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -310,6 +319,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         register,
         authenticateWithGoogle,
         authenticateWithFacebook,
+        forgotPassword
       }}
     >
       {children}

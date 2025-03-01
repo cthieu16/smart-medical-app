@@ -15,6 +15,7 @@ const images = [
 
 const Home = () => {
   const { user } = useAuth();
+
   const router = useRouter();
 
   return (
@@ -25,9 +26,9 @@ const Home = () => {
           className="w-16 h-16 rounded-full border-2 border-[#4A90E2]"
           resizeMode="cover"
         />
-        <View>
+        <View className="ml-2">
           <Text className="text-lg font-semibold text-white">Xin chào,</Text>
-          <Text className="text-xl font-bold text-[#4A90E2]">{user?.firstName} {user?.lastName}</Text>
+          <Text className="text-xl font-bold text-[#4A90E2]">{user?.userName}</Text>
         </View>
       </View>
 

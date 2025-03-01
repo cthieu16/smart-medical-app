@@ -1,15 +1,28 @@
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
 import { FormTitle } from "../components/Form/FormTitle";
 import { TextInput } from "../components/TextInput/TextInput";
+import { useAuth } from "../context/AuthContext";
 
 const ForgotPassword = () => {
   const router = useRouter();
+  const { forgotPassword } = useAuth();
+
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+
+  const handleForgotPassword = async () => {
+    try {
+      await forgotPassword(email);
+    } catch (err) {
+      setError("Lỗi khi gửi email. Vui lòng kiểm tra lại.");
+    }
+  };
 
   return (
     <View className="flex-1 px-8 pt-12 bg-black">
@@ -29,11 +42,13 @@ const ForgotPassword = () => {
           <TextInput
             label="Email"
             placeholder="example@email.com"
+            value={email}
+            onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
 
-          <PrimaryButton title="Gửi" onPress={() => { }} />
+          <PrimaryButton title="Gửi" onPress={handleForgotPassword} />
 
           <Pressable className="py-2" onPress={() => router.push("/login")}>
             <Text className="text-[#4A90E2] text-center text-base">
