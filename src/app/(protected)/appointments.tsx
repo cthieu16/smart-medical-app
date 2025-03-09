@@ -64,25 +64,38 @@ const AddAppointmentButton = ({ onPress }: { onPress: () => void }) => (
 );
 
 const AppointmentsScreen: React.FC = () => {
-    const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
+    const router = useRouter();
+    const [appointments, setAppointments] =
+      useState<Appointment[]>(initialAppointments);
 
-    const renderAppointment = useCallback(({ item }: { item: Appointment }) => (
+    const renderAppointment = useCallback(
+      ({ item }: { item: Appointment }) => (
         <AppointmentItem appointment={item} />
-    ), []);
+      ),
+      []
+    );
 
     return (
-        <View className="flex-1 bg-[#121212]">
-            <Header title="Lịch hẹn" />
-            <Text className="text-lg font-semibold text-gray-300 mx-4 mt-6">📅 Danh sách lịch hẹn</Text>
-            <FlatList
-                data={appointments}
-                keyExtractor={(item) => item.id}
-                renderItem={renderAppointment}
-                contentContainerStyle={{ paddingVertical: 10 }}
-                ListEmptyComponent={<Text className="text-gray-400 text-center mt-6">Không có lịch hẹn nào.</Text>}
-            />
-            <AddAppointmentButton onPress={() => console.log("Add new appointment")} />
-        </View>
+      <View className="flex-1 bg-[#121212]">
+        <Header title="Lịch hẹn" />
+        <Text className="text-lg font-semibold text-gray-300 mx-4 mt-6">
+          📅 Danh sách lịch hẹn
+        </Text>
+        <FlatList
+          data={appointments}
+          keyExtractor={(item) => item.id}
+          renderItem={renderAppointment}
+          contentContainerStyle={{ paddingVertical: 10 }}
+          ListEmptyComponent={
+            <Text className="text-gray-400 text-center mt-6">
+              Không có lịch hẹn nào.
+            </Text>
+          }
+        />
+        <AddAppointmentButton
+          onPress={() => router.push("/(protected)/appointments-create")}
+        />
+      </View>
     );
 };
 

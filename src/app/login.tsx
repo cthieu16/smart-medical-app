@@ -40,6 +40,7 @@ const Login = () => {
             placeholder="example"
             value={username}
             onChangeText={setUsername}
+            autoCapitalize="none"
           />
 
           <TextInput

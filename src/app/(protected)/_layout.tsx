@@ -19,14 +19,18 @@ const ProtectedLayoutWrapper = ({
 const ProtectedRouteLayout = () => {
   return (
     <Stack>
-      <Stack.Screen name='home' options={{ headerShown: false }} />
-      <Stack.Screen name='appointments' options={{ headerShown: false }} />
-      <Stack.Screen name='medical-records' options={{ headerShown: false }} />
-      <Stack.Screen name='notifications' options={{ headerShown: false }} />
-      <Stack.Screen name='checkout' options={{ headerShown: false }} />
-      <Stack.Screen name='success' options={{ headerShown: false }} />
-      <Stack.Screen name='profile' options={{ headerShown: false }} />
-      <Stack.Screen name='settings' options={{ headerShown: false }} />
+      <Stack.Screen name="home" options={{ headerShown: false }} />
+      <Stack.Screen name="appointments" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="appointments-create"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="medical-records" options={{ headerShown: false }} />
+      <Stack.Screen name="notifications" options={{ headerShown: false }} />
+      <Stack.Screen name="checkout" options={{ headerShown: false }} />
+      <Stack.Screen name="success" options={{ headerShown: false }} />
+      <Stack.Screen name="profile" options={{ headerShown: false }} />
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
     </Stack>
   );
 };
