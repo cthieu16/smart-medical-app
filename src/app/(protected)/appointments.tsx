@@ -37,22 +37,37 @@ const AppointmentItem = ({ appointment }: { appointment: Appointment }) => {
     const router = useRouter();
 
     return (
-        <Pressable
-            onPress={() => router.push(`/`)}
-            className="bg-gray-800 mx-4 p-4 rounded-xl mt-3 shadow-sm border border-gray-700 flex-row justify-between items-center"
-        >
-            <View className="flex-col gap-2">
-                <Text className="text-white font-semibold">📅 {appointment.date} - 🕒 {appointment.time}</Text>
-                <Text className="text-gray-400">👨‍⚕️ Bác sĩ: <Text className="text-white">{appointment.doctor}</Text></Text>
-                <Text className="text-gray-400">🏥 Chuyên khoa: <Text className="text-white">{appointment.specialty}</Text></Text>
-                <Text className={`font-semibold ${appointment.status === "Đã xác nhận" ? "text-green-400"
-                    : appointment.status === "Chờ xác nhận" ? "text-yellow-400"
-                        : "text-red-400"}`}>
-                    📌 Trạng thái: {appointment.status}
-                </Text>
-            </View>
-            <AntDesign name="right" size={20} color="white" />
-        </Pressable>
+      <Pressable
+        onPress={() =>
+          router.push(`/(protected)/appointments-detail?id=${appointment.id}`)
+        }
+        className="bg-gray-800 mx-4 p-4 rounded-xl mt-3 shadow-sm border border-gray-700 flex-row justify-between items-center"
+      >
+        <View className="flex-col gap-2">
+          <Text className="text-white font-semibold">
+            📅 {appointment.date} - 🕒 {appointment.time}
+          </Text>
+          <Text className="text-gray-400">
+            👨‍⚕️ Bác sĩ: <Text className="text-white">{appointment.doctor}</Text>
+          </Text>
+          <Text className="text-gray-400">
+            🏥 Chuyên khoa:{" "}
+            <Text className="text-white">{appointment.specialty}</Text>
+          </Text>
+          <Text
+            className={`font-semibold ${
+              appointment.status === "Đã xác nhận"
+                ? "text-green-400"
+                : appointment.status === "Chờ xác nhận"
+                ? "text-yellow-400"
+                : "text-red-400"
+            }`}
+          >
+            📌 Trạng thái: {appointment.status}
+          </Text>
+        </View>
+        <AntDesign name="right" size={20} color="white" />
+      </Pressable>
     );
 };
 

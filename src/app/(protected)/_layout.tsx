@@ -25,6 +25,10 @@ const ProtectedRouteLayout = () => {
         name="appointments-create"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="appointments-detail"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="medical-records" options={{ headerShown: false }} />
       <Stack.Screen name="notifications" options={{ headerShown: false }} />
       <Stack.Screen name="checkout" options={{ headerShown: false }} />
