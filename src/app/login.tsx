@@ -16,7 +16,24 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const validateInputs = () => {
+    if (username.trim().length < 3) {
+      setError("Tên đăng nhập phải có ít nhất 3 ký tự.");
+      return false;
+    }
+
+    if (password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự.");
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
+
   const handleLogin = async () => {
+    if (!validateInputs()) return;
+
     try {
       await login(username, password);
       router.replace("/home");

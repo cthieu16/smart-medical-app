@@ -14,19 +14,57 @@ const Register = () => {
   const { register, login } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
+  const [username, setusername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  const validateInputs = () => {
+    if (fullName.trim().length < 3) {
+      setError("Họ và tên phải có ít nhất 3 ký tự.");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Email không hợp lệ.");
+      return false;
+    }
+
+    if (username.trim().length < 3 || /\s/.test(username)) {
+      setError(
+        "Tên đăng nhập phải có ít nhất 3 ký tự và không chứa khoảng trắng."
+      );
+      return false;
+    }
+
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    if (!passwordRegex.test(password)) {
+      setError(
+        "Mật khẩu phải có ít nhất 6 ký tự, một chữ in hoa, một số và một ký tự đặc biệt."
+      );
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Mật khẩu nhập lại không khớp.");
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
 
   const handleRegister = async () => {
+    if (!validateInputs()) return;
+
     try {
       await register(fullName, email, username, password, confirmPassword);
       await login(email, password);
       router.replace("/home");
     } catch (err) {
-      setError("Lỗi khi đăng nhập. Vui lòng kiểm tra lại.");
+      setError("Lỗi khi đăng ký. Vui lòng kiểm tra lại.");
     }
   };
 
@@ -60,7 +98,7 @@ const Register = () => {
             label="Tên đăng nhập"
             placeholder="Tên đăng nhập"
             value={username}
-            onChangeText={setUsername}
+            onChangeText={setusername}
             autoCapitalize="none"
           />
 

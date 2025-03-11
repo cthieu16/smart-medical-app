@@ -8,37 +8,34 @@ import {
   Text,
   TextInput,
   View,
+  Alert,
 } from "react-native";
 import { useUser } from "../../hooks/useUser";
+import { useAuth } from "@/src/context/AuthContext";
 
 const SettingsScreen = () => {
   const router = useRouter();
   const { user, updateUser, isUpdating } = useUser();
+  const { changePassword } = useAuth();
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    fullName: "",
+    username: "",
     email: "",
-    phone: "",
-    street: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "",
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
   });
 
   useEffect(() => {
     if (user) {
       setFormData({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone || "",
-        street: user.address?.street || "",
-        city: user.address?.city || "",
-        state: user.address?.state || "",
-        postalCode: user.address?.postalCode || "",
-        country: user.address?.country || "",
+        fullName: user.fullName ?? "",
+        username: user.username ?? "",
+        email: user.email ?? "",
       });
     }
   }, [user]);
@@ -47,21 +44,53 @@ const SettingsScreen = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePasswordInputChange = (name: string, value: string) => {
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = () => {
     const updatedData: Partial<typeof user> = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
+      fullName: formData.fullName,
+      username: formData.username,
       email: formData.email,
-      phone: formData.phone || null,
-      address: {
-        street: formData.street,
-        city: formData.city,
-        state: formData.state,
-        postalCode: formData.postalCode,
-        country: formData.country,
-      },
     };
     updateUser(updatedData);
+  };
+
+  const handlePasswordChange = async () => {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmNewPassword
+    ) {
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      Alert.alert("Lỗi", "Mật khẩu mới không khớp!");
+      return;
+    }
+
+    try {
+      await changePassword(
+        passwordData.currentPassword,
+        passwordData.newPassword,
+        passwordData.confirmNewPassword
+      );
+      Alert.alert("Thành công", "Mật khẩu đã được thay đổi!");
+      setIsPasswordModalVisible(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+    } catch (err: any) {
+      Alert.alert(
+        "Lỗi",
+        err.message || "Không thể đổi mật khẩu, vui lòng thử lại."
+      );
+    }
   };
 
   if (!user) {
@@ -91,15 +120,15 @@ const SettingsScreen = () => {
             className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
             placeholder="Họ"
             placeholderTextColor="#666"
-            value={formData.firstName}
-            onChangeText={(value) => handleChange("firstName", value)}
+            value={formData.fullName}
+            onChangeText={(value) => handleChange("fullName", value)}
           />
           <TextInput
             className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
             placeholder="Tên"
             placeholderTextColor="#666"
-            value={formData.lastName}
-            onChangeText={(value) => handleChange("lastName", value)}
+            value={formData.username}
+            onChangeText={(value) => handleChange("username", value)}
           />
           <TextInput
             className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
@@ -108,53 +137,6 @@ const SettingsScreen = () => {
             value={formData.email}
             onChangeText={(value) => handleChange("email", value)}
             keyboardType="email-address"
-          />
-          <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
-            placeholder="Số điện thoại"
-            placeholderTextColor="#666"
-            value={formData.phone}
-            onChangeText={(value) => handleChange("phone", value)}
-            keyboardType="phone-pad"
-          />
-        </View>
-
-        <Text className="mt-8 mb-4 text-xl text-white">Địa chỉ</Text>
-        <View className="gap-3 space-y-4">
-          <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
-            placeholder="Đường, phố"
-            placeholderTextColor="#666"
-            value={formData.street}
-            onChangeText={(value) => handleChange("street", value)}
-          />
-          <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
-            placeholder="Thành phố"
-            placeholderTextColor="#666"
-            value={formData.city}
-            onChangeText={(value) => handleChange("city", value)}
-          />
-          <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
-            placeholder="Bang, tiểu bang (hoặc tỉnh, tùy theo quốc gia)"
-            placeholderTextColor="#666"
-            value={formData.state}
-            onChangeText={(value) => handleChange("state", value)}
-          />
-          <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
-            placeholder="Mã bưu điện"
-            placeholderTextColor="#666"
-            value={formData.postalCode}
-            onChangeText={(value) => handleChange("postalCode", value)}
-          />
-          <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
-            placeholder="Quốc gia"
-            placeholderTextColor="#666"
-            value={formData.country}
-            onChangeText={(value) => handleChange("country", value)}
           />
         </View>
 
@@ -198,24 +180,34 @@ const SettingsScreen = () => {
                 placeholder="Mật khẩu cũ"
                 placeholderTextColor="#666"
                 secureTextEntry
+                value={passwordData.currentPassword}
+                onChangeText={(value) =>
+                  handlePasswordInputChange("currentPassword", value)
+                }
               />
               <TextInput
                 className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
                 placeholder="Mật khẩu mới"
                 placeholderTextColor="#666"
                 secureTextEntry
+                value={passwordData.newPassword}
+                onChangeText={(value) =>
+                  handlePasswordInputChange("newPassword", value)
+                }
               />
               <TextInput
                 className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
                 placeholder="Nhập lại mật khẩu mới"
                 placeholderTextColor="#666"
                 secureTextEntry
+                value={passwordData.confirmNewPassword}
+                onChangeText={(value) =>
+                  handlePasswordInputChange("confirmNewPassword", value)
+                }
               />
               <Pressable
                 className="bg-[#E63946] py-3 px-6 rounded-lg mb-4"
-                onPress={() => {
-                  setIsPasswordModalVisible(false);
-                }}
+                onPress={handlePasswordChange}
               >
                 <Text className="font-semibold text-center text-white">
                   Lưu

@@ -26,7 +26,7 @@ type UpdateUserData = Partial<User>;
 const ApiURL = process.env.EXPO_PUBLIC_API_BACKEND_URL;
 
 export const useUser = () => {
-  const { user, token } = useAuth();
+  const { user, accessToken } = useAuth();
   const queryClient = useQueryClient();
 
   const updateUser = async (data: UpdateUserData): Promise<User> => {
@@ -34,7 +34,7 @@ export const useUser = () => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(data),
     });

@@ -5,7 +5,7 @@ import React, { createContext, useContext } from "react";
 type User = {
   fullName: string | null;
   email: string;
-  userName: string;
+  username: string;
 };
 
 type GoogleUser = {
@@ -51,6 +51,11 @@ type AuthContextType = {
   authenticateWithGoogle: (accessToken: string) => Promise<void>;
   authenticateWithFacebook: (accessToken: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+    newPasswordConfirm: string
+  ) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -154,13 +159,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       email,
       username,
       password,
-      confirmPassword
+      confirmPassword,
     }: {
-      fullName: string,
-      email: string,
-      username: string,
-      password: string,
-      confirmPassword: string
+      fullName: string;
+      email: string;
+      username: string;
+      password: string;
+      confirmPassword: string;
     }) => {
       const response = await fetch(`${ApiURL}/auth/register`, {
         method: "POST",
@@ -170,7 +175,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email,
           username,
           password,
-          confirmPassword
+          confirmPassword,
         }),
       });
       console.log(response);
@@ -256,12 +261,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     },
   });
 
+  const changePasswordMutation = useMutation({
+    mutationFn: async ({
+      currentPassword,
+      newPassword,
+      newPasswordConfirm,
+    }: {
+      currentPassword: string;
+      newPassword: string;
+      newPasswordConfirm: string;
+    }) => {
+      const response = await fetch(
+        `${ApiURL}/auth/my-profile/change-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+            newPasswordConfirm,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Không thể đổi mật khẩu. Vui lòng thử lại!");
+      }
+    },
+  });
+
   const login = async (username: string, password: string) => {
     if (username === "admin" && password === "password123") {
       const defaultUser: User = {
         fullName: "User",
         email: "admin@example.com",
-        userName: "admin",
+        username: "admin",
       };
 
       await AsyncStorage.setItem("@token", "default_token");
@@ -291,7 +328,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       email,
       username,
       password,
-      confirmPassword
+      confirmPassword,
     });
   };
 
@@ -307,6 +344,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await forgotPasswordMutation.mutateAsync(email);
   };
 
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string,
+    newPasswordConfirm: string
+  ) => {
+    await changePasswordMutation.mutateAsync({
+      currentPassword,
+      newPassword,
+      newPasswordConfirm,
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -319,7 +368,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         register,
         authenticateWithGoogle,
         authenticateWithFacebook,
-        forgotPassword
+        forgotPassword,
+        changePassword,
       }}
     >
       {children}

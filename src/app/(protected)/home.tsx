@@ -22,13 +22,15 @@ const Home = () => {
     <ScrollView className="flex-1 bg-[#121212]">
       <View className="flex-row items-center space-x-4 mx-4 mt-6">
         <Image
-          source={require('../../assets/images/user.png')}
+          source={require("../../assets/images/user.png")}
           className="w-16 h-16 rounded-full border-2 border-[#4A90E2]"
           resizeMode="cover"
         />
         <View className="ml-2">
           <Text className="text-lg font-semibold text-white">Xin chào,</Text>
-          <Text className="text-xl font-bold text-[#4A90E2]">{user?.userName}</Text>
+          <Text className="text-xl font-bold text-[#4A90E2]">
+            {user?.username}
+          </Text>
         </View>
       </View>
 
@@ -43,7 +45,11 @@ const Home = () => {
           style={{ alignSelf: "center" }}
           renderItem={({ item }) => (
             <View className="rounded-2xl overflow-hidden">
-              <Image source={item} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+              <Image
+                source={item}
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="cover"
+              />
             </View>
           )}
         />
@@ -76,8 +82,12 @@ const Home = () => {
       </View>
 
       <View className="bg-gray-900 mx-4 p-5 rounded-xl mt-8">
-        <Text className="text-lg font-semibold text-white">📅 Lịch hẹn gần nhất</Text>
-        <Text className="text-xl font-bold text-[#4A90E2] mt-2">15:00 - 16/06/2025</Text>
+        <Text className="text-lg font-semibold text-white">
+          📅 Lịch hẹn gần nhất
+        </Text>
+        <Text className="text-xl font-bold text-[#4A90E2] mt-2">
+          15:00 - 16/06/2025
+        </Text>
       </View>
 
       <Pressable
@@ -85,8 +95,12 @@ const Home = () => {
         onPress={() => router.push("/medical-records")}
       >
         <View>
-          <Text className="text-lg font-semibold text-white">📝 Bệnh án mới nhất</Text>
-          <Text className="text-sm text-gray-400 mt-1">Cập nhật lần cuối: 10/02/2025</Text>
+          <Text className="text-lg font-semibold text-white">
+            📝 Bệnh án mới nhất
+          </Text>
+          <Text className="text-sm text-gray-400 mt-1">
+            Cập nhật lần cuối: 10/02/2025
+          </Text>
         </View>
         <Text className="text-lg text-[#4A90E2] font-bold">Xem ngay</Text>
       </Pressable>
@@ -96,7 +110,9 @@ const Home = () => {
         onPress={() => router.push("/medical-records")}
       >
         <AntDesign name="filetext1" size={20} color="white" />
-        <Text className="font-semibold text-white text-lg ml-2">Xem bệnh án</Text>
+        <Text className="font-semibold text-white text-lg ml-2">
+          Xem bệnh án
+        </Text>
       </Pressable>
     </ScrollView>
   );
