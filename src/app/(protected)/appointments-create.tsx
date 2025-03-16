@@ -1,94 +1,119 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, Animated } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import {
+  Pressable,
+  Text,
+  TextInput,
+  View,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Picker } from "@react-native-picker/picker";
+import dayjs from "dayjs";
+
+const doctors = [
+  { id: "1", name: "BS. Lê Minh" },
+  { id: "2", name: "BS. Nguyễn Lan" },
+  { id: "3", name: "BS. Phạm Đức" },
+];
+
+const Header = ({ title }: { title: string }) => {
+  const router = useRouter();
+  return (
+    <View className="flex-row items-center justify-between p-4">
+      <Pressable onPress={() => router.back()} className="mr-4">
+        <AntDesign name="left" size={24} color="white" />
+      </Pressable>
+      <Text className="text-2xl font-bold text-white">{title}</Text>
+      <View style={{ width: 32 }} />
+    </View>
+  );
+};
 
 const AppointmentsCreateScreen = () => {
   const router = useRouter();
-  const [date, setDate] = useState(new Date());
-  const [doctor, setDoctor] = useState("");
-  const [specialty, setSpecialty] = useState("");
-  const [showPicker, setShowPicker] = useState(false);
-  const fadeAnim = useState(new Animated.Value(0))[0];
+  const [doctorId, setDoctorId] = useState(doctors[0].id);
+  const [note, setNote] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const handleConfirmDate = (date: Date) => {
+    setSelectedDate(date);
+    setDatePickerVisibility(false);
+  };
 
   const handleCreateAppointment = () => {
-    if (!doctor || !specialty) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
-      return;
-    }
-    console.log("Lịch hẹn đã được tạo:", { date, doctor, specialty });
-    router.push("/(protected)/appointments");
+    console.log("Tạo lịch hẹn với:", { doctorId, selectedDate, note });
+    router.back();
   };
 
   return (
-    <View className="flex-1 bg-[#121212]">
-      <View className="flex-row items-center justify-between p-4">
-        <Pressable onPress={() => router.back()} className="mr-4">
-          <AntDesign name="left" size={24} color="white" />
-        </Pressable>
-        <Text className="text-2xl font-bold text-white">Thêm mới lịch hẹn</Text>
-        <Pressable onPress={() => console.log("Search")}>
-          <AntDesign name="search1" size={24} color="white" />
-        </Pressable>
-      </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View className="flex-1 bg-[#121212]">
+        <Header title="Tạo lịch hẹn" />
+        <View className="mx-4 mt-6">
+          <Text className="text-lg text-gray-300 mb-2">Chọn bác sĩ</Text>
+          <View className="bg-gray-900 p-2 rounded-xl border border-gray-700">
+            <Picker
+              selectedValue={doctorId}
+              onValueChange={(itemValue) => setDoctorId(itemValue)}
+              style={{ color: "white" }}
+            >
+              {doctors.map((doctor) => (
+                <Picker.Item
+                  key={doctor.id}
+                  label={doctor.name}
+                  value={doctor.id}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
 
-      <View className="px-4 mt-4">
-        <Pressable
-          onPress={() => {
-            setShowPicker(true);
-            Animated.timing(fadeAnim, {
-              toValue: 1,
-              duration: 300,
-              useNativeDriver: true,
-            }).start();
-          }}
-          className="p-4 bg-gray-900 rounded-xl mb-4 border border-gray-700"
-        >
-          <Text className="text-white text-lg font-medium">
-            📅 Ngày hẹn: {date.toLocaleDateString()}
-          </Text>
-        </Pressable>
-        {showPicker && (
-          <Animated.View style={{ opacity: fadeAnim }}>
-            <DateTimePicker
-              value={date}
-              mode="date"
-              display="spinner"
-              onChange={(_, selectedDate) => {
-                setShowPicker(false);
-                if (selectedDate) setDate(selectedDate);
-              }}
-            />
-          </Animated.View>
-        )}
+        <View className="mx-4 mt-4">
+          <Text className="text-lg text-gray-300 mb-2">Chọn ngày và giờ</Text>
+          <Pressable
+            onPress={() => setDatePickerVisibility(true)}
+            className="bg-gray-900 p-4 rounded-xl border border-gray-700 flex-row items-center justify-between"
+          >
+            <Text className="text-white">
+              {selectedDate
+                ? dayjs(selectedDate).format("DD/MM/YYYY HH:mm")
+                : "Chọn ngày và giờ"}
+            </Text>
+            <MaterialIcons name="event" size={24} color="white" />
+          </Pressable>
+        </View>
 
-        <TextInput
-          placeholder="Nhập tên bác sĩ"
-          placeholderTextColor="#A0A0A0"
-          value={doctor}
-          onChangeText={setDoctor}
-          className="p-4 bg-gray-900 text-white rounded-xl mb-4 border border-gray-700"
-        />
-        <TextInput
-          placeholder="Nhập chuyên khoa"
-          placeholderTextColor="#A0A0A0"
-          value={specialty}
-          onChangeText={setSpecialty}
-          className="p-4 bg-gray-900 text-white rounded-xl mb-6 border border-gray-700"
-        />
+        <View className="mx-4 mt-4">
+          <Text className="text-lg text-gray-300 mb-2">Ghi chú</Text>
+          <TextInput
+            className="bg-gray-900 text-white p-4 rounded-xl border border-gray-700 h-32"
+            placeholder="Nhập ghi chú..."
+            placeholderTextColor="gray"
+            multiline
+            value={note}
+            onChangeText={setNote}
+          />
+        </View>
 
         <Pressable
           onPress={handleCreateAppointment}
-          className="bg-[#4A90E2] p-4 rounded-full flex-row items-center justify-center shadow-lg"
+          className="bg-[#4A90E2] p-4 rounded-xl mx-4 mt-6 items-center"
         >
-          <AntDesign name="check" size={28} color="white" />
-          <Text className="text-white font-semibold ml-3 text-lg">
-            Tạo lịch hẹn
-          </Text>
+          <Text className="text-white font-bold text-lg">Tạo lịch hẹn</Text>
         </Pressable>
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="datetime"
+          onConfirm={handleConfirmDate}
+          onCancel={() => setDatePickerVisibility(false)}
+        />
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

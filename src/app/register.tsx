@@ -38,14 +38,11 @@ const Register = () => {
       return false;
     }
 
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-    if (!passwordRegex.test(password)) {
-      setError(
-        "Mật khẩu phải có ít nhất 6 ký tự, một chữ in hoa, một số và một ký tự đặc biệt."
-      );
+    if (password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự.");
       return false;
     }
+
 
     if (password !== confirmPassword) {
       setError("Mật khẩu nhập lại không khớp.");

@@ -1,87 +1,117 @@
-import { AntDesign } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
-import { Text, View, Pressable, ScrollView } from "react-native";
+import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { ScrollView, Text, View, Pressable, Alert } from "react-native";
+import dayjs from "dayjs";
 
-const appointmentDetails = {
+const statusColors: Record<AppointmentStatus, string> = {
+  confirmed: "bg-green-600",
+  pending: "bg-yellow-500",
+  cancelled: "bg-red-500",
+};
+
+type AppointmentStatus = "confirmed" | "pending" | "cancelled";
+
+const initialAppointment = {
   id: "1",
-  date: "01/03/2025",
-  time: "14:00",
-  doctor: "BS. Lê Minh",
-  specialty: "Nội khoa",
-  status: "Đã xác nhận",
-  location: "Phòng khám ABC, 123 Đường XYZ, TP.HCM",
-  notes: "Bệnh nhân có tiền sử cao huyết áp, cần kiểm tra định kỳ.",
+  patientId: "1",
+  doctorId: "1",
+  clinicId: "1",
+  queueNumber: 1,
+  startTime: "2025-03-16T06:01:44.876Z",
+  endTime: "2025-03-16T06:31:44.876Z",
+  status: "confirmed" as AppointmentStatus,
+  createAt: "2025-03-10T08:00:00.000Z",
+  note: "Khám sức khỏe tổng quát",
+  doctorName: "BS. Lê Minh",
 };
 
 const AppointmentsDetailScreen = () => {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const [appointment, setAppointment] = useState(initialAppointment);
+
+  const handleCancelAppointment = () => {
+    Alert.alert("Xác nhận", "Bạn có chắc muốn hủy lịch hẹn này?", [
+      { text: "Không", style: "cancel" },
+      {
+        text: "Có",
+        onPress: () =>
+          setAppointment((prev) => ({ ...prev, status: "cancelled" })),
+      },
+    ]);
+  };
+
+  const isPastAppointment = dayjs().isAfter(dayjs(appointment.startTime));
 
   return (
-    <View className="flex-1 bg-[#1E1E1E] p-4">
-      <View className="flex-row items-center justify-between pb-4 border-gray-700">
+    <ScrollView className="flex-1 bg-[#121212]">
+      <View className="flex-row items-center justify-between p-4">
         <Pressable onPress={() => router.back()} className="p-2">
           <AntDesign name="left" size={24} color="white" />
         </Pressable>
         <Text className="text-2xl font-bold text-white">Chi tiết lịch hẹn</Text>
-        <View style={{ width: 24 }} />
+        <View className="w-8" />
       </View>
 
-      <ScrollView className="mt-6" showsVerticalScrollIndicator={false}>
-        <View className="bg-gray-800 p-5 rounded-2xl shadow-lg border border-gray-700">
-          <Text className="text-white text-lg font-semibold">
-            📅 {appointmentDetails.date} - 🕒 {appointmentDetails.time}
-          </Text>
-          <Text className="text-gray-400 mt-3">
-            👨‍⚕️ Bác sĩ:{" "}
-            <Text className="text-white">{appointmentDetails.doctor}</Text>
-          </Text>
-          <Text className="text-gray-400 mt-1">
-            🏥 Chuyên khoa:{" "}
-            <Text className="text-white">{appointmentDetails.specialty}</Text>
-          </Text>
-          <Text className="text-gray-400 mt-1">
-            📍 Địa điểm:{" "}
-            <Text className="text-white">{appointmentDetails.location}</Text>
-          </Text>
-          <Text className="text-gray-400 mt-1">
-            📝 Ghi chú:{" "}
-            <Text className="text-white">{appointmentDetails.notes}</Text>
-          </Text>
-          <Text
-            className={`mt-4 text-lg font-semibold ${
-              appointmentDetails.status === "Đã xác nhận"
-                ? "text-green-400"
-                : appointmentDetails.status === "Chờ xác nhận"
-                ? "text-yellow-400"
-                : "text-red-400"
+      <View className="p-4">
+        <View className="bg-gray-900 p-4 rounded-2xl shadow-lg border border-gray-800">
+          <Text className="text-xl font-bold text-white mb-2">Thông tin</Text>
+          <View className="flex-row items-center mb-2">
+            <MaterialIcons name="event" size={20} color="gray" />
+            <Text className="text-white ml-2">
+              {dayjs(appointment.startTime).format("DD/MM/YYYY")}
+            </Text>
+          </View>
+          <View className="flex-row items-center mb-2">
+            <AntDesign name="clockcircleo" size={20} color="gray" />
+            <Text className="text-white ml-2">
+              {dayjs(appointment.startTime).format("HH:mm")} -{" "}
+              {dayjs(appointment.endTime).format("HH:mm")}
+            </Text>
+          </View>
+          <View className="flex-row items-center mb-2">
+            <FontAwesome name="user-md" size={20} color="gray" />
+            <Text className="text-white ml-2">
+              Bác sĩ: {appointment.doctorName}
+            </Text>
+          </View>
+          <View className="flex-row items-center mb-2">
+            <MaterialIcons name="notes" size={20} color="gray" />
+            <Text className="text-white ml-2">Ghi chú: {appointment.note}</Text>
+          </View>
+          <View
+            className={`mt-2 px-2 py-1 rounded-lg flex-row items-center ${
+              statusColors[appointment.status]
             }`}
           >
-            📌 Trạng thái: {appointmentDetails.status}
-          </Text>
+            <MaterialIcons name="info" size={20} color="white" />
+            <Text className="text-white ml-2 font-bold">
+              {appointment.status === "confirmed"
+                ? "Đã xác nhận"
+                : appointment.status === "pending"
+                ? "Chờ xác nhận"
+                : "Đã hủy"}
+            </Text>
+          </View>
         </View>
+      </View>
 
-        <View className="mt-6 flex-row justify-between">
-          <Pressable
-            className="bg-red-500 p-4 rounded-lg flex-1 mr-2 shadow-md active:opacity-80"
-            onPress={() => console.log("Hủy lịch hẹn")}
-          >
-            <Text className="text-white text-center font-semibold text-lg">
-              ❌ Hủy hẹn
-            </Text>
-          </Pressable>
-          <Pressable
-            className="bg-green-500 p-4 rounded-lg flex-1 ml-2 shadow-md active:opacity-80"
-            onPress={() => console.log("Xác nhận hẹn")}
-          >
-            <Text className="text-white text-center font-semibold text-lg">
-              ✅ Xác nhận
-            </Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </View>
+      {appointment.status !== "cancelled" && (
+        <Pressable
+          className={`mx-4 my-4 p-4 rounded-lg items-center ${
+            isPastAppointment ? "bg-gray-500" : "bg-red-600"
+          }`}
+          onPress={handleCancelAppointment}
+          disabled={isPastAppointment}
+        >
+          <Text className="text-white font-bold">
+            {isPastAppointment
+              ? "Không thể huỷ lịch hẹn đã qua"
+              : "Hủy lịch hẹn"}
+          </Text>
+        </Pressable>
+      )}
+    </ScrollView>
   );
 };
 
