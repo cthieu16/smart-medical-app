@@ -1,88 +1,120 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
+import dayjs from "dayjs";
 
-const patientInfo = {
-    name: "Nguyễn Văn A",
-    dob: "01/01/1990",
-    gender: "Nam",
-    recordNumber: "BA20231234",
-};
+interface MedicalRecord {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  appointmentId: string;
+  diagnosis: string;
+  symptoms: string;
+  medicalHistory: string;
+  testResults: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-const medicalRecords = [
-    { id: "1", date: "25/02/2025", doctor: "BS. Trần Minh", diagnosis: "Cảm cúm" },
-    { id: "2", date: "12/01/2025", doctor: "BS. Lê Thị Hoa", diagnosis: "Viêm họng" },
-    { id: "3", date: "05/11/2024", doctor: "BS. Nguyễn Văn B", diagnosis: "Sốt xuất huyết" },
+const fakeMedicalRecords: MedicalRecord[] = [
+  {
+    id: "1",
+    patientId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    doctorId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    appointmentId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    diagnosis: "Cảm cúm",
+    symptoms: "Sốt, ho, đau họng",
+    medicalHistory: "Không có tiền sử bệnh nghiêm trọng",
+    testResults: "Không có dấu hiệu bất thường",
+    createdAt: "2025-03-17T13:59:05.751Z",
+    updatedAt: "2025-03-17T13:59:05.751Z",
+  },
+  {
+    id: "2",
+    patientId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    doctorId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    appointmentId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    diagnosis: "Đau dạ dày",
+    symptoms: "Đau bụng, buồn nôn",
+    medicalHistory: "Có tiền sử viêm loét dạ dày",
+    testResults: "Cần nội soi để kiểm tra chi tiết hơn",
+    createdAt: "2025-03-16T10:45:00.000Z",
+    updatedAt: "2025-03-16T10:45:00.000Z",
+  },
 ];
 
-const Header = ({ onBack, onSearch }: { onBack: () => void; onSearch: () => void }) => (
-    <View className="flex-row items-center justify-between p-4">
-        <Pressable onPress={onBack} className="mr-4">
-            <AntDesign name="left" size={24} color="white" />
-        </Pressable>
-        <Text className="text-2xl font-bold text-white">Hồ sơ bệnh án</Text>
-        <Pressable onPress={onSearch}>
-            <AntDesign name="search1" size={24} color="white" />
-        </Pressable>
+const Header = ({ title }: { title: string }) => {
+  const router = useRouter();
+  return (
+    <View className="flex-row items-center justify-between px-5 py-4 shadow-md">
+      <Pressable onPress={() => router.back()}>
+        <AntDesign name="arrowleft" size={24} color="white" />
+      </Pressable>
+      <Text className="text-2xl font-semibold text-white">{title}</Text>
+      <Pressable onPress={() => console.log("Search")}>
+        <AntDesign name="search1" size={24} color="white" />
+      </Pressable>
     </View>
-);
-
-// Component hiển thị thông tin bệnh nhân
-const PatientInfoCard = ({ info }: { info: typeof patientInfo }) => (
-    <View className="bg-gray-900 mx-4 mt-4 p-5 rounded-2xl shadow-lg">
-        <Text className="text-xl font-bold text-white">{info.name}</Text>
-        <View className="mt-2 space-y-1 flex-col gap-2">
-            <Text className="text-gray-400">📅 Ngày sinh: <Text className="text-white">{info.dob}</Text></Text>
-            <Text className="text-gray-400">⚧ Giới tính: <Text className="text-white">{info.gender}</Text></Text>
-            <Text className="text-gray-400">📄 Mã bệnh án: <Text className="text-white">{info.recordNumber}</Text></Text>
-        </View>
-    </View>
-);
-
-const MedicalRecordItem = ({ record }: { record: typeof medicalRecords[0] }) => {
-    const router = useRouter();
-
-    return (
-        <Pressable
-            onPress={() => router.push(`/`)}
-            className="bg-gray-800 mx-4 p-4 rounded-xl mt-3 shadow-sm border border-gray-700 flex-row justify-between items-center"
-        >
-            <View className="flex-col gap-2">
-                <Text className="text-white font-semibold">📅 {record.date}</Text>
-                <Text className="text-gray-400">👨‍⚕️ Bác sĩ: <Text className="text-white">{record.doctor}</Text></Text>
-                <Text className="text-gray-400">💊 Chẩn đoán: <Text className="text-white">{record.diagnosis}</Text></Text>
-            </View>
-            <AntDesign name="right" size={20} color="white" />
-        </Pressable>
-    );
+  );
 };
 
-const AddNewRecordButton = ({ onPress }: { onPress: () => void }) => (
-    <Pressable onPress={onPress} className="bg-[#4A90E2] p-4 rounded-full mx-6 mt-4 flex-row items-center justify-center shadow-lg mb-4">
-        <AntDesign name="plus" size={20} color="white" />
-        <Text className="text-white font-semibold ml-2 text-lg">Thêm hồ sơ mới</Text>
+const MedicalRecordItem = ({ record }: { record: MedicalRecord }) => {
+  const router = useRouter();
+  return (
+    <Pressable
+      onPress={() =>
+        router.push(`/(protected)/medical-records-detail?id=${record.id}`)
+      }
+      className="bg-gray-800 mx-4 p-5 rounded-2xl mt-3 shadow-md border border-gray-700 flex-row justify-between items-center"
+    >
+      <View className="flex-1">
+        <View className="flex-row items-center">
+          <FontAwesome5 name="file-medical" size={20} color="#4ADE80" />
+          <Text className="text-lg font-bold text-white ml-2">
+            {record.diagnosis}
+          </Text>
+        </View>
+        <Text className="text-gray-300 text-sm mt-1">
+          Triệu chứng: {record.symptoms}
+        </Text>
+        <Text className="text-gray-300 text-sm mt-1">
+          Tiền sử: {record.medicalHistory}
+        </Text>
+        <Text className="text-gray-300 text-sm mt-1">
+          Xét nghiệm: {record.testResults}
+        </Text>
+        <Text className="text-gray-500 text-xs mt-2">
+          Ngày tạo: {dayjs(record.createdAt).format("DD/MM/YYYY HH:mm")}
+        </Text>
+      </View>
+      <AntDesign name="right" size={20} color="white" />
     </Pressable>
-);
+  );
+};
 
 const MedicalRecordsScreen: React.FC = () => {
-    const router = useRouter();
+  const medicalRecords = useMemo(() => fakeMedicalRecords, []);
 
-    return (
-        <View className="flex-1 bg-[#121212]">
-            <Header onBack={() => router.back()} onSearch={() => console.log("Search")} />
-            <PatientInfoCard info={patientInfo} />
-            <Text className="text-lg font-semibold text-gray-300 mx-4 mt-6">📂 Lịch sử khám bệnh</Text>
-            <FlatList
-                data={medicalRecords}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <MedicalRecordItem record={item} />}
-                contentContainerStyle={{ paddingVertical: 10 }}
-                ListEmptyComponent={<Text className="text-gray-400 text-center mt-6">Không có bệnh án nào.</Text>}
-            />
-            <AddNewRecordButton onPress={() => console.log("Add new record")} />
-        </View>
-    );
+  return (
+    <View className="flex-1 bg-[#121212]">
+      <Header title="Hồ sơ bệnh án" />
+      <FlatList
+        data={medicalRecords}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <MedicalRecordItem record={item} />}
+        contentContainerStyle={{ paddingVertical: 10 }}
+        ListEmptyComponent={
+          <View className="items-center mt-10">
+            <MaterialIcons name="event-busy" size={50} color="gray" />
+            <Text className="text-gray-400 text-center mt-2">
+              Không có hồ sơ bệnh án nào.
+            </Text>
+          </View>
+        }
+      />
+    </View>
+  );
 };
 
 export default MedicalRecordsScreen;

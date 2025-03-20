@@ -1,142 +1,161 @@
-import { useAuth } from "@/src/context/AuthContext";
-import { AntDesign, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
-import {
-  Dimensions,
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import Carousel from "react-native-reanimated-carousel";
+import React, { memo, useCallback, useMemo } from "react";
+import { FlatList, Pressable, Text, View, StyleSheet } from "react-native";
+import dayjs from "dayjs";
+import { useMyAppointments } from "@/src/hooks/useAppointments";
+import { useMyDoctors } from "@/src/hooks/useDoctors";
+import { Header } from "@/src/components/Header/Header";
 
-const { width } = Dimensions.get("window");
+type AppointmentStatus = "CONFIRMED" | "PENDING" | "CANCELLED";
 
-const images = [
-  require("../../assets/images/slider/slider1.jpg"),
-  require("../../assets/images/slider/slider2.jpg"),
-  require("../../assets/images/slider/slider3.jpg"),
-];
+type Appointment = {
+  id: string;
+  startTime: string;
+  status: AppointmentStatus;
+  note?: string;
+  doctorId: string;
+};
 
-const Home = () => {
-  const { user } = useAuth();
-  const router = useRouter();
+type Doctor = {
+  id: string;
+  fullName: string;
+};
 
-  return (
-    <View className="flex-1 bg-[#1A1A2E]">
-      <ScrollView>
-        <View className="flex-row items-center mx-4 mt-8 p-4 bg-[#16213E] rounded-2xl shadow-lg border border-[#0F3460]">
-          <Image
-            source={require("../../assets/images/user.png")}
-            className="w-14 h-14 rounded-full border-2 border-[#E94560]"
-            resizeMode="cover"
-          />
-          <View className="ml-4">
-            <Text className="text-lg text-gray-400">Xin chào,</Text>
-            <Text className="text-2xl font-bold text-[#E94560]">
-              {user?.username}
+const STATUS_CONFIG: Record<
+  AppointmentStatus,
+  { label: string; color: string }
+> = {
+  CONFIRMED: { label: "Đã xác nhận", color: "bg-green-600" },
+  PENDING: { label: "Chờ xác nhận", color: "bg-yellow-500" },
+  CANCELLED: { label: "Đã hủy", color: "bg-red-500" },
+};
+
+type AppointmentItemProps = {
+  appointment: Appointment;
+  doctor?: Doctor;
+};
+
+const AppointmentItem = memo(
+  ({ appointment, doctor }: AppointmentItemProps) => {
+    const router = useRouter();
+    const { label, color } = STATUS_CONFIG[appointment.status];
+
+    const handleDetail = useCallback(() => {
+      router.push(`/(protected)/appointments-detail?id=${appointment.id}`);
+    }, [appointment.id, router]);
+
+    return (
+      <Pressable
+        onPress={handleDetail}
+        className="bg-gray-800 mx-4 p-4 rounded-2xl mt-3 shadow-lg border border-gray-800 flex-row justify-between items-center"
+      >
+        <View className="flex-1">
+          <View className="flex-row items-center mb-1">
+            <MaterialIcons name="event" size={20} color="white" />
+            <Text className="text-white text-lg font-bold ml-2">
+              {dayjs(appointment.startTime).format("DD/MM/YYYY")}
             </Text>
-          </View>
-        </View>
-
-        <View className="mt-6 px-4">
-          <Carousel
-            loop
-            width={width - 32}
-            height={220}
-            autoPlay
-            data={images}
-            scrollAnimationDuration={1000}
-            style={{ alignSelf: "center" }}
-            renderItem={({ item }) => (
-              <View className="rounded-2xl overflow-hidden shadow-xl border border-[#0F3460]">
-                <Image
-                  source={item}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              </View>
-            )}
-          />
-        </View>
-
-        <View className="flex-row justify-between mx-4 mt-8">
-          {[
-            {
-              icon: "event-note",
-              text: "Lịch hẹn",
-              route: "/appointments",
-              IconComponent: MaterialIcons,
-            },
-            {
-              icon: "notes-medical",
-              text: "Bệnh án",
-              route: "/medical-records",
-              IconComponent: FontAwesome5,
-            },
-            {
-              icon: "bells",
-              text: "Thông báo",
-              route: "/notifications",
-              IconComponent: AntDesign,
-            },
-          ].map(({ icon, text, route, IconComponent }, index) => (
-            <Pressable
-              key={index}
-              className="flex-1 bg-[#0F3460] p-5 rounded-2xl items-center mx-2 shadow-md active:opacity-80 border border-[#E94560]"
-            >
-              <IconComponent name={icon} size={28} color="#E94560" />
-              <Text className="text-white mt-2 font-semibold text-sm">
-                {text}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        <View className="bg-[#16213E] mx-4 p-6 rounded-2xl mt-8 shadow-lg flex-row items-center border border-[#0F3460]">
-          <MaterialIcons name="event" size={26} color="#E94560" />
-          <View className="ml-3">
-            <Text className="text-lg font-semibold text-gray-300">
-              Lịch hẹn gần nhất
-            </Text>
-            <Text className="text-xl font-bold text-[#E94560] mt-2">
-              15:00 - 16/06/2025
-            </Text>
-          </View>
-        </View>
-
-        <Pressable
-          className="bg-[#0F3460] mx-4 p-6 rounded-2xl mt-4 flex-row justify-between items-center shadow-lg border border-[#E94560]"
-          onPress={() => router.push("/medical-records")}
-        >
-          <View className="flex-row items-center">
-            <FontAwesome5 name="file-medical" size={26} color="#E94560" />
-            <View className="ml-3">
-              <Text className="text-lg font-semibold text-gray-300">
-                Bệnh án mới nhất
-              </Text>
-              <Text className="text-sm text-gray-400 mt-1">
-                Cập nhật lần cuối: 10/02/2025
+            <View className="flex-row items-center ml-2">
+              <AntDesign name="clockcircleo" size={16} color="gray" />
+              <Text className="text-gray-400 ml-1">
+                {dayjs(appointment.startTime).format("HH:mm")}
               </Text>
             </View>
           </View>
-          <Text className="text-lg text-[#E94560] font-bold">Xem ngay</Text>
-        </Pressable>
+          <View className="flex-row items-center mt-1">
+            <FontAwesome name="user-md" size={16} color="gray" />
+            <Text className="text-gray-400 text-sm ml-2">
+              Bác sĩ:{" "}
+              <Text className="text-white font-medium">
+                {doctor?.fullName || "Chưa xác định"}
+              </Text>
+            </Text>
+          </View>
+          {appointment.note && (
+            <View className="flex-row items-center mt-1">
+              <MaterialIcons name="notes" size={16} color="gray" />
+              <Text className="text-gray-400 text-sm ml-2">
+                Ghi chú:{" "}
+                <Text className="text-gray-300">{appointment.note}</Text>
+              </Text>
+            </View>
+          )}
+          <View
+            className={`mt-2 px-2 py-1 rounded-lg flex-row items-center ${color}`}
+          >
+            <MaterialIcons name="info" size={16} color="white" />
+            <Text className="text-white ml-1 text-xs font-bold">{label}</Text>
+          </View>
+        </View>
+        <AntDesign name="right" size={20} color="white" />
+      </Pressable>
+    );
+  }
+);
 
-        <Pressable
-          className="mx-4 my-8 bg-[#E94560] py-4 rounded-2xl flex-row items-center justify-center shadow-xl active:opacity-80 border border-[#0F3460]"
-          onPress={() => router.push("/medical-records")}
-        >
-          <AntDesign name="filetext1" size={22} color="white" />
-          <Text className="font-semibold text-white text-lg ml-2">
-            Xem bệnh án
-          </Text>
-        </Pressable>
-      </ScrollView>
+const AppointmentsScreen = () => {
+  const router = useRouter();
+  const { data: rawAppointments = [] } = useMyAppointments();
+  const { data: dataMyDoctors = [] } = useMyDoctors();
+
+  const dataMyAppointments = useMemo(
+    () =>
+      rawAppointments.map((item) => ({
+        ...item,
+        status: item.status as AppointmentStatus,
+      })),
+    [rawAppointments]
+  );
+
+  const doctorMap = useMemo(
+    () =>
+      Object.fromEntries(dataMyDoctors.map((doctor) => [doctor.id, doctor])),
+    [dataMyDoctors]
+  );
+
+  return (
+    <View className="flex-1 bg-[#121212]">
+      <Header title="Lịch hẹn" />
+      <View className="flex-row items-center mx-4 mt-6">
+        <MaterialIcons name="event-note" size={20} color="gray" />
+        <Text className="text-lg font-semibold text-gray-300 ml-2">
+          Danh sách lịch hẹn của bạn
+        </Text>
+      </View>
+      <FlatList
+        data={dataMyAppointments}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <AppointmentItem
+            appointment={item}
+            doctor={doctorMap[item.doctorId]}
+          />
+        )}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={
+          <View className="items-center mt-6">
+            <MaterialIcons name="event-busy" size={50} color="gray" />
+            <Text className="text-gray-400 text-center mt-2">
+              Không có lịch hẹn nào.
+            </Text>
+          </View>
+        }
+      />
+      <Pressable
+        className="absolute bottom-6 right-6 bg-[#4A90E2] p-4 rounded-full shadow-lg"
+        onPress={() => router.push("/(protected)/appointments-create")}
+      >
+        <AntDesign name="plus" size={28} color="white" />
+      </Pressable>
     </View>
   );
 };
 
-export default Home;
+const styles = StyleSheet.create({
+  listContainer: {
+    paddingVertical: 10,
+  },
+});
+
+export default AppointmentsScreen;

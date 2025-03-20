@@ -1,117 +1,102 @@
 import { AntDesign, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView, Text, View, Pressable, Alert } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React from "react";
+import { View, Text, Pressable, Alert } from "react-native";
 import dayjs from "dayjs";
+import { useAppointmentDetail } from "@/src/hooks/useAppointments";
+import { useMyDoctors } from "@/src/hooks/useDoctors";
+import { Header } from "@/src/components/Header/Header";
 
-const statusColors: Record<AppointmentStatus, string> = {
-  confirmed: "bg-green-600",
-  pending: "bg-yellow-500",
-  cancelled: "bg-red-500",
-};
+type Status = "CONFIRMED" | "PENDING" | "CANCELLED";
 
-type AppointmentStatus = "confirmed" | "pending" | "cancelled";
-
-const initialAppointment = {
-  id: "1",
-  patientId: "1",
-  doctorId: "1",
-  clinicId: "1",
-  queueNumber: 1,
-  startTime: "2025-03-16T06:01:44.876Z",
-  endTime: "2025-03-16T06:31:44.876Z",
-  status: "confirmed" as AppointmentStatus,
-  createAt: "2025-03-10T08:00:00.000Z",
-  note: "Khám sức khỏe tổng quát",
-  doctorName: "BS. Lê Minh",
+const STATUS_CONFIG: Record<Status, { label: string; color: string }> = {
+  CONFIRMED: { label: "Đã xác nhận", color: "bg-green-600" },
+  PENDING: { label: "Chờ xác nhận", color: "bg-yellow-500" },
+  CANCELLED: { label: "Đã hủy", color: "bg-red-500" },
 };
 
 const AppointmentsDetailScreen = () => {
   const router = useRouter();
-  const [appointment, setAppointment] = useState(initialAppointment);
+  const { id } = useLocalSearchParams();
+  const { data: appointment } = useAppointmentDetail(id as string);
+  const { data: doctors = [] } = useMyDoctors();
 
-  const handleCancelAppointment = () => {
-    Alert.alert("Xác nhận", "Bạn có chắc muốn hủy lịch hẹn này?", [
-      { text: "Không", style: "cancel" },
+  const doctor = doctors.find((doc) => doc.id === appointment?.doctorId);
+
+  const handleCancel = () => {
+    Alert.alert("Xác nhận", "Bạn có chắc chắn muốn hủy lịch hẹn này?", [
+      { text: "Không" },
       {
         text: "Có",
-        onPress: () =>
-          setAppointment((prev) => ({ ...prev, status: "cancelled" })),
+        onPress: () => {
+          router.push("/(protected)/appointments");
+        },
       },
     ]);
   };
 
-  const isPastAppointment = dayjs().isAfter(dayjs(appointment.startTime));
+  if (!appointment) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#121212]">
+        <Text className="text-gray-400">Không tìm thấy lịch hẹn.</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView className="flex-1 bg-[#121212]">
-      <View className="flex-row items-center justify-between p-4">
-        <Pressable onPress={() => router.back()} className="p-2">
-          <AntDesign name="left" size={24} color="white" />
-        </Pressable>
-        <Text className="text-2xl font-bold text-white">Chi tiết lịch hẹn</Text>
-        <View className="w-8" />
-      </View>
-
-      <View className="p-4">
-        <View className="bg-gray-900 p-4 rounded-2xl shadow-lg border border-gray-800">
-          <Text className="text-xl font-bold text-white mb-2">Thông tin</Text>
-          <View className="flex-row items-center mb-2">
-            <MaterialIcons name="event" size={20} color="gray" />
-            <Text className="text-white ml-2">
-              {dayjs(appointment.startTime).format("DD/MM/YYYY")}
-            </Text>
-          </View>
-          <View className="flex-row items-center mb-2">
-            <AntDesign name="clockcircleo" size={20} color="gray" />
-            <Text className="text-white ml-2">
-              {dayjs(appointment.startTime).format("HH:mm")} -{" "}
-              {dayjs(appointment.endTime).format("HH:mm")}
-            </Text>
-          </View>
-          <View className="flex-row items-center mb-2">
-            <FontAwesome name="user-md" size={20} color="gray" />
-            <Text className="text-white ml-2">
-              Bác sĩ: {appointment.doctorName}
-            </Text>
-          </View>
-          <View className="flex-row items-center mb-2">
-            <MaterialIcons name="notes" size={20} color="gray" />
-            <Text className="text-white ml-2">Ghi chú: {appointment.note}</Text>
-          </View>
-          <View
-            className={`mt-2 px-2 py-1 rounded-lg flex-row items-center ${
-              statusColors[appointment.status]
-            }`}
-          >
-            <MaterialIcons name="info" size={20} color="white" />
-            <Text className="text-white ml-2 font-bold">
-              {appointment.status === "confirmed"
-                ? "Đã xác nhận"
-                : appointment.status === "pending"
-                ? "Chờ xác nhận"
-                : "Đã hủy"}
-            </Text>
+    <View className="flex-1 bg-[#121212]">
+      <Header title="Chi tiết lịch hẹn" />
+      <View className="p-6">
+        <View className="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+          <Text className="text-white text-2xl font-bold text-center mb-4">
+            Thông tin lịch hẹn
+          </Text>
+          <View className="space-y-4">
+            <View className="flex-row items-center">
+              <MaterialIcons name="event" size={24} color="white" />
+              <Text className="text-white text-lg ml-3">
+                {dayjs(appointment.startTime).format("DD/MM/YYYY HH:mm")}
+              </Text>
+            </View>
+            <View className="flex-row items-center">
+              <FontAwesome name="user-md" size={24} color="white" />
+              <Text className="text-white text-lg ml-3">
+                Bác sĩ: {doctor?.fullName || "Chưa xác định"}
+              </Text>
+            </View>
+            {appointment.note && (
+              <View className="flex-row items-center">
+                <MaterialIcons name="notes" size={24} color="white" />
+                <Text className="text-gray-300 text-lg ml-3">
+                  {appointment.note}
+                </Text>
+              </View>
+            )}
+            <View
+              className={`px-4 py-2 rounded-lg ${
+                STATUS_CONFIG[appointment.status as Status].color
+              } flex-row items-center justify-center mt-4`}
+            >
+              <MaterialIcons name="info" size={20} color="white" />
+              <Text className="text-white text-lg font-bold ml-2">
+                {STATUS_CONFIG[appointment.status as Status].label}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
-
-      {appointment.status !== "cancelled" && (
+      <View className="mt-8 items-center">
         <Pressable
-          className={`mx-4 my-4 p-4 rounded-lg items-center ${
-            isPastAppointment ? "bg-gray-500" : "bg-red-600"
-          }`}
-          onPress={handleCancelAppointment}
-          disabled={isPastAppointment}
+          className="bg-red-600 px-6 py-3 rounded-lg shadow-lg flex-row items-center"
+          onPress={handleCancel}
         >
-          <Text className="text-white font-bold">
-            {isPastAppointment
-              ? "Không thể huỷ lịch hẹn đã qua"
-              : "Hủy lịch hẹn"}
+          <AntDesign name="closecircleo" size={24} color="white" />
+          <Text className="text-white text-lg font-bold ml-3">
+            Hủy lịch hẹn
           </Text>
         </Pressable>
-      )}
-    </ScrollView>
+      </View>
+    </View>
   );
 };
 
