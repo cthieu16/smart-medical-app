@@ -1,3 +1,4 @@
+import { PrimaryButton } from "@/src/components/Buttons/PrimaryButton";
 import { useAuth } from "@/src/context/AuthContext";
 import { AntDesign, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -27,8 +28,7 @@ const Home = () => {
   return (
     <View className="flex-1 bg-[#121212]">
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="flex-row items-center mx-4 mt-10 p-5 bg-gray-900 rounded-3xl shadow-lg">
+        <View className="flex-row items-center mx-4 mt-10 p-6 bg-gray-900 rounded-3xl shadow-lg">
           <Image
             source={require("../../assets/images/user.png")}
             className="w-16 h-16 rounded-full border-4 border-blue-500"
@@ -37,13 +37,12 @@ const Home = () => {
           <View className="ml-4">
             <Text className="text-lg text-gray-400">Chào mừng,</Text>
             <Text className="text-2xl font-bold text-blue-500">
-              {user?.username}
+              {user?.fullName}
             </Text>
           </View>
         </View>
 
-        {/* Image Carousel */}
-        <View className="mt-6 px-4">
+        <View className="mt-6 px-6">
           <Carousel
             loop
             width={width - 32}
@@ -64,7 +63,6 @@ const Home = () => {
           />
         </View>
 
-        {/* Action Buttons */}
         <View className="flex-row justify-between mx-4 mt-8">
           {[
             {
@@ -98,7 +96,6 @@ const Home = () => {
           ))}
         </View>
 
-        {/* Upcoming Appointment */}
         <View className="bg-gray-900 mx-4 p-6 rounded-3xl mt-8 shadow-xl flex-row items-center">
           <MaterialIcons name="event" size={28} color="#4A90E2" />
           <View className="ml-3">
@@ -111,7 +108,6 @@ const Home = () => {
           </View>
         </View>
 
-        {/* Medical Record */}
         <Pressable
           className="bg-gray-800 mx-4 p-6 rounded-3xl mt-4 flex-row justify-between items-center shadow-xl"
           onPress={() => router.push("/medical-records")}
@@ -130,16 +126,12 @@ const Home = () => {
           <Text className="text-lg text-blue-500 font-bold">Xem ngay</Text>
         </Pressable>
 
-        {/* View Records Button */}
-        <Pressable
-          className="mx-4 my-8 bg-blue-500 py-4 rounded-3xl flex-row items-center justify-center shadow-2xl active:opacity-80"
-          onPress={() => router.push("/medical-records")}
-        >
-          <AntDesign name="filetext1" size={24} color="white" />
-          <Text className="font-semibold text-white text-lg ml-2">
-            Xem bệnh án
-          </Text>
-        </Pressable>
+        <View className="p-6">
+          <PrimaryButton
+            title="Xem bệnh án"
+            onPress={() => router.push("/medical-records")}
+          />
+        </View>
       </ScrollView>
     </View>
   );

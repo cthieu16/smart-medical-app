@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useUser } from "../../hooks/useUser";
 import { useAuth } from "@/src/context/AuthContext";
+import { Header } from "@/src/components/Header/Header";
 
 const SettingsScreen = () => {
   const router = useRouter();
@@ -103,17 +104,9 @@ const SettingsScreen = () => {
 
   return (
     <ScrollView className="flex-1 bg-[#121212]">
-      <View className="flex-row items-center justify-between p-4">
-        <Pressable onPress={() => router.back()} className="mr-4">
-          <AntDesign name="left" size={24} color="white" />
-        </Pressable>
-        <Text className="text-2xl font-bold text-white">Cài đặt</Text>
-        <Pressable onPress={() => console.log("Search")}>
-          <AntDesign name="search1" size={24} color="white" />
-        </Pressable>
-      </View>
+      <Header title="Cài đặt" />
 
-      <View className="px-4 mt-4">
+      <View className="px-6 mt-4">
         <Text className="mb-4 text-xl text-white">Thông tin cá nhân</Text>
         <View className="gap-3 space-y-4">
           <TextInput
