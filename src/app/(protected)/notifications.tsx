@@ -28,7 +28,6 @@ const NotificationItem = ({
   const handlePress = () => {
     setReaded(true);
     console.log(`Clicked: ${title}`);
-    // TODO: Gửi API cập nhật trạng thái đã đọc lên server
   };
 
   const notificationLabel =

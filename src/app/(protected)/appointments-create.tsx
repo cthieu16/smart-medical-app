@@ -9,6 +9,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Picker } from "@react-native-picker/picker";
@@ -16,6 +17,7 @@ import dayjs from "dayjs";
 import { Header } from "@/src/components/Header/Header";
 import { useMyDoctors } from "@/src/hooks/useDoctors";
 import { useCreateAppointment } from "@/src/hooks/useAppointments";
+import { PrimaryButton } from "@/src/components/Buttons/PrimaryButton";
 
 const timeSlots = [
   "09:00 - 09:30",
@@ -43,6 +45,7 @@ const AppointmentsCreateScreen = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(timeSlots[0]);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleConfirmDate = (date: any) => {
     setSelectedDate(date);
@@ -52,107 +55,121 @@ const AppointmentsCreateScreen = () => {
   const handleCreateAppointment = async () => {
     if (!selectedDate) return alert("Vui lòng chọn ngày!");
 
-    const formatTime = (time: any) => {
-      const [hour, minute] = time.split(":");
-      return { hour: Number(hour), minute: Number(minute) };
-    };
+    setLoading(true);
 
-    const [start, end] = selectedTime.split(" - ").map(formatTime);
-    const startTime = dayjs(selectedDate)
-      .hour(start.hour)
-      .minute(start.minute)
-      .format("YYYY-MM-DDTHH:mm:ss");
-    const endTime = dayjs(selectedDate)
-      .hour(end.hour)
-      .minute(end.minute)
-      .format("YYYY-MM-DDTHH:mm:ss");
+    try {
+      const formatTime = (time: any) => {
+        const [hour, minute] = time.split(":");
+        return { hour: Number(hour), minute: Number(minute) };
+      };
 
-    const payload = { doctorId, startTime, endTime, note };
-    await createAppointment.mutateAsync(payload);
-    router.back();
+      const [start, end] = selectedTime.split(" - ").map(formatTime);
+      const startTime = dayjs(selectedDate)
+        .hour(start.hour)
+        .minute(start.minute)
+        .format("YYYY-MM-DDTHH:mm:ss");
+      const endTime = dayjs(selectedDate)
+        .hour(end.hour)
+        .minute(end.minute)
+        .format("YYYY-MM-DDTHH:mm:ss");
+
+      const payload = { doctorId, startTime, endTime, note };
+      await createAppointment.mutateAsync(payload);
+      router.replace("/(protected)/appointments");
+    } catch (error) {
+      alert("Đã có lỗi xảy ra. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <ScrollView className="flex-1 bg-[#121212]">
-        <Header title="Tạo lịch hẹn" />
+      <View className="flex-1">
+        <ScrollView className="flex-1 bg-[#121212]">
+          <Header title="Tạo lịch hẹn" />
 
-        <View className="p-6">
-          <Text className="text-lg text-gray-300 mb-2">Chọn bác sĩ</Text>
-          <Picker
-            selectedValue={doctorId}
-            onValueChange={setDoctorId}
-            style={{ color: "white" }}
-            className="bg-gray-800 p-2 rounded-xl border border-gray-700"
-          >
-            {doctors.map((doctor) => (
-              <Picker.Item
-                key={doctor.id}
-                label={doctor.fullName}
-                value={doctor.id}
-              />
-            ))}
-          </Picker>
-        </View>
+          <View className="p-6">
+            <Text className="text-lg text-gray-300 mb-2">Chọn bác sĩ</Text>
+            <Picker
+              selectedValue={doctorId}
+              onValueChange={setDoctorId}
+              style={{ color: "white" }}
+              className="bg-gray-800 p-2 rounded-xl border border-gray-700"
+            >
+              {doctors.map((doctor) => (
+                <Picker.Item
+                  key={doctor.id}
+                  label={doctor.fullName}
+                  value={doctor.id}
+                />
+              ))}
+            </Picker>
+          </View>
 
-        <View className="mt-4 px-6">
-          <Text className="text-lg text-gray-300 mb-2">Chọn ngày</Text>
-          <Pressable
-            onPress={() => setDatePickerVisibility(true)}
-            className="bg-gray-800 p-4 rounded-xl border border-gray-700 flex-row items-center justify-between"
-          >
-            <Text className="text-white">
-              {selectedDate
-                ? dayjs(selectedDate).format("DD/MM/YYYY")
-                : "Chọn ngày"}
-            </Text>
-            <MaterialIcons name="event" size={24} color="white" />
-          </Pressable>
-        </View>
+          <View className="mt-4 px-6">
+            <Text className="text-lg text-gray-300 mb-2">Chọn ngày</Text>
+            <Pressable
+              onPress={() => setDatePickerVisibility(true)}
+              className="bg-gray-800 p-4 rounded-xl border border-gray-700 flex-row items-center justify-between"
+            >
+              <Text className="text-white">
+                {selectedDate
+                  ? dayjs(selectedDate).format("DD/MM/YYYY")
+                  : "Chọn ngày"}
+              </Text>
+              <MaterialIcons name="event" size={24} color="white" />
+            </Pressable>
+          </View>
 
-        <View className="mt-4 px-6">
-          <Text className="text-lg text-gray-300 mb-2">Chọn giờ</Text>
-          <Picker
-            selectedValue={selectedTime}
-            onValueChange={setSelectedTime}
-            style={{ color: "white" }}
-            className="bg-gray-800 p-2 rounded-xl border border-gray-700"
-            mode="dropdown"
-          >
-            {timeSlots.map((time) => (
-              <Picker.Item key={time} label={time} value={time} />
-            ))}
-          </Picker>
-        </View>
+          <View className="mt-4 px-6">
+            <Text className="text-lg text-gray-300 mb-2">Chọn giờ</Text>
+            <Picker
+              selectedValue={selectedTime}
+              onValueChange={setSelectedTime}
+              style={{ color: "white" }}
+              className="bg-gray-800 p-2 rounded-xl border border-gray-700"
+              mode="dropdown"
+            >
+              {timeSlots.map((time) => (
+                <Picker.Item key={time} label={time} value={time} />
+              ))}
+            </Picker>
+          </View>
 
-        <View className="mt-4 px-6">
-          <Text className="text-lg text-gray-300 mb-2">Ghi chú</Text>
-          <TextInput
-            className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700 h-32"
-            placeholder="Nhập ghi chú..."
-            placeholderTextColor="gray"
-            multiline
-            value={note}
-            onChangeText={setNote}
+          <View className="mt-4 px-6">
+            <Text className="text-lg text-gray-300 mb-2">Ghi chú</Text>
+            <TextInput
+              className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700 h-32"
+              placeholder="Nhập ghi chú..."
+              placeholderTextColor="gray"
+              multiline
+              value={note}
+              onChangeText={setNote}
+            />
+          </View>
+
+          <View className="p-6">
+            <PrimaryButton
+              title="Tạo lịch hẹn"
+              onPress={handleCreateAppointment}
+            />
+          </View>
+
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="date"
+            onConfirm={handleConfirmDate}
+            onCancel={() => setDatePickerVisibility(false)}
           />
-        </View>
+        </ScrollView>
 
-        <View className="px-6">
-          <Pressable
-            onPress={handleCreateAppointment}
-            className="bg-[#4A90E2] p-4 rounded-xl mt-6 items-center mb-6 active:scale-95 transition-transform"
-          >
-            <Text className="text-white font-bold text-lg">Tạo lịch hẹn</Text>
-          </Pressable>
-        </View>
-
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleConfirmDate}
-          onCancel={() => setDatePickerVisibility(false)}
-        />
-      </ScrollView>
+        {loading && (
+          <View className="absolute inset-0 bg-black/70 flex items-center justify-center">
+            <ActivityIndicator size="large" color="white" />
+          </View>
+        )}
+      </View>
     </TouchableWithoutFeedback>
   );
 };
