@@ -41,17 +41,17 @@ const MedicalRecordDetailScreen = () => {
 
   if (!record) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#121212]">
+      <View className="flex-1 items-center justify-center bg-[#0D1117]">
         <Text className="text-gray-400">Hồ sơ bệnh án không tồn tại.</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-[#121212]">
+    <View className="flex-1 bg-[#0D1117]">
       <Header title="Chi tiết bệnh án" />
       <ScrollView className="px-4 py-6">
-        <View className="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+        <View className="bg-[#161B22] p-6 rounded-2xl shadow-lg border border-gray-700">
           <View className="flex-row items-center mb-4">
             <FontAwesome5 name="file-medical" size={22} color="#4ADE80" />
             <Text className="text-xl font-bold text-white ml-3">

@@ -17,18 +17,18 @@ export const Header = ({
   const router = useRouter();
 
   return (
-    <View className='flex-row items-center justify-between px-4 py-3 bg-[#121212] border-b border-gray-800'>
-      <View className='flex-row items-center'>
+    <View className="flex-row items-center justify-between px-4 py-3 bg-[#0D1117] border-b border-gray-800">
+      <View className="flex-row items-center">
         {showBackButton && (
-          <Pressable onPress={() => router.back()} className='mr-4'>
-            <AntDesign name='left' size={24} color='white' />
+          <Pressable onPress={() => router.back()} className="mr-4">
+            <AntDesign name="left" size={24} color="white" />
           </Pressable>
         )}
-        <Text className='text-xl font-bold text-white'>{title}</Text>
+        <Text className="text-xl font-bold text-white">{title}</Text>
       </View>
       {showSearchButton && (
         <Pressable onPress={() => console.log("search")}>
-          <AntDesign name='search1' size={24} color='white' />
+          <AntDesign name="search1" size={24} color="white" />
         </Pressable>
       )}
     </View>

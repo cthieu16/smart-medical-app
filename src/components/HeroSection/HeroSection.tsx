@@ -14,15 +14,15 @@ export const HeroSection = ({
   onButtonPress,
 }: HeroSectionProps) => {
   return (
-    <View className='relative h-[400px]'>
-      <Image source={{ uri: imageUrl }} className='w-full h-full' />
-      <View className='absolute bottom-8 left-4'>
-        <Text className='mb-4 text-4xl font-bold text-white'>{title}</Text>
+    <View className="relative h-[400px]">
+      <Image source={{ uri: imageUrl }} className="w-full h-full" />
+      <View className="absolute bottom-8 left-4">
+        <Text className="mb-4 text-4xl font-bold text-white">{title}</Text>
         <Pressable
-          className='bg-[#4A90E2] px-6 py-2 rounded-lg'
+          className="bg-[#4A90E2] px-6 py-2 rounded-sm"
           onPress={onButtonPress}
         >
-          <Text className='font-medium text-white'>{buttonText}</Text>
+          <Text className="font-medium text-white">{buttonText}</Text>
         </Pressable>
       </View>
     </View>

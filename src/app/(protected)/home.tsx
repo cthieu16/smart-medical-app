@@ -26,17 +26,17 @@ const Home = () => {
   const router = useRouter();
 
   return (
-    <View className="flex-1 bg-[#121212]">
+    <View className="flex-1 bg-[#0D1117]">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="flex-row items-center mx-4 mt-10 p-6 bg-gray-900 rounded-3xl shadow-lg">
+        <View className="flex-row items-center mx-4 mt-10 p-6 bg-[#161B22] rounded-3xl shadow-lg shadow-[#00AEEF]">
           <Image
             source={require("../../assets/images/user.png")}
-            className="w-16 h-16 rounded-full border-4 border-blue-500"
+            className="w-16 h-16 rounded-full border-4 border-[#00AEEF]"
             resizeMode="cover"
           />
           <View className="ml-4">
-            <Text className="text-lg text-gray-400">Chào mừng,</Text>
-            <Text className="text-2xl font-bold text-blue-500">
+            <Text className="text-lg text-[#8B949E]">Chào mừng,</Text>
+            <Text className="text-2xl font-bold text-[#fff]">
               {user?.fullName}
             </Text>
           </View>
@@ -77,18 +77,12 @@ const Home = () => {
               route: "/medical-records",
               IconComponent: FontAwesome5,
             },
-            {
-              icon: "bells",
-              text: "Thông báo",
-              route: "/notifications",
-              IconComponent: AntDesign,
-            },
           ].map(({ icon, text, route, IconComponent }, index) => (
             <Pressable
               key={index}
-              className="flex-1 bg-gray-800 p-6 rounded-3xl items-center mx-2 shadow-lg active:opacity-80"
+              className="flex-1 bg-[#161B22] p-6 rounded-3xl items-center mx-2 shadow-lg active:opacity-80"
             >
-              <IconComponent name={icon} size={30} color="#4A90E2" />
+              <IconComponent name={icon} size={30} color="#00AEEF" />
               <Text className="text-white mt-2 font-semibold text-sm">
                 {text}
               </Text>
@@ -96,34 +90,34 @@ const Home = () => {
           ))}
         </View>
 
-        <View className="bg-gray-900 mx-4 p-6 rounded-3xl mt-8 shadow-xl flex-row items-center">
-          <MaterialIcons name="event" size={28} color="#4A90E2" />
+        <View className="bg-[#161B22] mx-4 p-6 rounded-3xl mt-8 shadow-xl flex-row items-center">
+          <MaterialIcons name="event" size={28} color="#00AEEF" />
           <View className="ml-3">
-            <Text className="text-lg font-semibold text-gray-300">
+            <Text className="text-lg font-semibold text-[#8B949E]">
               Lịch hẹn gần nhất
             </Text>
-            <Text className="text-xl font-bold text-blue-500 mt-2">
+            <Text className="text-xl font-bold text-[#fff] mt-2">
               15:00 - 16/06/2025
             </Text>
           </View>
         </View>
 
         <Pressable
-          className="bg-gray-800 mx-4 p-6 rounded-3xl mt-4 flex-row justify-between items-center shadow-xl"
+          className="bg-[#161B22] mx-4 p-6 rounded-3xl mt-4 flex-row justify-between items-center shadow-xl"
           onPress={() => router.push("/medical-records")}
         >
           <View className="flex-row items-center">
-            <FontAwesome5 name="file-medical" size={28} color="#4A90E2" />
+            <FontAwesome5 name="file-medical" size={28} color="#00AEEF" />
             <View className="ml-3">
-              <Text className="text-lg font-semibold text-gray-300">
+              <Text className="text-lg font-semibold text-[#8B949E]">
                 Bệnh án mới nhất
               </Text>
-              <Text className="text-sm text-gray-400 mt-1">
+              <Text className="text-sm text-[#8B949E] mt-1">
                 Cập nhật lần cuối: 10/02/2025
               </Text>
             </View>
           </View>
-          <Text className="text-lg text-blue-500 font-bold">Xem ngay</Text>
+          <Text className="text-lg text-[#fff] font-bold">Xem ngay</Text>
         </Pressable>
 
         <View className="p-6">

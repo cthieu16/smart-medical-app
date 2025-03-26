@@ -96,35 +96,35 @@ const SettingsScreen = () => {
 
   if (!user) {
     return (
-      <View className="flex-1 bg-[#121212] items-center justify-center">
+      <View className="flex-1 bg-[#0D1117] items-center justify-center">
         <Text className="text-white">Đang chờ...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-[#121212]">
+    <ScrollView className="flex-1 bg-[#0D1117]">
       <Header title="Cài đặt" />
 
       <View className="px-6 mt-4">
         <Text className="mb-4 text-xl text-white">Thông tin cá nhân</Text>
         <View className="gap-3 space-y-4">
           <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            className="bg-[#161B22] text-white px-4 py-3 rounded-xl"
             placeholder="Họ"
             placeholderTextColor="#666"
             value={formData.fullName}
             onChangeText={(value) => handleChange("fullName", value)}
           />
           <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            className="bg-[#161B22] text-white px-4 py-3 rounded-xl"
             placeholder="Tên"
             placeholderTextColor="#666"
             value={formData.username}
             onChangeText={(value) => handleChange("username", value)}
           />
           <TextInput
-            className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg"
+            className="bg-[#161B22] text-white px-4 py-3 rounded-xl"
             placeholder="Email"
             placeholderTextColor="#666"
             value={formData.email}
@@ -134,7 +134,7 @@ const SettingsScreen = () => {
         </View>
 
         <Pressable
-          className="bg-[#4A90E2] mt-8 py-3 px-6 rounded-lg"
+          className="bg-[#4A90E2] mt-8 py-3 px-6 rounded-xl"
           onPress={handleSubmit}
           disabled={isUpdating}
         >
@@ -144,7 +144,7 @@ const SettingsScreen = () => {
         </Pressable>
 
         <Pressable
-          className="mt-8 py-3 px-6 rounded-lg border border-[#4A90E2] mb-4"
+          className="mt-8 py-3 px-6 rounded-xl border border-[#4A90E2] mb-4"
           onPress={() => setIsPasswordModalVisible(true)}
         >
           <Text className="text-[#4A90E2] text-center font-semibold">
@@ -164,12 +164,12 @@ const SettingsScreen = () => {
           onPress={() => setIsPasswordModalVisible(false)}
         >
           <Pressable onPress={(e) => e.stopPropagation()}>
-            <View className="bg-[#121212] p-6 rounded-t-3xl">
+            <View className="bg-[#0D1117] p-6 rounded-t-3xl">
               <Text className="mb-6 text-2xl font-bold text-white">
                 Đổi mật khẩu
               </Text>
               <TextInput
-                className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
+                className="bg-[#161B22] text-white px-4 py-3 rounded-xl mb-4"
                 placeholder="Mật khẩu cũ"
                 placeholderTextColor="#666"
                 secureTextEntry
@@ -179,7 +179,7 @@ const SettingsScreen = () => {
                 }
               />
               <TextInput
-                className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
+                className="bg-[#161B22] text-white px-4 py-3 rounded-xl mb-4"
                 placeholder="Mật khẩu mới"
                 placeholderTextColor="#666"
                 secureTextEntry
@@ -189,7 +189,7 @@ const SettingsScreen = () => {
                 }
               />
               <TextInput
-                className="bg-[#1E1E1E] text-white px-4 py-3 rounded-lg mb-4"
+                className="bg-[#161B22] text-white px-4 py-3 rounded-xl mb-4"
                 placeholder="Nhập lại mật khẩu mới"
                 placeholderTextColor="#666"
                 secureTextEntry
@@ -199,7 +199,7 @@ const SettingsScreen = () => {
                 }
               />
               <Pressable
-                className="bg-[#E63946] py-3 px-6 rounded-lg mb-4"
+                className="bg-[#E63946] py-3 px-6 rounded-xl mb-4"
                 onPress={handlePasswordChange}
               >
                 <Text className="font-semibold text-center text-white">

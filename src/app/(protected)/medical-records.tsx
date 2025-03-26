@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import dayjs from "dayjs";
+import { Header } from "@/src/components/Header/Header";
 
 interface MedicalRecord {
   id: string;
@@ -44,21 +45,6 @@ const fakeMedicalRecords: MedicalRecord[] = [
   },
 ];
 
-const Header = ({ title }: { title: string }) => {
-  const router = useRouter();
-  return (
-    <View className="flex-row items-center justify-between px-5 py-4 shadow-md">
-      <Pressable onPress={() => router.back()}>
-        <AntDesign name="arrowleft" size={24} color="white" />
-      </Pressable>
-      <Text className="text-2xl font-semibold text-white">{title}</Text>
-      <Pressable onPress={() => console.log("Search")}>
-        <AntDesign name="search1" size={24} color="white" />
-      </Pressable>
-    </View>
-  );
-};
-
 const MedicalRecordItem = ({ record }: { record: MedicalRecord }) => {
   const router = useRouter();
   return (
@@ -66,7 +52,7 @@ const MedicalRecordItem = ({ record }: { record: MedicalRecord }) => {
       onPress={() =>
         router.push(`/(protected)/medical-records-detail?id=${record.id}`)
       }
-      className="bg-gray-800 mx-4 p-5 rounded-2xl mt-3 shadow-md border border-gray-700 flex-row justify-between items-center"
+      className="bg-[#161B22] mx-4 p-5 rounded-2xl mt-3 shadow-lg flex-row justify-between items-center"
     >
       <View className="flex-1">
         <View className="flex-row items-center">
@@ -97,7 +83,7 @@ const MedicalRecordsScreen: React.FC = () => {
   const medicalRecords = useMemo(() => fakeMedicalRecords, []);
 
   return (
-    <View className="flex-1 bg-[#121212]">
+    <View className="flex-1 bg-[#0D1117]">
       <Header title="Hồ sơ bệnh án" />
       <FlatList
         data={medicalRecords}

@@ -26,9 +26,9 @@ const STATUS_CONFIG: Record<
   AppointmentStatus,
   { label: string; color: string }
 > = {
-  CONFIRMED: { label: "Đã xác nhận", color: "bg-green-600" },
-  PENDING: { label: "Chờ xác nhận", color: "bg-yellow-500" },
-  CANCELLED: { label: "Đã hủy", color: "bg-red-500" },
+  CONFIRMED: { label: "Đã xác nhận", color: "bg-[#00C851]" },
+  PENDING: { label: "Chờ xác nhận", color: "bg-[#FFBB33]" },
+  CANCELLED: { label: "Đã hủy", color: "bg-[#FF4444]" },
 };
 
 type AppointmentItemProps = {
@@ -48,33 +48,33 @@ const AppointmentItem = memo(
     return (
       <Pressable
         onPress={handleDetail}
-        className="bg-gray-800 mx-4 p-4 rounded-2xl mt-3 shadow-lg border border-gray-800 flex-row justify-between items-center"
+        className="bg-[#161B22] mx-4 p-4 rounded-2xl mt-3 shadow-lg flex-row justify-between items-center"
       >
         <View className="flex-1">
           <View className="flex-row items-center mb-1">
-            <MaterialIcons name="event" size={20} color="white" />
-            <Text className="text-white text-lg font-bold ml-2">
+            <MaterialIcons name="event" size={20} color="#8B949E" />
+            <Text className="text-[#fff] text-lg font-bold ml-2">
               {dayjs(appointment.startTime).format("DD/MM/YYYY")}
             </Text>
             <View className="flex-row items-center ml-2">
-              <AntDesign name="clockcircleo" size={16} color="gray" />
+              <AntDesign name="clockcircleo" size={16} color="#8B949E" />
               <Text className="text-gray-400 ml-1">
                 {dayjs(appointment.startTime).format("HH:mm")}
               </Text>
             </View>
           </View>
           <View className="flex-row items-center mt-1">
-            <FontAwesome name="user-md" size={16} color="gray" />
+            <FontAwesome name="user-md" size={16} color="#8B949E" />
             <Text className="text-gray-400 text-sm ml-2">
               Bác sĩ:{" "}
-              <Text className="text-white font-medium">
+              <Text className="text-[#fff] font-medium">
                 {doctor?.fullName || "Chưa xác định"}
               </Text>
             </Text>
           </View>
           {appointment.note && (
             <View className="flex-row items-center mt-1">
-              <MaterialIcons name="notes" size={16} color="gray" />
+              <MaterialIcons name="notes" size={16} color="#8B949E" />
               <Text className="text-gray-400 text-sm ml-2">
                 Ghi chú:{" "}
                 <Text className="text-gray-300">{appointment.note}</Text>
@@ -82,13 +82,13 @@ const AppointmentItem = memo(
             </View>
           )}
           <View
-            className={`mt-2 px-2 py-1 rounded-lg flex-row items-center ${color}`}
+            className={`mt-2 px-2 py-1 rounded-sm flex-row items-center ${color}`}
           >
             <MaterialIcons name="info" size={16} color="white" />
             <Text className="text-white ml-1 text-xs font-bold">{label}</Text>
           </View>
         </View>
-        <AntDesign name="right" size={20} color="white" />
+        <AntDesign name="right" size={20} color="#8B949E" />
       </Pressable>
     );
   }
@@ -115,10 +115,10 @@ const AppointmentsScreen = () => {
   );
 
   return (
-    <View className="flex-1 bg-[#121212]">
+    <View className="flex-1 bg-[#0D1117]">
       <Header title="Lịch hẹn" />
       <View className="flex-row items-center mx-4 mt-6">
-        <MaterialIcons name="event-note" size={20} color="gray" />
+        <MaterialIcons name="event-note" size={20} color="#8B949E" />
         <Text className="text-lg font-semibold text-gray-300 ml-2">
           Danh sách lịch hẹn của bạn
         </Text>
@@ -135,7 +135,7 @@ const AppointmentsScreen = () => {
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <View className="items-center mt-6">
-            <MaterialIcons name="event-busy" size={50} color="gray" />
+            <MaterialIcons name="event-busy" size={50} color="#8B949E" />
             <Text className="text-gray-400 text-center mt-2">
               Không có lịch hẹn nào.
             </Text>
@@ -143,7 +143,7 @@ const AppointmentsScreen = () => {
         }
       />
       <Pressable
-        className="absolute bottom-6 right-6 bg-[#4A90E2] p-4 rounded-full shadow-lg"
+        className="absolute bottom-6 right-6 bg-[#00AEEF] p-4 rounded-full shadow-lg"
         onPress={() => router.push("/(protected)/appointments-create")}
       >
         <AntDesign name="plus" size={28} color="white" />

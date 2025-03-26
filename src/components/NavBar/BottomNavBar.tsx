@@ -34,7 +34,7 @@ export const BottomNavBar = () => {
   const router = useRouter();
 
   return (
-    <View className='flex-row items-center justify-around py-4 bg-[#121212] border-t border-gray-800'>
+    <View className="flex-row items-center justify-around py-4 bg-[#0D1117] border-t border-gray-800">
       {NAV_ITEMS.map((item) => (
         <NavBarItem
           key={item.id}

@@ -35,7 +35,7 @@ const ProfileScreen = () => {
   ];
 
   return (
-    <ScrollView className="flex-1 bg-[#121212]">
+    <ScrollView className="flex-1 bg-[#0D1117]">
       {/* Header */}
       <View className="flex-row items-center justify-between p-4">
         <Text className="text-2xl font-bold text-white">Thông tin cá nhân</Text>
@@ -59,7 +59,7 @@ const ProfileScreen = () => {
             onPress={item.onPress}
           >
             <View className="flex-row items-center">
-              <View className="items-center justify-center w-10 h-10 bg-gray-800 rounded-full">
+              <View className="items-center justify-center w-10 h-10 bg-[#161B22] rounded-full">
                 <Feather name={item.icon as any} size={20} color="#4A90E2" />
               </View>
               <View className="ml-4">
@@ -76,7 +76,7 @@ const ProfileScreen = () => {
 
       {/* Logout Button */}
       <Pressable
-        className="mx-4 mt-8 mb-4 bg-[#4A90E2] py-3 px-6 rounded-lg"
+        className="mx-4 mt-8 mb-4 bg-[#4A90E2] py-3 px-6 rounded-xl"
         onPress={async () => {
           await logout();
           router.replace("/");

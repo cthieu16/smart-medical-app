@@ -35,7 +35,7 @@ const NotificationItem = ({
 
   return (
     <Pressable
-      className="bg-gray-800 mx-4 p-4 rounded-xl mt-3 shadow-sm border border-gray-700 flex-row justify-between items-center"
+      className="bg-[#161B22] mx-4 p-4 rounded-2xl mt-3 shadow-lg flex-row justify-between items-center"
       onPress={handlePress}
     >
       <View className="flex-1">
@@ -67,7 +67,7 @@ const NotificationsScreen = () => {
   const handleGoBack = useCallback(() => router.back(), [router]);
 
   return (
-    <View className="flex-1 bg-[#121212]">
+    <View className="flex-1 bg-[#0D1117]">
       <Header title="Thông báo" />
 
       {isLoading ? (
