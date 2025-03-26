@@ -140,18 +140,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           },
         });
       }
+
+      await AsyncStorage.removeItem("@accessToken");
       await AsyncStorage.removeItem("@user");
-      await AsyncStorage.removeItem("@token");
       await AsyncStorage.removeItem("@googleUser");
       await AsyncStorage.removeItem("@facebookUser");
+
+      queryClient.removeQueries();
     },
     onSuccess: () => {
-      queryClient.setQueryData(["token"], null);
+      queryClient.setQueryData(["accessToken"], null);
       queryClient.setQueryData(["user"], null);
       queryClient.setQueryData(["googleUser"], null);
       queryClient.setQueryData(["facebookUser"], null);
     },
   });
+
 
   const registerMutation = useMutation({
     mutationFn: async ({

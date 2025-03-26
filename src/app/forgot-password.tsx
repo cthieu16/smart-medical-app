@@ -1,7 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, Alert } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
@@ -14,13 +14,29 @@ const ForgotPassword = () => {
   const { forgotPassword } = useAuth();
 
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
 
   const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      return Alert.alert("Lỗi", "Vui lòng nhập email của bạn.");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return Alert.alert(
+        "Lỗi",
+        "Email không hợp lệ. Vui lòng nhập đúng định dạng."
+      );
+    }
+
     try {
       await forgotPassword(email);
+      Alert.alert(
+        "Thành công",
+        "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.",
+        [{ text: "OK", onPress: () => router.push("/login") }]
+      );
     } catch (err) {
-      setError("Lỗi khi gửi email. Vui lòng kiểm tra lại.");
+      Alert.alert("Lỗi", "Có lỗi xảy ra khi gửi email. Vui lòng thử lại.");
     }
   };
 

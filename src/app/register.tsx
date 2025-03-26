@@ -1,7 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
@@ -14,42 +14,40 @@ const Register = () => {
   const { register, login } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [username, setusername] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
 
   const validateInputs = () => {
     if (fullName.trim().length < 3) {
-      setError("Họ và tên phải có ít nhất 3 ký tự.");
+      Alert.alert("Lỗi", "Họ và tên phải có ít nhất 3 ký tự.");
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError("Email không hợp lệ.");
+      Alert.alert("Lỗi", "Email không hợp lệ.");
       return false;
     }
 
     if (username.trim().length < 3 || /\s/.test(username)) {
-      setError(
+      Alert.alert(
+        "Lỗi",
         "Tên đăng nhập phải có ít nhất 3 ký tự và không chứa khoảng trắng."
       );
       return false;
     }
 
     if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự.");
+      Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 6 ký tự.");
       return false;
     }
-
 
     if (password !== confirmPassword) {
-      setError("Mật khẩu nhập lại không khớp.");
+      Alert.alert("Lỗi", "Mật khẩu nhập lại không khớp.");
       return false;
     }
 
-    setError("");
     return true;
   };
 
@@ -61,7 +59,7 @@ const Register = () => {
       await login(email, password);
       router.replace("/home");
     } catch (err) {
-      setError("Lỗi khi đăng ký. Vui lòng kiểm tra lại.");
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi đăng ký. Vui lòng kiểm tra lại.");
     }
   };
 
@@ -95,7 +93,7 @@ const Register = () => {
             label="Tên đăng nhập"
             placeholder="Tên đăng nhập"
             value={username}
-            onChangeText={setusername}
+            onChangeText={setUsername}
             autoCapitalize="none"
           />
 
@@ -115,16 +113,12 @@ const Register = () => {
             secureTextEntry
           />
 
-          <View className="h-6">
-            {error ? <Text className="text-red-500">{error}</Text> : null}
-          </View>
-
           <PrimaryButton title="Đăng ký" onPress={handleRegister} />
 
           <Text className="text-[#666] text-center text-sm mt-4">
             Khi đăng ký, bạn đồng ý với các{" "}
             <Text className="text-[#4A90E2]">Điều khoản</Text> và{" "}
-            <Text className="text-[#4A90E2]">Điều kiện </Text>của chúng tôi.
+            <Text className="text-[#4A90E2]">Điều kiện</Text> của chúng tôi.
           </Text>
         </View>
       </Animated.View>
@@ -132,4 +126,4 @@ const Register = () => {
   );
 };
 
-export { Register as default };
+export default Register;

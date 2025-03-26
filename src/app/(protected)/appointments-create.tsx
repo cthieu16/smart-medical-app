@@ -53,7 +53,21 @@ const AppointmentsCreateScreen = () => {
   };
 
   const handleCreateAppointment = async () => {
-    if (!selectedDate) return alert("Vui lòng chọn ngày!");
+    if (!doctorId) {
+      return alert("Vui lòng chọn bác sĩ!");
+    }
+
+    if (!selectedDate) {
+      return alert("Vui lòng chọn ngày!");
+    }
+
+    if (dayjs(selectedDate).isBefore(dayjs(), "day")) {
+      return alert("Ngày không hợp lệ! Vui lòng chọn ngày trong tương lai.");
+    }
+
+    if (!selectedTime) {
+      return alert("Vui lòng chọn giờ!");
+    }
 
     setLoading(true);
 
@@ -91,27 +105,29 @@ const AppointmentsCreateScreen = () => {
 
           <View className="p-6">
             <Text className="text-lg text-gray-300 mb-2">Chọn bác sĩ</Text>
-            <Picker
-              selectedValue={doctorId}
-              onValueChange={setDoctorId}
-              style={{ color: "white" }}
-              className="bg-gray-800 p-2 rounded-xl border border-gray-700"
-            >
-              {doctors.map((doctor) => (
-                <Picker.Item
-                  key={doctor.id}
-                  label={doctor.fullName}
-                  value={doctor.id}
-                />
-              ))}
-            </Picker>
+            <View className="border border-gray-600 rounded-xl">
+              <Picker
+                selectedValue={doctorId}
+                onValueChange={setDoctorId}
+                style={{ color: "white" }}
+                className="bg-gray-800 p-2 rounded-xl"
+              >
+                {doctors.map((doctor) => (
+                  <Picker.Item
+                    key={doctor.id}
+                    label={doctor.fullName}
+                    value={doctor.id}
+                  />
+                ))}
+              </Picker>
+            </View>
           </View>
 
           <View className="mt-4 px-6">
             <Text className="text-lg text-gray-300 mb-2">Chọn ngày</Text>
             <Pressable
               onPress={() => setDatePickerVisibility(true)}
-              className="bg-gray-800 p-4 rounded-xl border border-gray-700 flex-row items-center justify-between"
+              className="bg-gray-800 p-4 rounded-xl border border-gray-600 flex-row items-center justify-between"
             >
               <Text className="text-white">
                 {selectedDate
@@ -124,23 +140,24 @@ const AppointmentsCreateScreen = () => {
 
           <View className="mt-4 px-6">
             <Text className="text-lg text-gray-300 mb-2">Chọn giờ</Text>
-            <Picker
-              selectedValue={selectedTime}
-              onValueChange={setSelectedTime}
-              style={{ color: "white" }}
-              className="bg-gray-800 p-2 rounded-xl border border-gray-700"
-              mode="dropdown"
-            >
-              {timeSlots.map((time) => (
-                <Picker.Item key={time} label={time} value={time} />
-              ))}
-            </Picker>
+            <View className="border border-gray-600 rounded-xl">
+              <Picker
+                selectedValue={selectedTime}
+                onValueChange={setSelectedTime}
+                style={{ color: "white" }}
+                className="bg-gray-800 p-2 rounded-xl"
+              >
+                {timeSlots.map((time) => (
+                  <Picker.Item key={time} label={time} value={time} />
+                ))}
+              </Picker>
+            </View>
           </View>
 
           <View className="mt-4 px-6">
             <Text className="text-lg text-gray-300 mb-2">Ghi chú</Text>
             <TextInput
-              className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700 h-32"
+              className="bg-gray-800 text-white p-4 rounded-xl border border-gray-600 h-32"
               placeholder="Nhập ghi chú..."
               placeholderTextColor="gray"
               multiline

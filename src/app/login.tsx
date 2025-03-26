@@ -1,7 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, Alert } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
@@ -14,31 +14,21 @@ const Login = () => {
   const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const validateInputs = () => {
+  const handleLogin = async () => {
     if (username.trim().length < 3) {
-      setError("Tên đăng nhập phải có ít nhất 3 ký tự.");
-      return false;
+      return Alert.alert("Lỗi", "Tên đăng nhập phải có ít nhất 3 ký tự.");
     }
 
     if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự.");
-      return false;
+      return Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 6 ký tự.");
     }
-
-    setError("");
-    return true;
-  };
-
-  const handleLogin = async () => {
-    if (!validateInputs()) return;
 
     try {
       await login(username, password);
       router.replace("/home");
     } catch (err) {
-      setError("Lỗi khi đăng nhập. Vui lòng kiểm tra lại.");
+      Alert.alert("Lỗi", "Đăng nhập không thành công. Vui lòng kiểm tra lại.");
     }
   };
 
@@ -68,10 +58,6 @@ const Login = () => {
             secureTextEntry
           />
 
-          <View className="h-6">
-            {error ? <Text className="text-red-500">{error}</Text> : null}
-          </View>
-
           <PrimaryButton title="Đăng nhập" onPress={handleLogin} />
 
           <Link href="/forgot-password" asChild>
@@ -87,4 +73,4 @@ const Login = () => {
   );
 };
 
-export { Login as default };
+export default Login;
