@@ -82,7 +82,7 @@ const AppointmentItem = memo(
             </View>
           )}
           <View
-            className={`mt-2 px-2 py-1 rounded-sm flex-row items-center ${color}`}
+            className={`mt-2 px-2 py-1 rounded-lg flex-row items-center ${color}`}
           >
             <MaterialIcons name="info" size={16} color="white" />
             <Text className="text-white ml-1 text-xs font-bold">{label}</Text>

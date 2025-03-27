@@ -3,7 +3,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import dayjs from "dayjs";
-import { useAppointmentDetail } from "@/src/hooks/useAppointments";
+import {
+  useAppointmentDetail,
+  useUpdateAppointmentStatus,
+} from "@/src/hooks/useAppointments";
 import { useMyDoctors } from "@/src/hooks/useDoctors";
 import { Header } from "@/src/components/Header/Header";
 
@@ -20,6 +23,7 @@ const AppointmentsDetailScreen = () => {
   const { id } = useLocalSearchParams();
   const { data: appointment } = useAppointmentDetail(id as string);
   const { data: doctors = [] } = useMyDoctors();
+  const { mutate: updateStatus } = useUpdateAppointmentStatus();
 
   const doctor = doctors.find((doc) => doc.id === appointment?.doctorId);
 
@@ -29,7 +33,21 @@ const AppointmentsDetailScreen = () => {
       {
         text: "Có",
         onPress: () => {
-          router.push("/(protected)/appointments");
+          updateStatus(
+            {
+              id: appointment!.id,
+              status: "CANCELLED",
+            },
+            {
+              onSuccess: () => {
+                Alert.alert("Thành công", "Lịch hẹn đã được hủy.");
+                router.push("/(protected)/appointments");
+              },
+              onError: () => {
+                Alert.alert("Lỗi", "Không thể hủy lịch hẹn.");
+              },
+            }
+          );
         },
       },
     ]);
@@ -73,7 +91,7 @@ const AppointmentsDetailScreen = () => {
               </View>
             )}
             <View
-              className={`px-4 py-2 rounded-sm ${
+              className={`px-4 py-2 rounded-lg ${
                 STATUS_CONFIG[appointment.status as Status].color
               } flex-row items-center justify-center mt-4`}
             >
@@ -87,8 +105,17 @@ const AppointmentsDetailScreen = () => {
       </View>
       <View className="mt-8 items-center">
         <Pressable
-          className="bg-red-600 px-6 py-3 rounded-sm shadow-lg flex-row items-center"
+          className={`px-6 py-3 rounded-lg shadow-lg flex-row items-center ${
+            appointment.status === "CANCELLED" ||
+            appointment.status === "CONFIRMED"
+              ? "bg-gray-500"
+              : "bg-red-600"
+          }`}
           onPress={handleCancel}
+          disabled={
+            appointment.status === "CANCELLED" ||
+            appointment.status === "CONFIRMED"
+          }
         >
           <AntDesign name="closecircleo" size={24} color="white" />
           <Text className="text-white text-lg font-bold ml-3">

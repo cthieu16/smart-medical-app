@@ -1,5 +1,6 @@
 import { PrimaryButton } from "@/src/components/Buttons/PrimaryButton";
 import { useAuth } from "@/src/context/AuthContext";
+import { useMyAppointments } from "@/src/hooks/useAppointments";
 import { AntDesign, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -21,9 +22,48 @@ const images = [
   require("../../assets/images/slider/slider3.jpg"),
 ];
 
+interface Appointment {
+  id: string;
+  clinicId: string;
+  doctorId: string;
+  patientId: string;
+  startTime: string;
+  endTime: string;
+  queueNumber: number;
+  status: "CONFIRMED" | "CANCELLED" | "PENDING";
+  note?: string;
+  createAt: string;
+}
+
+const getUpcomingAppointment = (
+  appointments: Appointment[]
+): Appointment | null => {
+  const now = new Date();
+  return (
+    appointments
+      .filter((appt) => appt.status !== "CANCELLED")
+      .filter((appt) => new Date(appt.startTime) >= now)
+      .sort(
+        (a, b) =>
+          new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+      )[0] || null
+  );
+};
+
 const Home = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const { data: rawAppointments = [] } = useMyAppointments() as {
+    data: Appointment[];
+  };
+
+  const upcomingAppointment = getUpcomingAppointment(rawAppointments);
+  const formattedAppointmentTime = upcomingAppointment
+    ? `${new Date(upcomingAppointment.startTime).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${new Date(upcomingAppointment.startTime).toLocaleDateString()}`
+    : "Không có lịch hẹn";
 
   return (
     <View className="flex-1 bg-[#0D1117]">
@@ -97,7 +137,7 @@ const Home = () => {
               Lịch hẹn gần nhất
             </Text>
             <Text className="text-xl font-bold text-[#fff] mt-2">
-              15:00 - 16/06/2025
+              {formattedAppointmentTime}
             </Text>
           </View>
         </View>

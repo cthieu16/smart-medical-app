@@ -23,6 +23,12 @@ export type CreateAppointmentData = {
   note?: string;
 };
 
+export type UpdateAppointmentStatusData = {
+  id: string;
+  status: string;
+  note?: string;
+};
+
 const fetcher = async (url: string, accessToken: string, options = {}) => {
   const response = await fetch(`${ApiURL}${url}`, {
     headers: {
@@ -58,6 +64,15 @@ const createAppointment = (
     body: JSON.stringify(appointmentData),
   });
 
+const updateAppointmentStatus = (
+  accessToken: string,
+  updateData: UpdateAppointmentStatusData
+) =>
+  fetcher("/appointments/update-status", accessToken, {
+    method: "PUT",
+    body: JSON.stringify(updateData),
+  });
+
 export const useMyAppointments = () => {
   const { accessToken } = useAuth();
   return useQuery({
@@ -89,6 +104,19 @@ export const useCreateAppointment = () => {
       createAppointment(accessToken as string, appointmentData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["create-appointments"] });
+    },
+  });
+};
+
+export const useUpdateAppointmentStatus = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (updateData: UpdateAppointmentStatusData) =>
+      updateAppointmentStatus(accessToken as string, updateData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
     },
   });
 };
