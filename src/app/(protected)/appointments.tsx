@@ -12,6 +12,7 @@ type AppointmentStatus = "CONFIRMED" | "PENDING" | "CANCELLED";
 type Appointment = {
   id: string;
   startTime: string;
+  endTime: string;
   status: AppointmentStatus;
   note?: string;
   doctorId: string;
@@ -59,7 +60,8 @@ const AppointmentItem = memo(
             <View className="flex-row items-center ml-2">
               <AntDesign name="clockcircleo" size={16} color="#8B949E" />
               <Text className="text-gray-400 ml-1">
-                {dayjs(appointment.startTime).format("HH:mm")}
+                {dayjs(appointment.startTime).format("HH:mm")} -{" "}
+                {dayjs(appointment.endTime).format("HH:mm")}{" "}
               </Text>
             </View>
           </View>

@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Picker } from "@react-native-picker/picker";
@@ -54,19 +55,22 @@ const AppointmentsCreateScreen = () => {
 
   const handleCreateAppointment = async () => {
     if (!doctorId) {
-      return alert("Vui lòng chọn bác sĩ!");
+      return Alert.alert("Thông báo", "Vui lòng chọn bác sĩ!");
     }
 
     if (!selectedDate) {
-      return alert("Vui lòng chọn ngày!");
+      return Alert.alert("Thông báo", "Vui lòng chọn ngày!");
     }
 
     if (dayjs(selectedDate).isBefore(dayjs(), "day")) {
-      return alert("Ngày không hợp lệ! Vui lòng chọn ngày trong tương lai.");
+      return Alert.alert(
+        "Thông báo",
+        "Ngày không hợp lệ! Vui lòng chọn ngày trong tương lai."
+      );
     }
 
     if (!selectedTime) {
-      return alert("Vui lòng chọn giờ!");
+      return Alert.alert("Thông báo", "Vui lòng chọn giờ!");
     }
 
     setLoading(true);
@@ -89,9 +93,15 @@ const AppointmentsCreateScreen = () => {
 
       const payload = { doctorId, startTime, endTime, note };
       await createAppointment.mutateAsync(payload);
-      router.replace("/(protected)/appointments");
+
+      Alert.alert("Thành công", "Lịch hẹn đã được tạo!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(protected)/appointments"),
+        },
+      ]);
     } catch (error) {
-      alert("Đã có lỗi xảy ra. Vui lòng thử lại!");
+      Alert.alert("Lỗi", "Đã có lỗi xảy ra. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
