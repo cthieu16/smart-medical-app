@@ -21,7 +21,7 @@ import { useMyDoctors } from "@/src/hooks/useDoctors";
 import { useCreateAppointment } from "@/src/hooks/useAppointments";
 import { PrimaryButton } from "@/src/components/Buttons/PrimaryButton";
 import { SecondaryButton } from "@/src/components/Buttons/SecondaryButton";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 const timeSlots = [
@@ -40,10 +40,28 @@ const timeSlots = [
   "16:30 - 17:00",
 ];
 
+const FIELD_COLORS = {
+  iconBg: "rgba(0, 174, 239, 0.15)",
+  border: "#30363D",
+  inputBg: "#161B22",
+  placeholder: "#8B949E",
+  highlight: "#00AEEF",
+  text: "#FFFFFF",
+  note: "#8B949E"
+};
+
 const InputLabel = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
   <View className="flex-row items-center mb-2">
-    <View className="mr-2">{icon}</View>
+    <View className="mr-2 p-1.5 rounded-full" style={{ backgroundColor: FIELD_COLORS.iconBg }}>
+      {icon}
+    </View>
     <Text className="text-white font-medium text-base">{label}</Text>
+  </View>
+);
+
+const FormField = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <View className={`mb-6 ${className}`}>
+    {children}
   </View>
 );
 
@@ -124,122 +142,155 @@ const AppointmentsCreateScreen = () => {
         <Header title="Tạo lịch hẹn" />
         
         <ScrollView className="flex-1">
-          <Animated.View 
-            className="p-6" 
-            entering={FadeInDown.delay(200).duration(400)}
-          >            
-            <View className="mb-6">
-              <InputLabel 
-                icon={<FontAwesome5 name="user-md" size={18} color="#00AEEF" />} 
-                label="Chọn bác sĩ" 
+          <View className="p-4">
+            <Animated.View 
+              className="bg-[#161B22]/50 rounded-2xl border border-[#30363D] p-4 mb-6 overflow-hidden" 
+              entering={FadeInDown.delay(100).duration(400)}
+            >
+              <LinearGradient 
+                colors={['rgba(0, 174, 239, 0.05)', 'rgba(0, 174, 239, 0)']} 
+                start={{ x: 0, y: 0 }} 
+                end={{ x: 1, y: 1 }} 
+                className="absolute top-0 left-0 right-0 bottom-0"
               />
-              <View className="bg-[#161B22] rounded-xl border border-[#30363D] overflow-hidden">
-                <Picker
-                  selectedValue={doctorId}
-                  onValueChange={setDoctorId}
-                  style={{ color: "white" }}
-                  dropdownIconColor="#00AEEF"
-                  mode="dropdown"
-                >
-                  <Picker.Item 
-                    label="-- Chọn bác sĩ --" 
-                    value="" 
-                    style={{ color: "#8B949E" }} 
-                  />
-                  {doctors.map((doctor) => (
-                    <Picker.Item
-                      key={doctor.id}
-                      label={doctor.fullName}
-                      value={doctor.id}
-                      color="#fff"
-                    />
-                  ))}
-                </Picker>
-              </View>
-            </View>
-
-            <View className="mb-6">
-              <InputLabel 
-                icon={<AntDesign name="calendar" size={18} color="#00AEEF" />} 
-                label="Chọn ngày khám" 
-              />
-              <TouchableOpacity
-                onPress={() => setDatePickerVisibility(true)}
-                className="bg-[#161B22] p-4 rounded-xl border border-[#30363D] flex-row items-center justify-between"
-              >
-                <Text className={`${selectedDate ? 'text-white' : 'text-[#8B949E]'}`}>
-                  {selectedDate
-                    ? dayjs(selectedDate).format("DD/MM/YYYY")
-                    : "Chọn ngày khám"}
-                </Text>
-                <MaterialIcons name="date-range" size={22} color="#00AEEF" />
-              </TouchableOpacity>
-            </View>
-
-            <View className="mb-6">
-              <InputLabel 
-                icon={<Ionicons name="time-outline" size={18} color="#00AEEF" />} 
-                label="Chọn giờ khám" 
-              />
-              <View className="bg-[#161B22] rounded-xl border border-[#30363D] overflow-hidden">
-                <Picker
-                  selectedValue={selectedTime}
-                  onValueChange={setSelectedTime}
-                  style={{ color: "white" }}
-                  dropdownIconColor="#00AEEF"
-                  mode="dropdown"
-                >
-                  {timeSlots.map((time) => (
-                    <Picker.Item key={time} label={time} value={time} color="#fff" />
-                  ))}
-                </Picker>
-              </View>
-            </View>
-
-            <View className="mb-6">
-              <InputLabel 
-                icon={<MaterialIcons name="note-alt" size={18} color="#00AEEF" />} 
-                label="Ghi chú" 
-              />
-              <TextInput
-                className="bg-[#161B22] text-white p-4 rounded-xl border border-[#30363D] h-32 text-base"
-                placeholder="Nhập triệu chứng hoặc yêu cầu khám..."
-                placeholderTextColor="#8B949E"
-                multiline
-                value={note}
-                onChangeText={setNote}
-                style={{ textAlignVertical: 'top' }}
-              />
-            </View>
-
-            <View className="flex-row justify-between mt-6">
-              <View className="flex-1 mr-3">
-                <SecondaryButton
-                  title="Hủy"
-                  onPress={() => router.back()}
-                />
-              </View>
-              <View className="flex-1">
-                <PrimaryButton
-                  title="Đặt lịch"
-                  onPress={handleCreateAppointment}
-                  loading={loading}
-                />
-              </View>
-            </View>
-            
-            <View className="mt-8 bg-[#161B22] p-4 rounded-xl border border-[#30363D]">
               <View className="flex-row items-center mb-2">
-                <MaterialIcons name="info-outline" size={18} color="#00AEEF" />
-                <Text className="text-white font-bold ml-2">Lưu ý khi đặt lịch</Text>
+                <MaterialCommunityIcons name="calendar-clock" size={20} color={FIELD_COLORS.highlight} />
+                <Text className="text-white font-bold ml-2 text-lg">Thông tin lịch hẹn</Text>
               </View>
-              <Text className="text-[#8B949E] text-sm leading-5">
-                • Đến trước giờ hẹn 15 phút để làm thủ tục{'\n'}
-                • Mang theo giấy tờ cần thiết (nếu có){'\n'}
-                • Nếu có thay đổi, vui lòng hủy lịch trước 24 giờ
+              <Text className="text-[#8B949E] text-sm">
+                Vui lòng điền đầy đủ thông tin bên dưới để đặt lịch hẹn
               </Text>
-            </View>
-          </Animated.View>
+            </Animated.View>
+            
+            <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+              <FormField>
+                <InputLabel 
+                  icon={<FontAwesome5 name="user-md" size={18} color={FIELD_COLORS.highlight} />} 
+                  label="Chọn bác sĩ" 
+                />
+                <View className="bg-[#161B22] rounded-xl overflow-hidden shadow-sm" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
+                  <Picker
+                    selectedValue={doctorId}
+                    onValueChange={setDoctorId}
+                    style={{ color: FIELD_COLORS.text }}
+                    dropdownIconColor={FIELD_COLORS.highlight}
+                    mode="dropdown"
+                  >
+                    <Picker.Item 
+                      label="-- Chọn bác sĩ --" 
+                      value="" 
+                      style={{ color: FIELD_COLORS.placeholder }} 
+                    />
+                    {doctors.map((doctor) => (
+                      <Picker.Item
+                        key={doctor.id}
+                        label={doctor.fullName}
+                        value={doctor.id}
+                        color={FIELD_COLORS.text}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </FormField>
+
+              <FormField>
+                <InputLabel 
+                  icon={<AntDesign name="calendar" size={18} color={FIELD_COLORS.highlight} />} 
+                  label="Chọn ngày khám" 
+                />
+                <TouchableOpacity
+                  onPress={() => setDatePickerVisibility(true)}
+                  className="bg-[#161B22] p-4 rounded-xl flex-row items-center justify-between shadow-sm"
+                  style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}
+                >
+                  <Text className={`${selectedDate ? 'text-white' : 'text-[#8B949E]'} text-base`}>
+                    {selectedDate
+                      ? dayjs(selectedDate).format("DD/MM/YYYY")
+                      : "Chọn ngày khám"}
+                  </Text>
+                  <MaterialIcons name="date-range" size={22} color={FIELD_COLORS.highlight} />
+                </TouchableOpacity>
+              </FormField>
+
+              <FormField>
+                <InputLabel 
+                  icon={<Ionicons name="time-outline" size={18} color={FIELD_COLORS.highlight} />} 
+                  label="Chọn giờ khám" 
+                />
+                <View className="bg-[#161B22] rounded-xl overflow-hidden shadow-sm" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
+                  <Picker
+                    selectedValue={selectedTime}
+                    onValueChange={setSelectedTime}
+                    style={{ color: FIELD_COLORS.text }}
+                    dropdownIconColor={FIELD_COLORS.highlight}
+                    mode="dropdown"
+                  >
+                    {timeSlots.map((time) => (
+                      <Picker.Item key={time} label={time} value={time} color={FIELD_COLORS.text} />
+                    ))}
+                  </Picker>
+                </View>
+              </FormField>
+
+              <FormField>
+                <InputLabel 
+                  icon={<MaterialIcons name="note-alt" size={18} color={FIELD_COLORS.highlight} />} 
+                  label="Ghi chú" 
+                />
+                <TextInput
+                  className="bg-[#161B22] text-white p-4 rounded-xl h-32 text-base shadow-sm"
+                  placeholder="Nhập triệu chứng hoặc yêu cầu khám..."
+                  placeholderTextColor={FIELD_COLORS.placeholder}
+                  multiline
+                  value={note}
+                  onChangeText={setNote}
+                  style={{ textAlignVertical: 'top', borderWidth: 1, borderColor: FIELD_COLORS.border }}
+                />
+              </FormField>
+
+              <View className="flex-row justify-between mt-6">
+                <View className="flex-1 mr-3">
+                  <SecondaryButton
+                    title="Hủy"
+                    onPress={() => router.back()}
+                  />
+                </View>
+                <View className="flex-1">
+                  <PrimaryButton
+                    title="Đặt lịch"
+                    onPress={handleCreateAppointment}
+                    loading={loading}
+                  />
+                </View>
+              </View>
+            </Animated.View>
+            
+            <Animated.View 
+              className="mt-8 bg-[#161B22]/70 p-5 rounded-xl border border-[#30363D]"
+              entering={FadeInDown.delay(300).duration(400)}
+            >
+              <View className="flex-row items-start mb-3">
+                <Animated.View 
+                  className="bg-[rgba(0,174,239,0.15)] p-2 rounded-full mr-3 mt-0.5"
+                  entering={FadeInRight.delay(400).duration(300)}
+                >
+                  <MaterialIcons name="info-outline" size={20} color={FIELD_COLORS.highlight} />
+                </Animated.View>
+                <View className="flex-1">
+                  <Text className="text-white font-bold text-base mb-2">Lưu ý khi đặt lịch</Text>
+                  <Text className="text-[#8B949E] text-sm leading-5 mb-1">
+                    1. Đến trước giờ hẹn 15 phút để làm thủ tục
+                  </Text>
+                  <Text className="text-[#8B949E] text-sm leading-5 mb-1">
+                    2. Mang theo giấy tờ cần thiết (nếu có)
+                  </Text>
+                  <Text className="text-[#8B949E] text-sm leading-5">
+                    3. Nếu có thay đổi, vui lòng hủy lịch trước 24 giờ
+                  </Text>
+                </View>
+              </View>
+            </Animated.View>
+          </View>
         </ScrollView>
 
         <DateTimePickerModal
@@ -248,14 +299,8 @@ const AppointmentsCreateScreen = () => {
           onConfirm={handleConfirmDate}
           onCancel={() => setDatePickerVisibility(false)}
           minimumDate={new Date()}
+          buttonTextColorIOS={FIELD_COLORS.highlight}
         />
-
-        {loading && (
-          <View className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <ActivityIndicator size="large" color="#00AEEF" />
-            <Text className="text-white mt-4">Đang xử lý...</Text>
-          </View>
-        )}
       </View>
     </TouchableWithoutFeedback>
   );

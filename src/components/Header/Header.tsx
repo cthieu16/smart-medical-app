@@ -1,36 +1,126 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, StatusBar } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from "@/src/theme/colors";
+import { spacing } from "@/src/theme/spacing";
 
 type HeaderProps = {
   title: string;
   showBackButton?: boolean;
   showSearchButton?: boolean;
+  rightIcon?: React.ReactNode;
+  onRightPress?: () => void;
+  transparentBackground?: boolean;
+  accentColor?: string;
+  subtitle?: string;
 };
 
+/**
+ * Header component that supports transparent mode and custom right icon
+ */
 export const Header = ({
   title,
   showBackButton = true,
-  showSearchButton = true,
+  showSearchButton = false,
+  rightIcon,
+  onRightPress,
+  transparentBackground = false,
+  accentColor = colors.primary.main,
+  subtitle,
 }: HeaderProps) => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-row items-center justify-between px-4 py-3 bg-[#0D1117] border-b border-gray-800">
-      <View className="flex-row items-center">
-        {showBackButton && (
-          <Pressable onPress={() => router.back()} className="mr-4">
-            <AntDesign name="left" size={24} color="white" />
-          </Pressable>
-        )}
-        <Text className="text-xl font-bold text-white">{title}</Text>
-      </View>
-      {showSearchButton && (
-        <Pressable onPress={() => console.log("search")}>
-          <AntDesign name="search1" size={24} color="white" />
-        </Pressable>
+    <Animated.View
+      entering={FadeIn.duration(300)}
+    >
+      <StatusBar barStyle="light-content" backgroundColor={colors.background.primary} translucent />
+
+      {transparentBackground ? (
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            {showBackButton && (
+              <Pressable
+                onPress={() => router.back()}
+                className="mr-3 w-10 h-10 rounded-full items-center justify-center"
+                style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                hitSlop={8}
+              >
+                <AntDesign name="arrowleft" size={spacing.iconSize.medium} color={colors.text.primary} />
+              </Pressable>
+            )}
+            <View>
+              <Text className="text-xl font-bold text-white">{title}</Text>
+              {subtitle ? (
+                <Text className="text-sm text-gray-400">{subtitle}</Text>
+              ) : null}
+            </View>
+          </View>
+
+          {rightIcon ? (
+            <Pressable onPress={onRightPress} hitSlop={8}>
+              {rightIcon}
+            </Pressable>
+          ) : showSearchButton && (
+            <Pressable
+              onPress={() => console.log("search")}
+              className="w-10 h-10 rounded-full items-center justify-center"
+              style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+              hitSlop={8}
+            >
+              <Feather name="search" size={spacing.iconSize.medium} color={colors.text.primary} />
+            </Pressable>
+          )}
+        </View>
+      ) : (
+        <View
+        >
+          <View className="flex-row items-center justify-between px-4 py-3">
+            <View className="flex-row items-center">
+              {showBackButton && (
+                <Pressable
+                  onPress={() => router.back()}
+                  className="mr-3 bg-[#21262D] w-10 h-10 rounded-full items-center justify-center"
+                  hitSlop={8}
+                >
+                  <AntDesign name="arrowleft" size={spacing.iconSize.medium} color={accentColor} />
+                </Pressable>
+              )}
+              <View className="flex-row items-center">
+                <View
+                  className="w-1 h-5 rounded-full mr-2"
+                  style={{ backgroundColor: accentColor }}
+                />
+                <View>
+                  <Text className="text-xl font-bold text-white">{title}</Text>
+                  {subtitle ? (
+                    <Text className="text-sm text-gray-400">{subtitle}</Text>
+                  ) : null}
+                </View>
+              </View>
+            </View>
+
+            {rightIcon ? (
+              <Pressable onPress={onRightPress} hitSlop={8}>
+                {rightIcon}
+              </Pressable>
+            ) : showSearchButton && (
+              <Pressable
+                onPress={() => console.log("search")}
+                className="bg-[#21262D] w-10 h-10 rounded-full items-center justify-center"
+                hitSlop={8}
+              >
+                <Feather name="search" size={spacing.iconSize.medium} color={accentColor} />
+              </Pressable>
+            )}
+          </View>
+        </View>
       )}
-    </View>
+    </Animated.View>
   );
 };
