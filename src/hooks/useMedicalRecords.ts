@@ -35,6 +35,24 @@ const fetchMedicalRecords = async (
   return jsonResponse.data;
 };
 
+const fetchMedicalRecordDetail = async (
+  accessToken: string,
+  medicalRecordId: string
+): Promise<MedicalRecord> => {
+  const response = await fetch(`${ApiURL}/medical-records/${medicalRecordId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch medical record detail");
+  }
+
+  const jsonResponse = await response.json();
+  return jsonResponse.data;
+};
+
 export const useMedicalRecords = () => {
   const { accessToken } = useAuth();
 
@@ -42,5 +60,16 @@ export const useMedicalRecords = () => {
     queryKey: ["medical-records"],
     queryFn: () => fetchMedicalRecords(accessToken as string),
     enabled: !!accessToken,
+  });
+};
+
+export const useMedicalRecordDetail = (medicalRecordId: string) => {
+  const { accessToken } = useAuth();
+
+  return useQuery<MedicalRecord, Error>({
+    queryKey: ["medical-record-detail", medicalRecordId],
+    queryFn: () =>
+      fetchMedicalRecordDetail(accessToken as string, medicalRecordId),
+    enabled: !!accessToken && !!medicalRecordId,
   });
 };

@@ -1,48 +1,41 @@
 import { AntDesign, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo } from "react";
-import { ScrollView, Text, View, Pressable } from "react-native";
+import React from "react";
+import {
+  ScrollView,
+  Text,
+  View,
+  Pressable,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import dayjs from "dayjs";
-
-const fakeMedicalRecord = {
-  id: "1",
-  patientId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  doctorId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  appointmentId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  diagnosis: "Cảm cúm",
-  symptoms: "Sốt, ho, đau họng",
-  medicalHistory: "Không có tiền sử bệnh nghiêm trọng",
-  testResults: "Không có dấu hiệu bất thường",
-  createdAt: "2025-03-17T13:59:05.751Z",
-  updatedAt: "2025-03-17T13:59:05.751Z",
-};
-
-const Header = ({ title }: { title: string }) => {
-  const router = useRouter();
-  return (
-    <View className="flex-row items-center justify-between p-4">
-      <Pressable onPress={() => router.back()} className="mr-4">
-        <AntDesign name="left" size={24} color="white" />
-      </Pressable>
-      <Text className="text-2xl font-bold text-white">{title}</Text>
-      <Pressable onPress={() => console.log("Search")}>
-        <AntDesign name="search1" size={24} color="white" />
-      </Pressable>
-    </View>
-  );
-};
+import { useMedicalRecordDetail } from "@/src/hooks/useMedicalRecords";
+import { Header } from "@/src/components/Header/Header";
 
 const MedicalRecordDetailScreen = () => {
   const { id } = useLocalSearchParams();
-  const record = useMemo(
-    () => (fakeMedicalRecord.id === id ? fakeMedicalRecord : null),
-    [id]
-  );
+  const {
+    data: record,
+    isLoading,
+    isError,
+  } = useMedicalRecordDetail(id as string);
 
-  if (!record) {
+  if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-[#0D1117]">
-        <Text className="text-gray-400">Hồ sơ bệnh án không tồn tại.</Text>
+        <ActivityIndicator size="large" color="#4ADE80" />
+        <Text className="text-gray-400 mt-4">Đang tải hồ sơ bệnh án...</Text>
+      </View>
+    );
+  }
+
+  if (isError || !record) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#0D1117]">
+        <Text className="text-gray-400">
+          Hồ sơ bệnh án không tồn tại hoặc xảy ra lỗi.
+        </Text>
       </View>
     );
   }
@@ -71,9 +64,9 @@ const MedicalRecordDetailScreen = () => {
           <Text className="text-gray-300 text-base mt-2">
             <MaterialIcons name="science" size={18} color="gray" />
             <Text className="font-semibold"> Xét nghiệm:</Text>{" "}
-            {record.testResults}
+            {record.testResults || "Không có"}
           </Text>
-          <View className="mt-6 border-t border-gray-600 pt-4">
+          <View className="mt-6 border-t border-gray-600 pt-4 flex-col gap-2">
             <Text className="text-gray-500 text-xs">
               Ngày tạo: {dayjs(record.createdAt).format("DD/MM/YYYY HH:mm")}
             </Text>
@@ -81,6 +74,17 @@ const MedicalRecordDetailScreen = () => {
               Cập nhật lần cuối:{" "}
               {dayjs(record.updatedAt).format("DD/MM/YYYY HH:mm")}
             </Text>
+          </View>
+          <View className="flex-row justify-end mt-4">
+            <Pressable
+              onPress={() => {
+                console.log(record);
+              }}
+              className="flex-row items-center bg-green-600 px-4 py-2 rounded-xl"
+            >
+              <AntDesign name="download" size={18} color="white" />
+              <Text className="text-white font-medium ml-2">Tải xuống</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
