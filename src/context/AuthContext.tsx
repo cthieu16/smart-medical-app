@@ -1,104 +1,35 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useContext } from "react";
-
-type User = {
-  fullName: string | null;
-  email: string;
-  username: string;
-};
-
-type GoogleUser = {
-  id: string;
-  email: string;
-  verified_email: boolean;
-  name: string;
-  given_name: string;
-  family_name: string;
-  picture: string;
-  locale: string;
-};
-
-type FacebookUser = {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  picture: {
-    data: {
-      height: number;
-      is_silhouette: boolean;
-      url: string;
-      width: number;
-    };
-  };
-};
-
-type AuthContextType = {
-  user: User | null;
-  accessToken: string | null;
-  googleUser: GoogleUser | null;
-  facebookUser: FacebookUser | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  register: (
-    fullName: string,
-    email: string,
-    username: string,
-    password: string,
-    confirmPassword: string
-  ) => Promise<void>;
-  authenticateWithGoogle: (accessToken: string) => Promise<void>;
-  authenticateWithFacebook: (accessToken: string) => Promise<void>;
-  forgotPassword: (email: string) => Promise<void>;
-  changePassword: (
-    currentPassword: string,
-    newPassword: string,
-    newPasswordConfirm: string
-  ) => Promise<void>;
-};
+import { API_URL, ENDPOINTS } from "../constants/api";
+import { AuthContextType, FacebookUser, GoogleUser, User } from "../types";
+import { clearAuthData, getData, storeAuthData, storeData, STORAGE_KEYS } from "../utils/storage";
+import { get, post } from "../utils/api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const ApiURL = process.env.EXPO_PUBLIC_API_BACKEND_URL;
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   const { data: accessToken } = useQuery<string | null>({
     queryKey: ["accessToken"],
-    queryFn: () => AsyncStorage.getItem("@accessToken"),
+    queryFn: () => getData(STORAGE_KEYS.ACCESS_TOKEN),
   });
 
   const { data: googleUser } = useQuery<GoogleUser | null>({
     queryKey: ["googleUser"],
-    queryFn: async () => {
-      const storedGoogleUser = await AsyncStorage.getItem("@googleUser");
-      return storedGoogleUser ? JSON.parse(storedGoogleUser) : null;
-    },
+    queryFn: async () => getData(STORAGE_KEYS.GOOGLE_USER),
   });
 
   const { data: facebookUser } = useQuery<FacebookUser | null>({
     queryKey: ["facebookUser"],
-    queryFn: async () => {
-      const storedFacebookUser = await AsyncStorage.getItem("@facebookUser");
-      return storedFacebookUser ? JSON.parse(storedFacebookUser) : null;
-    },
+    queryFn: async () => getData(STORAGE_KEYS.FACEBOOK_USER),
   });
 
   const { data: user } = useQuery<User | null>({
     queryKey: ["user"],
     queryFn: async () => {
       if (!accessToken) return null;
-      const response = await fetch(`${ApiURL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Error al obtener información del usuario");
-      }
-      return response.json();
+      return get<User>(ENDPOINTS.AUTH.ME);
     },
     enabled: !!accessToken,
   });
@@ -111,17 +42,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       username: string;
       password: string;
     }) => {
-      const response = await fetch(`${ApiURL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      if (!response.ok) {
-        throw new Error("Error al iniciar sesión");
-      }
-      const { accessToken: authToken } = await response.json();
-      await AsyncStorage.setItem("@accessToken", authToken);
-      return authToken;
+      const response = await post<{ accessToken: string }>(
+        ENDPOINTS.AUTH.LOGIN,
+        { username, password },
+        false
+      );
+      await storeAuthData(response.accessToken);
+      return response.accessToken;
     },
     onSuccess: (authToken) => {
       queryClient.setQueryData(["accessToken"], authToken);
@@ -132,20 +59,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       if (accessToken) {
-        await fetch(`${ApiURL}/auth/logout`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        await post(ENDPOINTS.AUTH.LOGOUT, {});
       }
-
-      await AsyncStorage.removeItem("@accessToken");
-      await AsyncStorage.removeItem("@user");
-      await AsyncStorage.removeItem("@googleUser");
-      await AsyncStorage.removeItem("@facebookUser");
-
+      await clearAuthData();
       queryClient.removeQueries();
     },
     onSuccess: () => {
@@ -155,7 +71,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       queryClient.setQueryData(["facebookUser"], null);
     },
   });
-
 
   const registerMutation = useMutation({
     mutationFn: async ({
@@ -171,22 +86,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       password: string;
       confirmPassword: string;
     }) => {
-      const response = await fetch(`${ApiURL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName,
-          email,
-          username,
-          password,
-          confirmPassword,
-        }),
-      });
-      console.log(response);
-
-      if (!response.ok) {
-        throw new Error("Error al registrar");
-      }
+      await post(ENDPOINTS.AUTH.REGISTER, {
+        fullName,
+        email,
+        username,
+        password,
+        confirmPassword,
+      }, false);
+      
       await loginMutation.mutateAsync({ username, password });
     },
   });
@@ -199,69 +106,74 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           headers: { Authorization: `Bearer ${googleToken}` },
         }
       );
-      const googleUserInfo: GoogleUser = await userInfoResponse.json();
-      await AsyncStorage.setItem("@googleUser", JSON.stringify(googleUserInfo));
 
-      const email = googleUserInfo.email;
-      const password = googleUserInfo.id;
+      if (!userInfoResponse.ok) {
+        throw new Error("Error al obtener información del usuario de Google");
+      }
 
-      // try {
-      //   await loginMutation.mutateAsync({ email, password });
-      // } catch (loginError) {
-      //   await registerMutation.mutateAsync({
-      //     firstName: googleUserInfo.given_name,
-      //     lastName: googleUserInfo.family_name,
-      //     email,
-      //     password,
-      //   });
-      // }
+      const userInfo: GoogleUser = await userInfoResponse.json();
+      await storeData(STORAGE_KEYS.GOOGLE_USER, userInfo);
+
+      // Authenticate with backend
+      const response = await post<{ accessToken: string }>(
+        ENDPOINTS.AUTH.LOGIN,
+        {
+          googleId: userInfo.id,
+          email: userInfo.email,
+          fullName: userInfo.name,
+        },
+        false
+      );
+
+      await storeAuthData(response.accessToken);
+      return response.accessToken;
     },
-    onSuccess: () => {
+    onSuccess: (authToken) => {
+      queryClient.setQueryData(["accessToken"], authToken);
       queryClient.invalidateQueries({ queryKey: ["googleUser"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
   const authenticateWithFacebookMutation = useMutation({
     mutationFn: async (facebookToken: string) => {
       const userInfoResponse = await fetch(
-        `https://graph.facebook.com/me?access_token=${facebookToken}&fields=id,name,email,first_name,last_name,picture.type(small)`
-      );
-      const facebookUserInfo: FacebookUser = await userInfoResponse.json();
-      await AsyncStorage.setItem(
-        "@facebookUser",
-        JSON.stringify(facebookUserInfo)
+        `https://graph.facebook.com/me?fields=id,first_name,last_name,email,picture&access_token=${facebookToken}`
       );
 
-      const email = facebookUserInfo.email;
-      const password = facebookUserInfo.id;
+      if (!userInfoResponse.ok) {
+        throw new Error(
+          "Error al obtener información del usuario de Facebook"
+        );
+      }
 
-      // try {
-      //   await loginMutation.mutateAsync({ email, password });
-      // } catch (loginError) {
-      //   await registerMutation.mutateAsync({
-      //     firstName: facebookUserInfo.first_name,
-      //     lastName: facebookUserInfo.last_name,
-      //     email,
-      //     password,
-      //   });
-      // }
+      const userInfo: FacebookUser = await userInfoResponse.json();
+      await storeData(STORAGE_KEYS.FACEBOOK_USER, userInfo);
+
+      // Authenticate with backend
+      const response = await post<{ accessToken: string }>(
+        ENDPOINTS.AUTH.LOGIN,
+        {
+          facebookId: userInfo.id,
+          email: userInfo.email,
+          fullName: `${userInfo.first_name} ${userInfo.last_name}`,
+        },
+        false
+      );
+
+      await storeAuthData(response.accessToken);
+      return response.accessToken;
     },
-    onSuccess: () => {
+    onSuccess: (authToken) => {
+      queryClient.setQueryData(["accessToken"], authToken);
       queryClient.invalidateQueries({ queryKey: ["facebookUser"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
   const forgotPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
-      const response = await fetch(`${ApiURL}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Không thể gửi yêu cầu đặt lại mật khẩu");
-      }
+      await post(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email }, false);
     },
   });
 
@@ -275,44 +187,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       newPassword: string;
       newPasswordConfirm: string;
     }) => {
-      const response = await fetch(
-        `${ApiURL}/auth/my-profile/change-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            currentPassword,
-            newPassword,
-            newPasswordConfirm,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Không thể đổi mật khẩu. Vui lòng thử lại!");
-      }
+      await post(ENDPOINTS.AUTH.CHANGE_PASSWORD, {
+        currentPassword,
+        newPassword,
+        newPasswordConfirm,
+      });
     },
   });
 
   const login = async (username: string, password: string) => {
-    if (username === "admin" && password === "password123") {
-      const defaultUser: User = {
-        fullName: "User",
-        email: "admin@example.com",
-        username: "admin",
-      };
-
-      await AsyncStorage.setItem("@token", "default_token");
-      await AsyncStorage.setItem("@user", JSON.stringify(defaultUser));
-
-      queryClient.setQueryData(["token"], "default_token");
-      queryClient.setQueryData(["user"], defaultUser);
-      return;
-    }
-
     await loginMutation.mutateAsync({ username, password });
   };
 
