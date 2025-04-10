@@ -4,6 +4,7 @@ import React from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { useOrders } from "../../hooks/useOrders";
+import { Header } from "@/src/components/Header/Header";
 
 const ProfileScreen = () => {
   const router = useRouter();
@@ -19,11 +20,11 @@ const ProfileScreen = () => {
       onPress: () => router.push("/"),
     },
     {
-      id: "payment",
-      title: "Thanh toán",
-      subtitle: "**** **** ****",
-      icon: "credit-card",
-      onPress: () => console.log("Navigate to payment methods"),
+      id: "map",
+      title: "Bản đồ",
+      subtitle: "Xem vị trí phòng khám",
+      icon: "map",
+      onPress: () => router.push("/map"),
     },
     {
       id: "settings",
@@ -36,17 +37,11 @@ const ProfileScreen = () => {
 
   return (
     <ScrollView className="flex-1 bg-[#0D1117]">
-      {/* Header */}
-      <View className="flex-row items-center justify-between p-4">
-        <Text className="text-2xl font-bold text-white">Thông tin cá nhân</Text>
-        <Pressable onPress={() => console.log("Search")}>
-          <AntDesign name="search1" size={24} color="white" />
-        </Pressable>
-      </View>
+      <Header title="Thông tin cá nhân"/>
 
       <View className="px-4 py-6">
         <Text className="text-xl font-semibold text-white">
-          {user?.firstName} {user?.lastName}
+          {user?.fullName}
         </Text>
         <Text className="text-gray-400">{user?.email}</Text>
       </View>
@@ -74,7 +69,6 @@ const ProfileScreen = () => {
         ))}
       </View>
 
-      {/* Logout Button */}
       <Pressable
         className="mx-4 mt-8 mb-4 bg-[#4A90E2] py-3 px-6 rounded-xl"
         onPress={async () => {

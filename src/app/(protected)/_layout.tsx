@@ -39,6 +39,7 @@ const ProtectedRouteLayout = () => {
       <Stack.Screen name="success" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
       <Stack.Screen name="settings" options={{ headerShown: false }} />
+      <Stack.Screen name="map" options={{ headerShown: false }} />
     </Stack>
   );
 };
