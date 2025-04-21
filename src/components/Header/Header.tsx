@@ -8,6 +8,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from "@/src/theme/colors";
 import { spacing } from "@/src/theme/spacing";
 
+// Safe icon rendering helpers
+const renderAntDesignIcon = (name: string, size: number, color: string) => {
+  return <AntDesign name={name as any} size={size} color={color} />;
+};
+
+const renderFeatherIcon = (name: string, size: number, color: string) => {
+  return <Feather name={name as any} size={size} color={color} />;
+};
+
 type HeaderProps = {
   title: string;
   showBackButton?: boolean;
@@ -52,7 +61,7 @@ export const Header = ({
                 style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
                 hitSlop={8}
               >
-                <AntDesign name="arrowleft" size={spacing.iconSize.medium} color={colors.text.primary} />
+                {renderAntDesignIcon("arrowleft", spacing.iconSize.medium, colors.text.primary)}
               </Pressable>
             )}
             <View>
@@ -67,16 +76,16 @@ export const Header = ({
             <Pressable onPress={onRightPress} hitSlop={8}>
               {rightIcon}
             </Pressable>
-          ) : showSearchButton && (
+          ) : showSearchButton ? (
             <Pressable
               onPress={() => console.log("search")}
               className="w-10 h-10 rounded-full items-center justify-center"
               style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
               hitSlop={8}
             >
-              <Feather name="search" size={spacing.iconSize.medium} color={colors.text.primary} />
+              {renderFeatherIcon("search", spacing.iconSize.medium, colors.text.primary)}
             </Pressable>
-          )}
+          ) : null}
         </View>
       ) : (
         <View className="bg-black">
@@ -88,7 +97,7 @@ export const Header = ({
                   className="mr-3 bg-[#21262D] w-10 h-10 rounded-full items-center justify-center"
                   hitSlop={8}
                 >
-                  <AntDesign name="arrowleft" size={spacing.iconSize.medium} color={accentColor} />
+                  {renderAntDesignIcon("arrowleft", spacing.iconSize.medium, accentColor)}
                 </Pressable>
               )}
               <View className="flex-row items-center">
@@ -109,15 +118,15 @@ export const Header = ({
               <Pressable onPress={onRightPress} hitSlop={8}>
                 {rightIcon}
               </Pressable>
-            ) : showSearchButton && (
+            ) : showSearchButton ? (
               <Pressable
                 onPress={() => console.log("search")}
                 className="bg-[#21262D] w-10 h-10 rounded-full items-center justify-center"
                 hitSlop={8}
               >
-                <Feather name="search" size={spacing.iconSize.medium} color={accentColor} />
+                {renderFeatherIcon("search", spacing.iconSize.medium, accentColor)}
               </Pressable>
-            )}
+            ) : null}
           </View>
         </View>
       )}

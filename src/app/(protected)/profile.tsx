@@ -1,28 +1,41 @@
-import { AntDesign, Feather, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { 
-  ScrollView, 
-  Text, 
-  View, 
-  TouchableOpacity, 
-  Image,
-  StyleSheet,
-  Pressable,
-  Dimensions,
-} from "react-native";
-import { useAuth } from "../../context/AuthContext";
-import { useOrders } from "../../hooks/useOrders";
 import { Header } from "@/src/components/Header/Header";
-import Animated, { FadeInDown, FadeInRight, FadeInUp } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors } from "@/src/theme/colors";
-import { spacing } from "@/src/theme/spacing";
 import { useMyAppointments } from "@/src/hooks/useAppointments";
 import { useMedicalRecords } from "@/src/hooks/useMedicalRecords";
+import { spacing } from "@/src/theme/spacing";
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { useAuth } from "../../context/AuthContext";
+import { useOrders } from "../../hooks/useOrders";
 
 const { width } = Dimensions.get('window');
 const ANIMATION_DELAY_BASE = 50;
+
+// Safely render icon to avoid text string warnings
+const renderFeatherIcon = (name: string, size: number, color: string) => {
+  return <Feather name={name as any} size={size} color={color} />;
+};
+
+const renderMaterialCommunityIcon = (name: string, size: number, color: string) => {
+  return <MaterialCommunityIcons name={name as any} size={size} color={color} />;
+};
+
+const renderIonicon = (name: string, size: number, color: string) => {
+  return <Ionicons name={name as any} size={size} color={color} />;
+};
 
 interface MenuItem {
   id: string;
@@ -42,28 +55,28 @@ const ProfileScreen = () => {
   const { data: appointments = [] } = useMyAppointments();
   const { data: medicalRecords = [] } = useMedicalRecords();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  
+
   const stats = [
     {
       id: "orders",
       title: "Đơn thuốc",
       count: orders.length,
       icon: "pill",
-      color: colors.primary.main
+      color: "#4A90E2"
     },
     {
       id: "appointments",
       title: "Lịch hẹn",
       count: appointments.length,
       icon: "calendar",
-      color: colors.accent.main
+      color: "#4A90E2"
     },
     {
       id: "records",
       title: "Bệnh án",
       count: medicalRecords.length,
       icon: "file-document-outline",
-      color: colors.secondary.main
+      color: "#4A90E2"
     }
   ];
 
@@ -74,7 +87,7 @@ const ProfileScreen = () => {
       subtitle: "Quản lý lịch hẹn khám bệnh",
       icon: "calendar",
       iconType: "Feather",
-      color: colors.primary.main,
+      color: "#4A90E2",
       route: "/(protected)/appointments",
       badge: appointments?.filter(a => a.status === "PENDING").length || 0
     },
@@ -84,7 +97,7 @@ const ProfileScreen = () => {
       subtitle: "Xem thông tin bệnh án của bạn",
       icon: "file-document-outline",
       iconType: "MaterialCommunityIcons",
-      color: colors.secondary.main,
+      color: "#4A90E2",
       route: "/(protected)/medical-records"
     },
     {
@@ -93,7 +106,7 @@ const ProfileScreen = () => {
       subtitle: "Xem đơn thuốc và lịch sử dùng thuốc",
       icon: "pill",
       iconType: "MaterialCommunityIcons",
-      color: colors.purple.main,
+      color: "#8B5CF6",
       route: "/(protected)/orders",
       badge: orders?.filter(o => o.status === "NEW" as any).length || 0
     },
@@ -103,7 +116,7 @@ const ProfileScreen = () => {
       subtitle: "Tìm địa điểm phòng khám gần bạn",
       icon: "map",
       iconType: "Feather",
-      color: colors.accent.main,
+      color: "#F59E0B",
       route: "/(protected)/map"
     },
     {
@@ -112,7 +125,7 @@ const ProfileScreen = () => {
       subtitle: "Xem các thông báo và cập nhật",
       icon: "bell",
       iconType: "Feather",
-      color: colors.pink.main,
+      color: "#EC4899",
       route: "/(protected)/notifications",
       badge: 2
     },
@@ -122,46 +135,26 @@ const ProfileScreen = () => {
       subtitle: "Cập nhật thông tin cá nhân và mật khẩu",
       icon: "settings",
       iconType: "Feather",
-      color: colors.text.secondary,
+      color: "#6B7280",
       route: "/(protected)/settings"
     },
   ];
 
-  const renderIcon = (item: MenuItem): React.ReactNode => {
-    const Icon = (() => {
-      switch (item.iconType) {
-        case "Feather":
-          return Feather;
-        case "MaterialCommunityIcons":
-          return MaterialCommunityIcons;
-        case "Ionicons":
-          return Ionicons;
-        default:
-          return Feather;
-      }
-    })();
-
-    return (
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Icon 
-          name={item.icon as any} 
-          size={spacing.iconSize.medium} 
-          color={item.color} 
-        />
-      </View>
-    );
+  const renderIcon = (item: MenuItem) => {
+    switch (item.iconType) {
+      case "Feather":
+        return renderFeatherIcon(item.icon, spacing.iconSize.medium, item.color);
+      case "MaterialCommunityIcons":
+        return renderMaterialCommunityIcon(item.icon, spacing.iconSize.medium, item.color);
+      case "Ionicons":
+        return renderIonicon(item.icon, spacing.iconSize.medium, item.color);
+      default:
+        return renderFeatherIcon(item.icon, spacing.iconSize.medium, item.color);
+    }
   };
 
-  const renderStatIcon = (stat: typeof stats[0]): React.ReactNode => {
-    return (
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <MaterialCommunityIcons 
-          name={stat.icon as any} 
-          size={16} 
-          color={stat.color} 
-        />
-      </View>
-    );
+  const renderStatIcon = (stat: typeof stats[0]) => {
+    return renderMaterialCommunityIcon(stat.icon, 16, stat.color);
   };
 
   const handleLogout = async () => {
@@ -170,43 +163,48 @@ const ProfileScreen = () => {
     router.replace("/");
   };
 
+  const navigateToRoute = (route: string) => {
+    if (route) router.push(route as any);
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
-      <Header 
-        title="Thông tin cá nhân" 
-        showSearchButton={false} 
-        accentColor={colors.primary.main}
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+      <StatusBar barStyle="light-content" />
+      <Header
+        title="Thông tin cá nhân"
+        showSearchButton={false}
+        accentColor="#4A90E2"
       />
 
-      <ScrollView 
-        style={{ flex: 1 }} 
+      <ScrollView
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: spacing.xl }}
       >
         {/* Profile Card */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.delay(ANIMATION_DELAY_BASE).duration(400)}
           style={styles.profileCardContainer}
         >
           <LinearGradient
-            colors={["#21262D", "#0D1117"]}
+            colors={["#161B22", "#0D1117"]}
             style={styles.profileCard}
           >
             <View style={styles.profileHeader}>
               <View style={styles.avatarContainer}>
                 <Image
                   source={require("../../assets/images/user.png")}
-                  style={styles.avatar}
+                  style={[styles.avatar, { borderColor: "#4A90E2" }]}
                   resizeMode="cover"
                 />
-                <View 
+                <View
                   style={[
                     styles.statusIndicator,
-                    { backgroundColor: colors.secondary.main }
-                  ]} 
+                    { backgroundColor: "#4A90E2" }
+                  ]}
                 />
               </View>
-              
+
               <View style={styles.userInfoContainer}>
                 <Text style={styles.userName}>
                   {user?.fullName || "Người dùng"}
@@ -215,24 +213,18 @@ const ProfileScreen = () => {
                   {user?.email || "email@example.com"}
                 </Text>
               </View>
-              
-              <TouchableOpacity 
-                style={styles.editButton}
+
+              <TouchableOpacity
+                style={[styles.editButton, { backgroundColor: "#21262D" }]}
                 onPress={() => router.push("/(protected)/settings" as any)}
                 hitSlop={spacing.xs}
               >
-                <View>
-                  <Feather 
-                    name="edit-2" 
-                    size={spacing.iconSize.small} 
-                    color={colors.primary.main} 
-                  />
-                </View>
+                {renderFeatherIcon("edit-2", spacing.iconSize.small, "#4A90E2")}
               </TouchableOpacity>
             </View>
-            
+
             {/* Statistics */}
-            <View style={styles.statsContainer}>
+            <View style={[styles.statsContainer, { backgroundColor: "#161B22" }]}>
               {stats.map((stat, index) => (
                 <React.Fragment key={stat.id}>
                   {index > 0 && (
@@ -247,14 +239,14 @@ const ProfileScreen = () => {
                         if (stat.id === "records") return "/(protected)/medical-records";
                         return "";
                       })();
-                      if (route) router.push(route as any);
+                      if (route) navigateToRoute(route);
                     }}
-                    activeOpacity={0.7}
+                    activeOpacity={0.8}
                   >
-                    <View 
+                    <View
                       style={[
                         styles.statIconContainer,
-                        { backgroundColor: stat.color + '20' }
+                        { backgroundColor: `${stat.color}20` }
                       ]}
                     >
                       {renderStatIcon(stat)}
@@ -268,70 +260,24 @@ const ProfileScreen = () => {
           </LinearGradient>
         </Animated.View>
 
-        {/* Menu Items */}
-        <Animated.View 
-          entering={FadeInDown.delay(ANIMATION_DELAY_BASE + 100).duration(400)}
-          style={styles.menuContainer}
-        >
-          <Text style={styles.menuTitle}>
-            MENU CHÍNH
-          </Text>
-
-          <View style={styles.menuGrid}>
-            {menuItems.map((item, index) => (
-              <Animated.View 
-                key={item.id}
-                entering={FadeInUp.delay((index % 2) * 100 + ANIMATION_DELAY_BASE + 150).duration(400)}
-                style={styles.menuItemWrapper}
-              >
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => {
-                    router.push(item.route as any);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View 
-                    style={[
-                      styles.menuIconContainer,
-                      { backgroundColor: item.color + '15' }
-                    ]}
-                  >
-                    {renderIcon(item)}
-                    {item.badge && item.badge > 0 && (
-                      <View style={styles.badgeContainer}>
-                        <Text style={styles.badgeText}>{item.badge}</Text>
-                      </View>
-                    )}
-                  </View>
-                  
-                  <Text style={styles.menuItemTitle}>{item.title}</Text>
-                  <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </View>
-        </Animated.View>
-
         {/* App Info & Logout */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.delay(ANIMATION_DELAY_BASE + 300).duration(400)}
           style={styles.footerContainer}
         >
           <TouchableOpacity
-            style={styles.logoutButton}
+            style={[styles.logoutButton, { backgroundColor: "#161B22", borderColor: "#F87171" }]}
             onPress={() => setShowLogoutConfirm(true)}
+            activeOpacity={0.8}
           >
-            <View>
-              <Feather name="log-out" size={18} color={colors.danger.main} />
-            </View>
-            <Text style={styles.logoutButtonText}>
+            {renderFeatherIcon("log-out", 18, "#F87171")}
+            <Text style={[styles.logoutButtonText, { color: "#F87171" }]}>
               Đăng xuất
             </Text>
           </TouchableOpacity>
-          
+
           <View style={styles.appInfoContainer}>
-            <Image 
+            <Image
               source={require('../../assets/images/logo-mdc.jpg')}
               style={styles.appLogo}
             />
@@ -344,30 +290,30 @@ const ProfileScreen = () => {
 
       {/* Logout Confirmation Dialog */}
       {showLogoutConfirm && (
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.duration(300)}
           style={styles.modalOverlay}
         >
-          <View style={styles.modalContainer}>
+          <View style={[styles.modalContainer, { backgroundColor: "#161B22" }]}>
             <Text style={styles.modalTitle}>
               Đăng xuất
             </Text>
             <Text style={styles.modalMessage}>
               Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?
             </Text>
-            
+
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[styles.modalButton, styles.cancelButton, { backgroundColor: "#21262D" }]}
                 onPress={() => setShowLogoutConfirm(false)}
               >
                 <Text style={styles.cancelButtonText}>
                   Hủy
                 </Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
-                style={[styles.modalButton, styles.confirmButton]}
+                style={[styles.modalButton, styles.confirmButton, { backgroundColor: "#F87171" }]}
                 onPress={handleLogout}
               >
                 <Text style={styles.confirmButtonText}>
@@ -378,7 +324,7 @@ const ProfileScreen = () => {
           </View>
         </Animated.View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -389,14 +335,16 @@ const styles = StyleSheet.create({
     borderRadius: spacing.borderRadius.lg,
     overflow: 'hidden',
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   profileCard: {
     borderRadius: spacing.borderRadius.lg,
     padding: spacing.md,
+    borderWidth: 1,
+    borderColor: '#30363D',
   },
   profileHeader: {
     flexDirection: 'row',
@@ -410,7 +358,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     borderWidth: 2,
-    borderColor: colors.primary.main,
+    borderColor: "#4A90E2",
   },
   statusIndicator: {
     position: 'absolute',
@@ -420,7 +368,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: colors.background.primary,
+    borderColor: 'black',
   },
   userInfoContainer: {
     marginLeft: spacing.md,
@@ -429,24 +377,28 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: 'white',
     marginBottom: 2,
   },
   userEmail: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: '#A1A1AA',
   },
   editButton: {
-    backgroundColor: colors.background.tertiary,
+    backgroundColor: "#21262D",
     padding: spacing.xs,
     borderRadius: spacing.borderRadius.circle,
+    borderWidth: 1,
+    borderColor: '#30363D',
   },
   statsContainer: {
     flexDirection: 'row',
     marginTop: spacing.md + 4,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#161B22",
     borderRadius: spacing.borderRadius.md,
     padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: '#30363D40',
   },
   statItem: {
     flex: 1,
@@ -457,12 +409,12 @@ const styles = StyleSheet.create({
     height: '70%',
     width: 1,
     alignSelf: 'center',
-    backgroundColor: colors.border.main,
+    backgroundColor: '#30363D',
   },
   statIconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
@@ -470,12 +422,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: 'white',
     marginBottom: 2,
   },
   statTitle: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: '#A1A1AA',
   },
   menuContainer: {
     marginHorizontal: spacing.screenMargin,
@@ -484,7 +436,7 @@ const styles = StyleSheet.create({
   menuTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.text.secondary,
+    color: '#A1A1AA',
     marginBottom: spacing.md,
     marginLeft: 4,
     letterSpacing: 0.5,
@@ -499,12 +451,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   menuItem: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#161B22",
     borderRadius: spacing.borderRadius.lg,
     padding: spacing.md,
     alignItems: 'center',
     height: 135,
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#30363D40',
   },
   menuIconContainer: {
     width: 44,
@@ -518,7 +472,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: colors.primary.main,
+    backgroundColor: "#4A90E2",
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -526,7 +480,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: {
-    color: colors.text.primary,
+    color: 'white',
     fontSize: 10,
     fontWeight: '700',
     paddingHorizontal: 4,
@@ -534,13 +488,13 @@ const styles = StyleSheet.create({
   menuItemTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: 'white',
     marginTop: spacing.sm,
     textAlign: 'center',
   },
   menuItemSubtitle: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: '#A1A1AA',
     marginTop: 2,
     textAlign: 'center',
   },
@@ -552,14 +506,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#161B22",
     borderWidth: 1,
-    borderColor: colors.danger.main,
+    borderColor: "#F87171",
     borderRadius: spacing.borderRadius.lg,
     paddingVertical: spacing.md,
   },
   logoutButtonText: {
-    color: colors.danger.main,
+    color: "#F87171",
     fontSize: 15,
     fontWeight: '600',
     marginLeft: spacing.xs,
@@ -576,7 +530,7 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 12,
-    color: colors.text.tertiary,
+    color: '#A1A1AA',
   },
   modalOverlay: {
     position: 'absolute',
@@ -590,21 +544,23 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   modalContainer: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: "#161B22",
     borderRadius: spacing.borderRadius.lg,
     width: '85%',
     padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: '#30363D',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: 'white',
     textAlign: 'center',
     marginBottom: spacing.xs,
   },
   modalMessage: {
     fontSize: 15,
-    color: colors.text.secondary,
+    color: '#A1A1AA',
     textAlign: 'center',
     marginVertical: spacing.md,
     lineHeight: 20,
@@ -621,20 +577,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelButton: {
-    backgroundColor: colors.background.tertiary,
+    backgroundColor: "#21262D",
     marginRight: spacing.xs,
+    borderWidth: 1,
+    borderColor: '#30363D',
   },
   cancelButtonText: {
-    color: colors.text.primary,
+    color: 'white',
     fontWeight: '600',
     fontSize: 15,
   },
   confirmButton: {
-    backgroundColor: colors.danger.main,
+    backgroundColor: "#F87171",
     marginLeft: spacing.xs,
   },
   confirmButtonText: {
-    color: colors.text.primary,
+    color: 'white',
     fontWeight: '600',
     fontSize: 15,
   },
