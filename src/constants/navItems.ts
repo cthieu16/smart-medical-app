@@ -14,19 +14,26 @@ export const NAV_ITEMS: NavItem[] = [
     id: "home",
     name: "Trang chủ",
     icon: "home",
-    routes: ["/(protected)/home"],
+    routes: ["/(protected)/home", "/(protected)/checkout", "/(protected)/success", "/(protected)/orders"],
   },
   {
     id: "appointments",
     name: "Lịch hẹn",
     icon: "calendar",
-    routes: ["/(protected)/appointments"],
+    routes: [
+      "/(protected)/appointments",
+      "/(protected)/appointments-create",
+      "/(protected)/appointments-detail"
+    ],
   },
   {
     id: "medical-records",
     name: "Bệnh án",
     icon: "file-text",
-    routes: ["/(protected)/medical-records"],
+    routes: [
+      "/(protected)/medical-records",
+      "/(protected)/medical-records-detail"
+    ],
   },
   {
     id: "notifications",
@@ -38,6 +45,10 @@ export const NAV_ITEMS: NavItem[] = [
     id: "profile",
     name: "Trang cá nhân",
     icon: "user",
-    routes: ["/(protected)/profile"],
+    routes: [
+      "/(protected)/profile",
+      "/(protected)/settings",
+      "/(protected)/map"
+    ],
   },
 ];
