@@ -84,9 +84,9 @@ const MedicalRecordItem = memo(({ record, doctor, index }: MedicalRecordItemProp
         <View className="p-4 pl-5">
           {/* Header with Date & Badge */}
           <View className="flex-row justify-between items-start mb-2">
-            <View className="flex-row items-center">
+            <View className="flex-row items-center gap-2">
               <LinearGradient
-                colors={['#21262D', '#2D333B']}
+                colors={['#161B22', '#161B22']}
                 className="w-10 h-10 rounded-full items-center justify-center mr-3"
               >
                 <MaterialIcons
