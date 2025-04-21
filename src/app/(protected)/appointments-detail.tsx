@@ -396,6 +396,28 @@ const AppointmentsDetailScreen = () => {
               </View>
             )}
           </Animated.View>
+
+          {/* Map Button */}
+          <Animated.View
+            entering={FadeInDown.delay(850).duration(500)}
+            className="mb-8"
+          >
+            <TouchableOpacity
+              className="bg-[#4A90E2] p-4 rounded-xl flex-row justify-center items-center"
+              onPress={() => router.push("/map")}
+              activeOpacity={0.7}
+              style={{
+                shadowColor: "#4A90E2",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 5,
+                elevation: 5,
+              }}
+            >
+              <MaterialIcons name="location-on" size={18} color="white" />
+              <Text className="text-white font-medium ml-2">Xem bản đồ phòng khám</Text>
+            </TouchableOpacity>
+          </Animated.View>
         </View>
       </ScrollView>
     </SafeAreaView>
