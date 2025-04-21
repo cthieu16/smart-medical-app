@@ -93,25 +93,6 @@ const MedicalRecordDetailScreen = () => {
     isError,
   } = useMedicalRecordDetail(id as string);
 
-  /**
-   * Hàm tạo nội dung PDF từ dữ liệu hồ sơ y tế
-   * Trong môi trường thực tế, bạn sẽ gọi API từ backend để tạo PDF
-   */
-  const generatePDF = async () => {
-    if (!record) return null;
-
-    // Trong môi trường thực tế, đây sẽ là URL của API tạo PDF
-    // const pdfUrl = `https://your-api.com/generate-pdf?id=${record.id}`;
-
-    // Đây là URL mẫu cho việc demo, bạn cần thay thế bằng URL thực tế
-    const dummyPdfUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
-    return dummyPdfUrl;
-  };
-
-  /**
-   * Tải xuống và lưu file PDF
-   * Sử dụng expo-file-system và expo-sharing
-   */
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
@@ -126,47 +107,8 @@ const MedicalRecordDetailScreen = () => {
         return;
       }
 
-      // Demo: Tạo độ trễ giả lập quá trình tải xuống
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      /*
-      // CODE SẼ ĐƯỢC SỬ DỤNG SAU KHI CÀI ĐẶT THƯ VIỆN:
-
-      // Lấy URL PDF từ hàm tạo PDF
-      const pdfUrl = await generatePDF();
-      if (!pdfUrl) {
-        throw new Error("Không thể tạo PDF");
-      }
-
-      // Tạo tên file từ thông tin bệnh án
-      const fileName = `HoSoBenhAn_${record?.code || id}_${dayjs().format("DDMMYYYY")}.pdf`;
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
-      // Tải file từ URL và lưu vào thiết bị
-      const downloadResumable = FileSystem.createDownloadResumable(
-        pdfUrl,
-        fileUri
-      );
-
-      const { uri } = await downloadResumable.downloadAsync();
-
-      // Kiểm tra xem thiết bị có hỗ trợ chia sẻ không
-      const isSharingAvailable = await Sharing.isAvailableAsync();
-
-      if (isSharingAvailable) {
-        // Mở menu chia sẻ hoặc lưu
-        await Sharing.shareAsync(uri);
-      } else {
-        // Thông báo thành công nếu không thể chia sẻ
-        Alert.alert(
-          "Tải xuống thành công",
-          `Hồ sơ bệnh án đã được lưu vào: ${uri}`,
-          [{ text: "OK" }]
-        );
-      }
-      */
-
-      // Demo: Thông báo thành công
       setIsDownloading(false);
       Alert.alert(
         "Tải xuống thành công",
@@ -177,25 +119,6 @@ const MedicalRecordDetailScreen = () => {
       setIsDownloading(false);
       Alert.alert("Lỗi", "Không thể tải xuống hồ sơ bệnh án.");
       console.error("Download error:", error);
-    }
-  };
-
-  /**
-   * Hiển thị PDF online (phương án thay thế cho việc tải xuống)
-   */
-  const handleViewPDF = async () => {
-    try {
-      // Lấy URL PDF từ hàm tạo PDF
-      const pdfUrl = await generatePDF();
-      if (!pdfUrl) {
-        throw new Error("Không thể tạo PDF");
-      }
-
-      // Mở URL trong trình duyệt
-      await Linking.openURL(pdfUrl);
-    } catch (error) {
-      Alert.alert("Lỗi", "Không thể mở hồ sơ bệnh án.");
-      console.error("View PDF error:", error);
     }
   };
 
@@ -373,16 +296,6 @@ const MedicalRecordDetailScreen = () => {
               )}
             </TouchableOpacity>
           </Animated.View>
-
-          {/* PDF Preview Button */}
-          <TouchableOpacity
-            onPress={handleViewPDF}
-            className="flex-row items-center bg-[#21262D] px-4 py-3.5 rounded-xl justify-center mt-4 border border-[#30363D]"
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="picture-as-pdf" size={20} color="#EC4899" />
-            <Text className="text-white font-medium ml-2.5">Xem PDF trực tuyến</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
