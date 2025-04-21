@@ -1,7 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, Text, View, Alert } from "react-native";
+import { Pressable, Text, View, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
@@ -14,6 +14,7 @@ const Login = () => {
   const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     if (username.trim().length < 3) {
@@ -25,51 +26,77 @@ const Login = () => {
     }
 
     try {
+      setIsLoading(true);
       await login(username, password);
       router.replace("/home");
     } catch (err) {
       Alert.alert("Lỗi", "Đăng nhập không thành công. Vui lòng kiểm tra lại.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <View className="flex-1 px-8 pt-12 bg-black">
-      <Pressable onPress={() => router.back()} className="mb-8">
-        <AntDesign name="arrowleft" size={24} color="white" />
-      </Pressable>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-black"
+    >
+      <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-1 px-8 pt-12">
+          <Pressable onPress={() => router.back()} className="mb-8">
+            <AntDesign name="arrowleft" size={24} color="white" />
+          </Pressable>
 
-      <Animated.View entering={FadeIn.duration(1000)} className="flex-1">
-        <FormTitle title="Đăng nhập" />
+          <Animated.View entering={FadeIn.duration(1000)} className="flex-1 justify-center">
+            <View className="mb-10">
+              <FormTitle title="Đăng nhập" />
+              <Text className="text-gray-400 text-base mt-2">Chào mừng bạn quay trở lại.</Text>
+            </View>
 
-        <View className="gap-3 space-y-4">
-          <TextInput
-            label="Tài khoản"
-            placeholder="example"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-          />
+            <View className="gap-5 mb-6">
+              <TextInput
+                label="Tài khoản"
+                placeholder="Nhập tên đăng nhập"
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+              />
 
-          <TextInput
-            label="Mật khẩu"
-            placeholder="********"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+              <TextInput
+                label="Mật khẩu"
+                placeholder="Nhập mật khẩu"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
 
-          <PrimaryButton title="Đăng nhập" onPress={handleLogin} />
+            <PrimaryButton
+              title="Đăng nhập"
+              onPress={handleLogin}
+              loading={isLoading}
+            />
 
-          <Link href="/forgot-password" asChild>
-            <Pressable className="py-2">
-              <Animated.Text className="text-[#4A90E2] text-center text-base">
-                Quên mật khẩu
-              </Animated.Text>
-            </Pressable>
-          </Link>
+            <Link href="/forgot-password" asChild>
+              <Pressable className="py-4 mt-2">
+                <Animated.Text className="text-[#4A90E2] text-center text-base">
+                  Quên mật khẩu?
+                </Animated.Text>
+              </Pressable>
+            </Link>
+
+            <View className="flex-row justify-center mt-6">
+              <Text className="text-gray-400">Chưa có tài khoản? </Text>
+              <Link href="/register" asChild>
+                <Pressable>
+                  <Text className="text-[#4A90E2] font-semibold">Đăng ký ngay</Text>
+                </Pressable>
+              </Link>
+            </View>
+          </Animated.View>
         </View>
-      </Animated.View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
