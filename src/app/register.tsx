@@ -73,18 +73,18 @@ const Register = () => {
       className="flex-1 bg-black"
     >
       <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 px-8 pt-12">
-          <Pressable onPress={() => router.back()} className="mb-8">
+        <View className="flex-1 px-8 pt-12 pb-6">
+          <Pressable onPress={() => router.back()} className="mb-10">
             <AntDesign name="arrowleft" size={24} color="white" />
           </Pressable>
 
           <Animated.View entering={FadeIn.duration(1000)} className="flex-1">
-            <View className="mb-8">
+            <View className="mb-10">
               <FormTitle title="Tạo tài khoản mới" />
               <Text className="text-gray-400 text-base mt-2">Nhập thông tin của bạn để đăng ký.</Text>
             </View>
 
-            <View className="gap-5 mb-6">
+            <View className="gap-5 mb-8">
               <TextInput
                 label="Họ và tên"
                 placeholder="Nhập họ và tên"
@@ -138,13 +138,16 @@ const Register = () => {
                 <Text className="text-[#4A90E2] font-semibold">Đăng nhập</Text>
               </Pressable>
             </View>
-
-            <Text className="text-[#666] text-center text-sm mt-8">
-              Khi đăng ký, bạn đồng ý với các{" "}
-              <Text className="text-[#4A90E2]">Điều khoản</Text> và{" "}
-              <Text className="text-[#4A90E2]">Điều kiện</Text> của chúng tôi.
-            </Text>
           </Animated.View>
+
+          <Animated.Text
+            entering={FadeIn.delay(500).duration(1000)}
+            className="text-[#666] text-center text-sm mt-8"
+          >
+            Khi đăng ký, bạn đồng ý với các{" "}
+            <Text className="text-[#4A90E2]">Điều khoản</Text> và{" "}
+            <Text className="text-[#4A90E2]">Điều kiện</Text> của chúng tôi.
+          </Animated.Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

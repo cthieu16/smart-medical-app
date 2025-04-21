@@ -42,8 +42,8 @@ const Login = () => {
       className="flex-1 bg-black"
     >
       <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 px-8 pt-12">
-          <Pressable onPress={() => router.back()} className="mb-8">
+        <View className="flex-1 px-8 pt-12 pb-6">
+          <Pressable onPress={() => router.back()} className="mb-10">
             <AntDesign name="arrowleft" size={24} color="white" />
           </Pressable>
 
@@ -53,7 +53,7 @@ const Login = () => {
               <Text className="text-gray-400 text-base mt-2">Chào mừng bạn quay trở lại.</Text>
             </View>
 
-            <View className="gap-5 mb-6">
+            <View className="gap-5 mb-8">
               <TextInput
                 label="Tài khoản"
                 placeholder="Nhập tên đăng nhập"
@@ -78,7 +78,7 @@ const Login = () => {
             />
 
             <Link href="/forgot-password" asChild>
-              <Pressable className="py-4 mt-2">
+              <Pressable className="py-4 mt-4">
                 <Animated.Text className="text-[#4A90E2] text-center text-base">
                   Quên mật khẩu?
                 </Animated.Text>
@@ -94,6 +94,13 @@ const Login = () => {
               </Link>
             </View>
           </Animated.View>
+
+          <Animated.Text
+            entering={FadeIn.delay(500).duration(1000)}
+            className="text-[#666] text-center text-sm mt-8"
+          >
+            Ứng dụng chăm sóc sức khỏe thông minh
+          </Animated.Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
