@@ -58,11 +58,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      if (accessToken) {
-        await post(ENDPOINTS.AUTH.LOGOUT, {});
+      try {
+        // Gọi API logout nếu có access token
+        if (accessToken) {
+          try {
+            await post(ENDPOINTS.AUTH.LOGOUT, {});
+          } catch (error) {
+            console.error("Error during API logout:", error);
+            // Tiếp tục xử lý kể cả khi API fail
+          }
+        }
+
+        // Luôn xóa dữ liệu local dù API có thành công hay không
+        await clearAuthData();
+
+        // Reset tất cả queries để tránh cache
+        queryClient.clear();
+
+        return true;
+      } catch (error) {
+        console.error("Failed to logout:", error);
+        // Force xóa dữ liệu nếu có lỗi
+        await clearAuthData();
+        throw error;
       }
-      await clearAuthData();
-      queryClient.removeQueries();
     },
     onSuccess: () => {
       queryClient.setQueryData(["accessToken"], null);
@@ -93,7 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         password,
         confirmPassword,
       }, false);
-      
+
       await loginMutation.mutateAsync({ username, password });
     },
   });
@@ -200,7 +219,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    await logoutMutation.mutateAsync();
+    try {
+      await logoutMutation.mutateAsync();
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Trong trường hợp xảy ra lỗi, vẫn đảm bảo dữ liệu local được xóa
+      await clearAuthData();
+    }
   };
 
   const register = async (

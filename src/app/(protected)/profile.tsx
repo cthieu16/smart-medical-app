@@ -16,10 +16,14 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
+  ActivityIndicator,
+  Pressable,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useAuth } from "../../context/AuthContext";
 import { useOrders } from "../../hooks/useOrders";
+import { AntDesign } from "@expo/vector-icons";
 
 const { width } = Dimensions.get('window');
 const ANIMATION_DELAY_BASE = 50;
@@ -55,6 +59,7 @@ const ProfileScreen = () => {
   const { data: appointments = [] } = useMyAppointments();
   const { data: medicalRecords = [] } = useMedicalRecords();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const stats = [
     {
@@ -158,9 +163,23 @@ const ProfileScreen = () => {
   };
 
   const handleLogout = async () => {
-    setShowLogoutConfirm(false);
-    await logout();
-    router.replace("/");
+    try {
+      setIsLoggingOut(true);
+      setShowLogoutConfirm(false);
+
+      // Đảm bảo gọi hàm logout từ context và đợi kết quả
+      await logout();
+
+      // Sau khi logout thành công, chuyển hướng đến trang đăng nhập
+      router.replace("/");
+    } catch (error: any) {
+      Alert.alert(
+        "Lỗi",
+        error.message || "Không thể đăng xuất, vui lòng thử lại sau."
+      );
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const navigateToRoute = (route: string) => {
@@ -266,13 +285,20 @@ const ProfileScreen = () => {
           style={styles.footerContainer}
         >
           <TouchableOpacity
-            style={[styles.logoutButton, { backgroundColor: "#161B22", borderColor: "#F87171" }]}
+            style={styles.logoutButton}
             onPress={() => setShowLogoutConfirm(true)}
             activeOpacity={0.8}
+            disabled={isLoggingOut}
           >
-            {renderFeatherIcon("log-out", 18, "#F87171")}
-            <Text style={[styles.logoutButtonText, { color: "#F87171" }]}>
-              Đăng xuất
+            <View style={styles.logoutButtonIcon}>
+              {isLoggingOut ? (
+                <ActivityIndicator size="small" color="#F87171" />
+              ) : (
+                <AntDesign name="logout" size={20} color="#F87171" />
+              )}
+            </View>
+            <Text style={styles.logoutButtonText}>
+              {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
             </Text>
           </TouchableOpacity>
 
@@ -288,41 +314,48 @@ const ProfileScreen = () => {
         </Animated.View>
       </ScrollView>
 
-      {/* Logout Confirmation Dialog */}
+      {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <Animated.View
-          entering={FadeInDown.duration(300)}
-          style={styles.modalOverlay}
-        >
-          <View style={[styles.modalContainer, { backgroundColor: "#161B22" }]}>
-            <Text style={styles.modalTitle}>
-              Đăng xuất
-            </Text>
-            <Text style={styles.modalMessage}>
-              Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?
-            </Text>
-
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton, { backgroundColor: "#21262D" }]}
-                onPress={() => setShowLogoutConfirm(false)}
-              >
-                <Text style={styles.cancelButtonText}>
-                  Hủy
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.confirmButton, { backgroundColor: "#F87171" }]}
-                onPress={handleLogout}
-              >
-                <Text style={styles.confirmButtonText}>
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={() => setShowLogoutConfirm(false)}
+          >
+            <Pressable onPress={(e) => e.stopPropagation()}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>
                   Đăng xuất
                 </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Animated.View>
+                <Text style={styles.modalMessage}>
+                  Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?
+                </Text>
+
+                <View style={styles.modalButtonContainer}>
+                  <TouchableOpacity
+                    style={styles.modalCancelButton}
+                    onPress={() => setShowLogoutConfirm(false)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.modalCancelButtonText}>Hủy bỏ</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalConfirmButton]}
+                    onPress={handleLogout}
+                    activeOpacity={0.8}
+                    disabled={isLoggingOut}
+                  >
+                    {isLoggingOut ? (
+                      <ActivityIndicator size="small" color="white" />
+                    ) : (
+                      <Text style={styles.modalConfirmButtonText}>Đăng xuất</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Pressable>
+          </Pressable>
+        </View>
       )}
     </SafeAreaView>
   );
@@ -512,11 +545,13 @@ const styles = StyleSheet.create({
     borderRadius: spacing.borderRadius.lg,
     paddingVertical: spacing.md,
   },
+  logoutButtonIcon: {
+    marginRight: spacing.xs,
+  },
   logoutButtonText: {
     color: "#F87171",
     fontSize: 15,
     fontWeight: '600',
-    marginLeft: spacing.xs,
   },
   appInfoContainer: {
     alignItems: 'center',
@@ -533,68 +568,74 @@ const styles = StyleSheet.create({
     color: '#A1A1AA',
   },
   modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: "#161B22",
-    borderRadius: spacing.borderRadius.lg,
-    width: '85%',
-    padding: spacing.lg,
+    backgroundColor: '#161B22',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingTop: 24,
     borderWidth: 1,
     borderColor: '#30363D',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: 'white',
+    marginBottom: 20,
     textAlign: 'center',
-    marginBottom: spacing.xs,
   },
   modalMessage: {
-    fontSize: 15,
     color: '#A1A1AA',
+    fontSize: 16,
+    marginBottom: 20,
     textAlign: 'center',
-    marginVertical: spacing.md,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   modalButtonContainer: {
     flexDirection: 'row',
-    marginTop: spacing.md,
+    marginTop: 16,
   },
-  modalButton: {
+  modalCancelButton: {
     flex: 1,
-    borderRadius: spacing.borderRadius.lg,
-    paddingVertical: spacing.md,
+    backgroundColor: '#21262D',
+    padding: 14,
+    borderRadius: 12,
+    marginRight: 6,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButton: {
-    backgroundColor: "#21262D",
-    marginRight: spacing.xs,
     borderWidth: 1,
     borderColor: '#30363D',
   },
-  cancelButtonText: {
+  modalCancelButtonText: {
     color: 'white',
     fontWeight: '600',
-    fontSize: 15,
+    fontSize: 16,
   },
-  confirmButton: {
-    backgroundColor: "#F87171",
-    marginLeft: spacing.xs,
+  modalConfirmButton: {
+    flex: 1,
+    backgroundColor: '#F87171',
+    padding: 14,
+    borderRadius: 12,
+    marginLeft: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  confirmButtonText: {
+  modalConfirmButtonText: {
     color: 'white',
     fontWeight: '600',
-    fontSize: 15,
+    fontSize: 16,
   },
 });
 

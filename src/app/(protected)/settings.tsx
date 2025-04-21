@@ -1,4 +1,4 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -9,16 +9,32 @@ import {
   TextInput,
   View,
   Alert,
+  StyleSheet,
+  TouchableOpacity,
+  StatusBar,
+  SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { useUser } from "../../hooks/useUser";
 import { useAuth } from "@/src/context/AuthContext";
 import { Header } from "@/src/components/Header/Header";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { spacing } from "@/src/theme/spacing";
+
+// Safe icon rendering helpers
+const renderFeatherIcon = (name: string, size: number, color: string) => {
+  return <Feather name={name as any} size={size} color={color} />;
+};
+
+const ANIMATION_DELAY_BASE = 50;
 
 const SettingsScreen = () => {
   const router = useRouter();
   const { user, updateUser, isUpdating } = useUser();
-  const { changePassword } = useAuth();
+  const { logout, changePassword } = useAuth();
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -94,127 +110,437 @@ const SettingsScreen = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      setShowLogoutConfirm(false);
+
+      await logout();
+
+      router.replace("/");
+    } catch (error: any) {
+      Alert.alert(
+        "Lỗi",
+        error.message || "Không thể đăng xuất, vui lòng thử lại sau."
+      );
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   if (!user) {
     return (
-      <View className="flex-1 bg-[#0D1117] items-center justify-center">
-        <Text className="text-white">Đang chờ...</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Đang chờ...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-[#0D1117]">
-      <Header title="Cài đặt" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <Header title="Cài đặt" accentColor="#4A90E2" />
 
-      <View className="px-6 mt-4">
-        <Text className="mb-4 text-xl text-white">Thông tin cá nhân</Text>
-        <View className="gap-3 space-y-4">
-          <TextInput
-            className="bg-[#161B22] text-white px-4 py-3 rounded-xl"
-            placeholder="Họ"
-            placeholderTextColor="#666"
-            value={formData.fullName}
-            onChangeText={(value) => handleChange("fullName", value)}
-          />
-          <TextInput
-            className="bg-[#161B22] text-white px-4 py-3 rounded-xl"
-            placeholder="Tên"
-            placeholderTextColor="#666"
-            value={formData.username}
-            onChangeText={(value) => handleChange("username", value)}
-          />
-          <TextInput
-            className="bg-[#161B22] text-white px-4 py-3 rounded-xl"
-            placeholder="Email"
-            placeholderTextColor="#666"
-            value={formData.email}
-            onChangeText={(value) => handleChange("email", value)}
-            keyboardType="email-address"
-          />
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View
+          entering={FadeInDown.delay(ANIMATION_DELAY_BASE).duration(400)}
+          style={styles.formContainer}
+        >
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleContainer}>
+              <View style={styles.sectionAccent} />
+              <Text style={styles.sectionTitle}>Thông tin cá nhân</Text>
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Họ và tên</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Họ và tên"
+                placeholderTextColor="#666"
+                value={formData.fullName}
+                onChangeText={(value) => handleChange("fullName", value)}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Tên người dùng</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Tên người dùng"
+                placeholderTextColor="#666"
+                value={formData.username}
+                onChangeText={(value) => handleChange("username", value)}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#666"
+                value={formData.email}
+                onChangeText={(value) => handleChange("email", value)}
+                keyboardType="email-address"
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleSubmit}
+            disabled={isUpdating}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.buttonText}>
+              {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() => setIsPasswordModalVisible(true)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.buttonIcon}>
+              {renderFeatherIcon("lock", 20, "#4A90E2")}
+            </View>
+            <Text style={styles.outlineButtonText}>
+              Đổi mật khẩu
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.dangerButton}
+            onPress={() => setShowLogoutConfirm(true)}
+            activeOpacity={0.8}
+            disabled={isLoggingOut}
+          >
+            <View style={styles.buttonIcon}>
+              {isLoggingOut ? (
+                <ActivityIndicator size="small" color="#F87171" />
+              ) : (
+                renderFeatherIcon("log-out", 20, "#F87171")
+              )}
+            </View>
+            <Text style={styles.dangerButtonText}>
+              {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </ScrollView>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={() => setShowLogoutConfirm(false)}
+          >
+            <Pressable onPress={(e) => e.stopPropagation()}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>
+                  Đăng xuất
+                </Text>
+                <Text style={styles.modalMessage}>
+                  Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?
+                </Text>
+
+                <View style={styles.modalButtonContainer}>
+                  <TouchableOpacity
+                    style={styles.modalCancelButton}
+                    onPress={() => setShowLogoutConfirm(false)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.modalCancelButtonText}>Hủy bỏ</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalSaveButton, { backgroundColor: '#F87171' }]}
+                    onPress={handleLogout}
+                    activeOpacity={0.8}
+                    disabled={isLoggingOut}
+                  >
+                    {isLoggingOut ? (
+                      <ActivityIndicator size="small" color="white" />
+                    ) : (
+                      <Text style={styles.modalSaveButtonText}>Đăng xuất</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Pressable>
+          </Pressable>
         </View>
+      )}
 
-        <Pressable
-          className="bg-[#4A90E2] mt-8 py-3 px-6 rounded-xl"
-          onPress={handleSubmit}
-          disabled={isUpdating}
-        >
-          <Text className="font-semibold text-center text-white">
-            {isUpdating ? "Đang lưu..." : "Lưu"}
-          </Text>
-        </Pressable>
-
-        <Pressable
-          className="mt-8 py-3 px-6 rounded-xl border border-[#4A90E2] mb-4"
-          onPress={() => setIsPasswordModalVisible(true)}
-        >
-          <Text className="text-[#4A90E2] text-center font-semibold">
-            Đổi mật khẩu
-          </Text>
-        </Pressable>
-      </View>
-
+      {/* Password Change Modal */}
       <Modal
         animationType="slide"
         transparent={true}
         visible={isPasswordModalVisible}
         onRequestClose={() => setIsPasswordModalVisible(false)}
       >
-        <Pressable
-          className="justify-end flex-1 bg-black bg-opacity-50"
-          onPress={() => setIsPasswordModalVisible(false)}
-        >
-          <Pressable onPress={(e) => e.stopPropagation()}>
-            <View className="bg-[#0D1117] p-6 rounded-t-3xl">
-              <Text className="mb-6 text-2xl font-bold text-white">
-                Đổi mật khẩu
-              </Text>
-              <TextInput
-                className="bg-[#161B22] text-white px-4 py-3 rounded-xl mb-4"
-                placeholder="Mật khẩu cũ"
-                placeholderTextColor="#666"
-                secureTextEntry
-                value={passwordData.currentPassword}
-                onChangeText={(value) =>
-                  handlePasswordInputChange("currentPassword", value)
-                }
-              />
-              <TextInput
-                className="bg-[#161B22] text-white px-4 py-3 rounded-xl mb-4"
-                placeholder="Mật khẩu mới"
-                placeholderTextColor="#666"
-                secureTextEntry
-                value={passwordData.newPassword}
-                onChangeText={(value) =>
-                  handlePasswordInputChange("newPassword", value)
-                }
-              />
-              <TextInput
-                className="bg-[#161B22] text-white px-4 py-3 rounded-xl mb-4"
-                placeholder="Nhập lại mật khẩu mới"
-                placeholderTextColor="#666"
-                secureTextEntry
-                value={passwordData.confirmNewPassword}
-                onChangeText={(value) =>
-                  handlePasswordInputChange("confirmNewPassword", value)
-                }
-              />
-              <Pressable
-                className="bg-[#E63946] py-3 px-6 rounded-xl mb-4"
-                onPress={handlePasswordChange}
-              >
-                <Text className="font-semibold text-center text-white">
-                  Lưu
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={() => setIsPasswordModalVisible(false)}
+          >
+            <Pressable onPress={(e) => e.stopPropagation()}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>
+                  Đổi mật khẩu
                 </Text>
-              </Pressable>
-              <Pressable onPress={() => setIsPasswordModalVisible(false)}>
-                <Text className="text-[#4A90E2] text-center">Huỷ bỏ</Text>
-              </Pressable>
-            </View>
+
+                <View style={styles.modalInputContainer}>
+                  <Text style={styles.inputLabel}>Mật khẩu hiện tại</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập mật khẩu hiện tại"
+                    placeholderTextColor="#666"
+                    secureTextEntry
+                    value={passwordData.currentPassword}
+                    onChangeText={(value) =>
+                      handlePasswordInputChange("currentPassword", value)
+                    }
+                  />
+                </View>
+
+                <View style={styles.modalInputContainer}>
+                  <Text style={styles.inputLabel}>Mật khẩu mới</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập mật khẩu mới"
+                    placeholderTextColor="#666"
+                    secureTextEntry
+                    value={passwordData.newPassword}
+                    onChangeText={(value) =>
+                      handlePasswordInputChange("newPassword", value)
+                    }
+                  />
+                </View>
+
+                <View style={styles.modalInputContainer}>
+                  <Text style={styles.inputLabel}>Xác nhận mật khẩu mới</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập lại mật khẩu mới"
+                    placeholderTextColor="#666"
+                    secureTextEntry
+                    value={passwordData.confirmNewPassword}
+                    onChangeText={(value) =>
+                      handlePasswordInputChange("confirmNewPassword", value)
+                    }
+                  />
+                </View>
+
+                <View style={styles.modalButtonContainer}>
+                  <TouchableOpacity
+                    style={styles.modalCancelButton}
+                    onPress={() => setIsPasswordModalVisible(false)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.modalCancelButtonText}>Hủy bỏ</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.modalSaveButton}
+                    onPress={handlePasswordChange}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.modalSaveButtonText}>Cập nhật</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </View>
       </Modal>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'black',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: 'black',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: 'white',
+  },
+  formContainer: {
+    padding: spacing.screenMargin,
+  },
+  sectionHeader: {
+    marginBottom: spacing.md,
+  },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionAccent: {
+    width: 4,
+    height: 20,
+    backgroundColor: '#4A90E2',
+    borderRadius: 2,
+    marginRight: spacing.xs,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'white',
+  },
+  inputGroup: {
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  inputContainer: {
+    marginBottom: spacing.md,
+  },
+  inputLabel: {
+    color: '#A1A1AA',
+    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  input: {
+    backgroundColor: '#161B22',
+    borderWidth: 1,
+    borderColor: '#30363D',
+    color: 'white',
+    padding: spacing.md,
+    borderRadius: spacing.borderRadius.lg,
+    fontSize: 15,
+  },
+  primaryButton: {
+    backgroundColor: '#4A90E2',
+    padding: spacing.md,
+    borderRadius: spacing.borderRadius.lg,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  outlineButton: {
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+    padding: spacing.md,
+    borderRadius: spacing.borderRadius.lg,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  buttonIcon: {
+    marginRight: spacing.xs,
+  },
+  outlineButtonText: {
+    color: '#4A90E2',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  dangerButton: {
+    borderWidth: 1,
+    borderColor: '#F87171',
+    padding: spacing.md,
+    borderRadius: spacing.borderRadius.lg,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  dangerButtonText: {
+    color: '#F87171',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: '#161B22',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+    borderWidth: 1,
+    borderColor: '#30363D',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    color: '#A1A1AA',
+    fontSize: 16,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  modalInputContainer: {
+    marginBottom: spacing.md,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    marginTop: spacing.md,
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: '#21262D',
+    padding: spacing.md,
+    borderRadius: spacing.borderRadius.lg,
+    marginRight: spacing.xs,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#30363D',
+  },
+  modalCancelButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  modalSaveButton: {
+    flex: 1,
+    backgroundColor: '#4A90E2',
+    padding: spacing.md,
+    borderRadius: spacing.borderRadius.lg,
+    marginLeft: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalSaveButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+});
 
 export default SettingsScreen;
