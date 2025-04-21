@@ -26,7 +26,7 @@ interface DetailItemProps {
 
 const DetailItem = ({ icon, label, value, iconColor = "#8B949E" }: DetailItemProps) => {
   return (
-    <Animated.View 
+    <Animated.View
       className="mt-3"
       entering={FadeInDown.duration(400)}
     >
@@ -47,7 +47,7 @@ const MedicalRecordDetailScreen = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const [isDownloading, setIsDownloading] = useState(false);
-  
+
   const {
     data: record,
     isLoading,
@@ -59,7 +59,7 @@ const MedicalRecordDetailScreen = () => {
       setIsDownloading(true);
       // Simulate download delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       setIsDownloading(false);
       Alert.alert(
         "Tải xuống thành công",
@@ -74,7 +74,7 @@ const MedicalRecordDetailScreen = () => {
 
   const handleShare = async () => {
     if (!record) return;
-    
+
     try {
       await Share.share({
         message: `Hồ sơ bệnh án: ${record.diagnosis}\nTriệu chứng: ${record.symptoms}\nNgày khám: ${dayjs(record.examinationDate).format("DD/MM/YYYY")}`,
@@ -101,7 +101,7 @@ const MedicalRecordDetailScreen = () => {
         <Text className="text-gray-400 mt-4 text-center px-6">
           Hồ sơ bệnh án không tồn tại hoặc xảy ra lỗi.
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           className="mt-6 bg-[#21262D] px-6 py-3 rounded-full"
           onPress={() => router.back()}
         >
@@ -114,10 +114,10 @@ const MedicalRecordDetailScreen = () => {
   return (
     <View className="flex-1 bg-[#0D1117]">
       <Header title="Chi tiết bệnh án" />
-      
+
       <ScrollView className="flex-1">
         {/* Hero Section */}
-        <Animated.View 
+        <Animated.View
           className="mb-4"
           entering={FadeInDown.duration(400)}
         >
@@ -136,7 +136,7 @@ const MedicalRecordDetailScreen = () => {
                 </Text>
               </View>
             </View>
-            
+
             <View className="mt-4 flex-row justify-between">
               <View className="bg-[#21262D] px-3 py-2 rounded-xl flex-row items-center">
                 <Feather name="calendar" size={14} color="#8B949E" />
@@ -144,7 +144,7 @@ const MedicalRecordDetailScreen = () => {
                   {dayjs(record.examinationDate).format("DD/MM/YYYY")}
                 </Text>
               </View>
-              
+
               <View className="bg-[#21262D] px-3 py-2 rounded-xl flex-row items-center">
                 <Feather name="hash" size={14} color="#8B949E" />
                 <Text className="text-gray-300 ml-2 text-sm">
@@ -154,39 +154,39 @@ const MedicalRecordDetailScreen = () => {
             </View>
           </LinearGradient>
         </Animated.View>
-        
+
         {/* Details Content */}
         <View className="px-5 pb-10">
-          <DetailItem 
+          <DetailItem
             icon={<MaterialIcons name="error-outline" size={18} color="#F59E0B" />}
             label="Triệu chứng"
             value={record.symptoms}
             iconColor="#F59E0B"
           />
-          
-          <DetailItem 
+
+          <DetailItem
             icon={<MaterialIcons name="history" size={18} color="#3B82F6" />}
             label="Tiền sử bệnh"
             value={record.medicalHistory}
             iconColor="#3B82F6"
           />
-          
-          <DetailItem 
+
+          <DetailItem
             icon={<MaterialIcons name="science" size={18} color="#EC4899" />}
             label="Xét nghiệm"
             value={record.testResults}
             iconColor="#EC4899"
           />
-          
-          <DetailItem 
+
+          <DetailItem
             icon={<MaterialIcons name="person" size={18} color="#8B5CF6" />}
             label="Bệnh nhân"
             value={record.patientName || "Không có thông tin"}
             iconColor="#8B5CF6"
           />
-          
+
           {/* Time Stamps */}
-          <Animated.View 
+          <Animated.View
             className="mt-6 border-t border-gray-700 pt-4"
             entering={FadeInDown.delay(200).duration(400)}
           >
@@ -197,7 +197,7 @@ const MedicalRecordDetailScreen = () => {
                   Ngày tạo: {dayjs(record.createdAt).format("DD/MM/YYYY HH:mm")}
                 </Text>
               </View>
-              
+
               <View className="flex-row items-center">
                 <Ionicons name="refresh-outline" size={14} color="#8B949E" />
                 <Text className="text-gray-500 text-xs ml-1">
@@ -206,9 +206,9 @@ const MedicalRecordDetailScreen = () => {
               </View>
             </View>
           </Animated.View>
-          
+
           {/* Action Buttons */}
-          <Animated.View 
+          <Animated.View
             className="flex-row justify-between mt-6"
             entering={FadeInDown.delay(300).duration(400)}
           >
@@ -220,7 +220,7 @@ const MedicalRecordDetailScreen = () => {
               <Ionicons name="share-social-outline" size={18} color="white" />
               <Text className="text-white font-medium ml-2">Chia sẻ</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               onPress={handleDownload}
               className="flex-row items-center bg-green-600 px-4 py-3 rounded-xl flex-1 ml-2 justify-center"

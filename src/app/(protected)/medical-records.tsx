@@ -1,15 +1,16 @@
 import { AntDesign, FontAwesome, MaterialIcons, FontAwesome5, Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { memo, useCallback, useMemo, useState } from "react";
-import { 
-  FlatList, 
-  Pressable, 
-  Text, 
-  View, 
-  StyleSheet, 
-  RefreshControl, 
+import {
+  FlatList,
+  Text,
+  View,
+  StyleSheet,
+  RefreshControl,
   TouchableOpacity,
-  ActivityIndicator 
+  ActivityIndicator,
+  StatusBar,
+  SafeAreaView
 } from "react-native";
 import dayjs from "dayjs";
 import { useMedicalRecords } from "@/src/hooks/useMedicalRecords";
@@ -56,36 +57,44 @@ const MedicalRecordItem = memo(({ record, doctor, index }: MedicalRecordItemProp
 
   // Generate a deterministic color based on the diagnosis text
   const getColorForDiagnosis = (text: string): string => {
-    const colors = ['#4ADE80', '#3B82F6', '#EC4899', '#F59E0B', '#8B5CF6'];
+    const colors = ['#4A90E2', '#6C5CE7', '#EC4899', '#F59E0B', '#8B5CF6'];
     const hash = text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return colors[hash % colors.length];
   };
-  
+
   const diagnosisColor = getColorForDiagnosis(record.diagnosis);
 
   return (
     <Animated.View
       entering={FadeInRight.delay(index * 100).duration(400)}
-      className="mx-4 my-2.5"
+      className="mx-6 my-3"
     >
-      <Pressable
+      <TouchableOpacity
         onPress={handleDetail}
-        className="bg-[#161B22] rounded-2xl shadow-lg overflow-hidden active:opacity-90 border border-[#30363D]"
+        className="bg-[#161B22] rounded-xl shadow-lg overflow-hidden active:opacity-90 border border-[#30363D]"
+        activeOpacity={0.8}
+        style={styles.cardShadow}
       >
         {/* Colored Side Indicator */}
-        <View className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: diagnosisColor }} />
-        
+        <LinearGradient
+          colors={[diagnosisColor, `${diagnosisColor}80`]}
+          className="absolute left-0 top-0 bottom-0 w-1.5"
+        />
+
         <View className="p-4 pl-5">
           {/* Header with Date & Badge */}
           <View className="flex-row justify-between items-start mb-2">
             <View className="flex-row items-center">
-              <View className="w-9 h-9 rounded-full bg-[#21262D] items-center justify-center mr-3">
-                <MaterialIcons 
-                  name="event-note" 
-                  size={18} 
-                  color={diagnosisColor} 
+              <LinearGradient
+                colors={['#21262D', '#2D333B']}
+                className="w-10 h-10 rounded-full items-center justify-center mr-3"
+              >
+                <MaterialIcons
+                  name="event-note"
+                  size={20}
+                  color={diagnosisColor}
                 />
-              </View>
+              </LinearGradient>
               <View>
                 <Text className="text-white text-base font-bold">
                   {formattedDate}
@@ -95,26 +104,26 @@ const MedicalRecordItem = memo(({ record, doctor, index }: MedicalRecordItemProp
                 </Text>
               </View>
             </View>
-            
+
             {isRecent && (
-              <View className="bg-[#4ADE8020] px-2 py-1 rounded-full">
-                <Text className="text-xs text-[#4ADE80] font-medium">Gần đây</Text>
+              <View className="bg-[#4A90E230] px-2.5 py-1 rounded-full border border-[#4A90E240]">
+                <Text className="text-xs text-[#4A90E2] font-medium">Gần đây</Text>
               </View>
             )}
           </View>
-          
+
           {/* Diagnosis */}
-          <View className="mb-3 mt-1">
+          <View className="mb-3 mt-2 bg-[#0D111780] p-3 rounded-xl border border-[#30363D40]">
             <Text className="text-gray-400 text-xs mb-1">Chẩn đoán</Text>
             <Text className="text-white font-medium text-base" numberOfLines={2}>
               {record.diagnosis}
             </Text>
           </View>
-          
+
           {/* Doctor & Action */}
-          <View className="flex-row justify-between items-center mt-3">
+          <View className="flex-row justify-between items-center mt-2">
             <View className="flex-row items-center flex-1">
-              <FontAwesome name="user-md" size={14} color="#8B949E" />
+              <FontAwesome name="user-md" size={13} color="gray" />
               <Text className="text-gray-400 text-sm ml-2 mr-1">
                 Bác sĩ:
               </Text>
@@ -122,33 +131,52 @@ const MedicalRecordItem = memo(({ record, doctor, index }: MedicalRecordItemProp
                 {doctor?.fullName || "Chưa xác định"}
               </Text>
             </View>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               onPress={handleDetail}
-              className="bg-[#21262D] px-3 py-1.5 rounded-lg flex-row items-center"
+              className="bg-[#21262D] px-3.5 py-2 rounded-xl flex-row items-center border border-[#30363D]"
             >
-              <Text className="text-white text-xs mr-1">Xem chi tiết</Text>
-              <AntDesign name="right" size={12} color="#8B949E" />
+              <Text className="text-white text-xs mr-1.5">Chi tiết</Text>
+              <AntDesign name="right" size={12} color="#4A90E2" />
             </TouchableOpacity>
           </View>
         </View>
-      </Pressable>
+      </TouchableOpacity>
     </Animated.View>
   );
 });
 
 const EmptyState = () => (
-  <Animated.View 
-    className="items-center mt-10 px-4"
+  <Animated.View
+    className="items-center mt-12 px-4"
     entering={FadeInDown.delay(300).duration(400)}
   >
-    <MaterialIcons name="medical-services" size={70} color="#8B949E" />
-    <Text className="text-gray-400 text-center mt-4 text-base">
-      Bạn chưa có hồ sơ bệnh án nào.
+    <LinearGradient
+      colors={['#21262D', '#161B22']}
+      className="w-20 h-20 rounded-full items-center justify-center mb-4"
+    >
+      <MaterialIcons name="medical-services" size={50} color="#4A90E2" />
+    </LinearGradient>
+    <Text className="text-white text-center mt-4 text-lg font-medium">
+      Chưa có hồ sơ bệnh án
     </Text>
-    <Text className="text-gray-500 text-center mt-2 text-sm px-6">
-      Hồ sơ bệnh án sẽ được hiển thị ở đây sau khi bạn khám bệnh.
+    <Text className="text-gray-400 text-center mt-2 text-sm px-10 leading-5">
+      Hồ sơ bệnh án sẽ được hiển thị ở đây sau khi bạn khám bệnh
     </Text>
+
+    <LinearGradient
+      colors={['#4A90E2', '#366DAF']}
+      className="mt-6 rounded-xl overflow-hidden"
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 0}}
+    >
+      <TouchableOpacity
+        className="px-6 py-3"
+        activeOpacity={0.8}
+      >
+        <Text className="text-white font-medium">Đặt lịch khám</Text>
+      </TouchableOpacity>
+    </LinearGradient>
   </Animated.View>
 );
 
@@ -156,7 +184,7 @@ const MedicalRecordsScreen = () => {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   const { data: medicalRecords = [], refetch } = useMedicalRecords();
   const { data: doctors = [] } = useMyDoctors();
 
@@ -165,7 +193,7 @@ const MedicalRecordsScreen = () => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 800);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -182,27 +210,29 @@ const MedicalRecordsScreen = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-[#0D1117] justify-center items-center">
-        <ActivityIndicator size="large" color="#4ADE80" />
+      <View className="flex-1 bg-black justify-center items-center">
+        <StatusBar barStyle="light-content" />
+        <ActivityIndicator size="large" color="#4A90E2" />
         <Text className="text-white mt-4">Đang tải hồ sơ bệnh án...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-[#0D1117]">
+    <SafeAreaView className="flex-1 bg-black">
+      <StatusBar barStyle="light-content" />
       <Header title="Hồ sơ bệnh án" />
-      
+
       {/* Header Section */}
-      <Animated.View 
-        className="mx-4 mt-4 mb-2"
+      <Animated.View
+        className="mx-6 mt-4 mb-2"
         entering={FadeInDown.delay(200).duration(400)}
       >
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center">
             <LinearGradient
-              colors={['#4ADE80', '#22C55E']}
-              className="w-1 h-6 rounded-full mr-2"
+              colors={['#4A90E2', '#366DAF']}
+              className="w-1.5 h-7 rounded-full mr-2.5"
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
             />
@@ -210,28 +240,28 @@ const MedicalRecordsScreen = () => {
               Hồ sơ bệnh án
             </Text>
           </View>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             onPress={onRefresh}
-            className="bg-[#21262D] rounded-full p-2"
+            className="bg-[#21262D] rounded-full p-2.5 border border-[#30363D]"
           >
-            <Feather name="refresh-cw" size={18} color="#8B949E" />
+            <Feather name="refresh-cw" size={18} color="#4A90E2" />
           </TouchableOpacity>
         </View>
-        
-        <Text className="text-gray-400 text-sm mt-2 ml-3">
+
+        <Text className="text-gray-400 text-sm mt-2 ml-4">
           Tổng số: {medicalRecords.length} hồ sơ
         </Text>
       </Animated.View>
-      
+
       {/* Records List */}
       <FlatList
         data={medicalRecords}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
-          <MedicalRecordItem 
-            record={item} 
-            doctor={doctorMap[item.doctorId]} 
+          <MedicalRecordItem
+            record={item}
+            doctor={doctorMap[item.doctorId]}
             index={index}
           />
         )}
@@ -240,21 +270,45 @@ const MedicalRecordsScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#4ADE80"
-            colors={["#4ADE80"]}
+            tintColor="#4A90E2"
+            colors={["#4A90E2"]}
           />
         }
         ListEmptyComponent={<EmptyState />}
+        showsVerticalScrollIndicator={false}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   listContainer: {
     paddingVertical: 10,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
+  cardShadow: {
+    shadowColor: "#4A90E2",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    shadowColor: "#4A90E2",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  }
 });
 
 export default MedicalRecordsScreen;
