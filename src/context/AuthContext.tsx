@@ -61,12 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         // Gọi API logout nếu có access token
         if (accessToken) {
-          try {
-            await post(ENDPOINTS.AUTH.LOGOUT, {});
-          } catch (error) {
-            console.error("Error during API logout:", error);
-            // Tiếp tục xử lý kể cả khi API fail
-          }
+          await post(ENDPOINTS.AUTH.LOGOUT, {});
         }
 
         // Luôn xóa dữ liệu local dù API có thành công hay không
