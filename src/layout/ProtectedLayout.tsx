@@ -8,7 +8,7 @@ type ProtectedLayoutProps = {
 
 export const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
   return (
-    <SafeAreaView className="flex-1 bg-[#0D1117]">
+    <SafeAreaView className="flex-1 bg-black">
       <View className="flex-1">{children}</View>
       <BottomNavBar />
     </SafeAreaView>

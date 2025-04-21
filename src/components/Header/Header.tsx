@@ -1,7 +1,7 @@
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, Text, View, StatusBar } from "react-native";
+import { Pressable, Text, View, StatusBar, TouchableOpacity } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,7 +29,7 @@ export const Header = ({
   rightIcon,
   onRightPress,
   transparentBackground = false,
-  accentColor = colors.primary.main,
+  accentColor = "#4A90E2",
   subtitle,
 }: HeaderProps) => {
   const router = useRouter();
@@ -38,8 +38,9 @@ export const Header = ({
   return (
     <Animated.View
       entering={FadeIn.duration(300)}
+      className="bg-black"
     >
-      <StatusBar barStyle="light-content" backgroundColor={colors.background.primary} translucent />
+      <StatusBar barStyle="light-content" backgroundColor="black" translucent />
 
       {transparentBackground ? (
         <View className="flex-row items-center justify-between">
@@ -78,9 +79,8 @@ export const Header = ({
           )}
         </View>
       ) : (
-        <View
-        >
-          <View className="flex-row items-center justify-between px-4 py-3">
+        <View className="bg-black">
+          <View className="flex-row items-center justify-between px-6 py-3">
             <View className="flex-row items-center">
               {showBackButton && (
                 <Pressable
@@ -97,7 +97,7 @@ export const Header = ({
                   style={{ backgroundColor: accentColor }}
                 />
                 <View>
-                  <Text className="text-xl font-bold text-white">{title}</Text>
+                  <Text className="text-lg font-bold text-white">{title}</Text>
                   {subtitle ? (
                     <Text className="text-sm text-gray-400">{subtitle}</Text>
                   ) : null}

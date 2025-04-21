@@ -1,23 +1,24 @@
 import { AntDesign, FontAwesome, MaterialIcons, Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { memo, useCallback, useMemo, useState } from "react";
-import { 
-  FlatList, 
-  Pressable, 
-  Text, 
-  View, 
-  StyleSheet, 
+import {
+  FlatList,
+  Text,
+  View,
+  StyleSheet,
   RefreshControl,
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
-  ScrollView
+  ScrollView,
+  StatusBar,
+  SafeAreaView
 } from "react-native";
 import dayjs from "dayjs";
 import { useMyAppointments } from "@/src/hooks/useAppointments";
 import { useMyDoctors } from "@/src/hooks/useDoctors";
 import { Header } from "@/src/components/Header/Header";
-import Animated, { FadeInDown, FadeInRight, FadeInLeft } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get('window');
@@ -41,33 +42,33 @@ type Doctor = {
 
 const STATUS_CONFIG: Record<
   AppointmentStatus,
-  { 
-    label: string; 
-    color: string; 
+  {
+    label: string;
+    color: string;
     iconName: string;
     iconSet: "MaterialCommunityIcons";
     bgColor: string;
     emoji: string;
   }
 > = {
-  CONFIRMED: { 
-    label: "Đã xác nhận", 
+  CONFIRMED: {
+    label: "Đã xác nhận",
     color: "#4CAF50",
     iconName: "check-circle-outline",
     iconSet: "MaterialCommunityIcons",
     bgColor: "rgba(76, 175, 80, 0.1)",
     emoji: "✅"
   },
-  PENDING: { 
-    label: "Chờ xác nhận", 
+  PENDING: {
+    label: "Chờ xác nhận",
     color: "#FF9800",
     iconName: "timer-sand-empty",
     iconSet: "MaterialCommunityIcons",
     bgColor: "rgba(255, 152, 0, 0.1)",
     emoji: "⏳"
   },
-  CANCELLED: { 
-    label: "Đã hủy", 
+  CANCELLED: {
+    label: "Đã hủy",
     color: "#F44336",
     iconName: "close-circle-outline",
     iconSet: "MaterialCommunityIcons",
@@ -80,7 +81,7 @@ const formatDay = (date: string) => {
   const d = dayjs(date);
   const today = dayjs().startOf('day');
   const tomorrow = today.add(1, 'day');
-  
+
   if (d.isSame(today, 'day')) {
     return 'Hôm nay';
   } else if (d.isSame(tomorrow, 'day')) {
@@ -100,7 +101,7 @@ type AppointmentItemProps = {
 const AppointmentItem = memo(
   ({ appointment, doctor, index }: AppointmentItemProps) => {
     const router = useRouter();
-    const { label, color, iconName, bgColor, emoji } = STATUS_CONFIG[appointment.status];
+    const { label, color, bgColor, emoji } = STATUS_CONFIG[appointment.status];
 
     const handleDetail = useCallback(() => {
       router.push(`/(protected)/appointments-detail?id=${appointment.id}`);
@@ -115,11 +116,12 @@ const AppointmentItem = memo(
     return (
       <Animated.View
         entering={FadeInRight.delay(index * 80).duration(300)}
-        className="mx-4 my-2"
+        className="mx-6 my-2"
       >
-        <Pressable
+        <TouchableOpacity
           onPress={handleDetail}
-          className="bg-[#161B22] rounded-2xl border border-[#30363D] shadow-md active:opacity-80 overflow-hidden"
+          className="bg-[#161B22] rounded-xl border border-[#30363D] overflow-hidden"
+          activeOpacity={0.7}
           style={{
             shadowColor: color + '20',
             shadowOffset: { width: 0, height: 2 },
@@ -129,7 +131,7 @@ const AppointmentItem = memo(
           }}
         >
           {/* Header */}
-          <View 
+          <View
             className="px-4 py-2 border-b border-[#30363D] flex-row justify-between items-center"
             style={{ backgroundColor: bgColor }}
           >
@@ -141,7 +143,7 @@ const AppointmentItem = memo(
                 {label}
               </Text>
             </View>
-            <Text className="text-[#8B949E] text-xs">
+            <Text className="text-gray-400 text-xs">
               ID: {appointment.id.substring(0, 6)}
             </Text>
           </View>
@@ -152,10 +154,10 @@ const AppointmentItem = memo(
               {/* Date and Time */}
               <View className="flex-row items-center">
                 <View className="w-12 h-12 rounded-full bg-[#21262D] items-center justify-center mr-3">
-                  <MaterialCommunityIcons 
-                    name={isToday ? "calendar-today" : "calendar-month-outline"} 
-                    size={24} 
-                    color={isToday ? "#00AEEF" : "#8B949E"} 
+                  <MaterialCommunityIcons
+                    name={isToday ? "calendar-today" : "calendar-month-outline"}
+                    size={20}
+                    color={isToday ? "#4A90E2" : "gray"}
                   />
                 </View>
                 <View>
@@ -164,12 +166,12 @@ const AppointmentItem = memo(
                       {dayLabel}
                     </Text>
                     {isToday && (
-                      <View className="px-2 py-0.5 bg-[#00AEEF30] rounded-full">
-                        <Text className="text-[#00AEEF] text-xs font-medium">Hôm nay</Text>
+                      <View className="px-2 py-0.5 bg-[#4A90E230] rounded-full">
+                        <Text className="text-[#4A90E2] text-xs font-medium">Hôm nay</Text>
                       </View>
                     )}
                   </View>
-                  <Text className="text-[#8B949E] text-xs">
+                  <Text className="text-gray-400 text-xs">
                     {formattedDate} • {startTime} - {endTime}
                   </Text>
                 </View>
@@ -187,7 +189,7 @@ const AppointmentItem = memo(
             {/* Doctor Info */}
             <View className="mt-3 flex-row justify-between items-center">
               <View className="flex-row items-center flex-1">
-                <FontAwesome name="user-md" size={14} color="#8B949E" />
+                <FontAwesome name="user-md" size={13} color="gray" />
                 <Text className="text-white ml-2 mr-1">
                   Bác sĩ:
                 </Text>
@@ -195,27 +197,27 @@ const AppointmentItem = memo(
                   {doctor?.fullName || "Chưa xác định"}
                 </Text>
               </View>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 onPress={handleDetail}
                 className="bg-[#21262D] px-3 py-1.5 rounded-lg flex-row items-center"
               >
                 <Text className="text-white text-xs font-medium mr-1">Chi tiết</Text>
-                <AntDesign name="right" size={12} color="#8B949E" />
+                <AntDesign name="right" size={12} color="gray" />
               </TouchableOpacity>
             </View>
 
             {/* Note (only if exists) */}
             {appointment.note && (
               <View className="mt-3 bg-[#21262D] p-3 rounded-lg flex-row items-start">
-                <MaterialIcons name="notes" size={16} color="#8B949E" style={{ marginTop: 2 }} />
-                <Text className="text-[#8B949E] text-xs ml-2 flex-1" numberOfLines={2} ellipsizeMode="tail">
+                <MaterialIcons name="notes" size={15} color="gray" style={{ marginTop: 2 }} />
+                <Text className="text-gray-400 text-xs ml-2 flex-1" numberOfLines={2} ellipsizeMode="tail">
                   {appointment.note}
                 </Text>
               </View>
             )}
           </View>
-        </Pressable>
+        </TouchableOpacity>
       </Animated.View>
     );
   }
@@ -223,8 +225,8 @@ const AppointmentItem = memo(
 
 const FilterOption = ({ label, active, onPress, color, emoji }: { label: string; active: boolean; onPress: () => void; color?: string; emoji?: string }) => (
   <TouchableOpacity
-    className={`px-4 py-2 rounded-2xl mx-1 ${active ? 'border-2' : 'bg-[#21262D] border-transparent border-2'}`}
-    style={{ borderColor: active ? (color || '#00AEEF') : 'transparent' }}
+    className={`px-4 py-2 rounded-xl mx-1 ${active ? 'border-2' : 'bg-[#21262D] border-transparent border-2'}`}
+    style={{ borderColor: active ? (color || '#4A90E2') : 'transparent' }}
     onPress={onPress}
     activeOpacity={0.7}
   >
@@ -232,7 +234,7 @@ const FilterOption = ({ label, active, onPress, color, emoji }: { label: string;
       {emoji && (
         <Text className="mr-1">{emoji}</Text>
       )}
-      <Text className={`text-sm font-medium ${active ? 'text-white' : 'text-[#8B949E]'}`}>
+      <Text className={`text-sm font-medium ${active ? 'text-white' : 'text-gray-400'}`}>
         {label}
       </Text>
     </View>
@@ -240,16 +242,16 @@ const FilterOption = ({ label, active, onPress, color, emoji }: { label: string;
 );
 
 const EmptyState = ({ message, onCreatePress }: { message: string, onCreatePress: () => void }) => (
-  <Animated.View 
+  <Animated.View
     className="items-center mt-10 px-6"
     entering={FadeInDown.delay(300).duration(400)}
   >
-    <MaterialIcons name="event-busy" size={60} color="#8B949E" />
-    <Text className="text-[#8B949E] text-center mt-4 text-base">
+    <MaterialIcons name="event-busy" size={60} color="gray" />
+    <Text className="text-gray-400 text-center mt-4 text-base">
       {message}
     </Text>
     <TouchableOpacity
-      className="mt-6 bg-[#00AEEF] px-6 py-3 rounded-full"
+      className="mt-6 bg-[#4A90E2] px-6 py-3 rounded-full"
       onPress={onCreatePress}
       activeOpacity={0.8}
     >
@@ -263,7 +265,7 @@ const AppointmentsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
-  
+
   const { data: rawAppointments = [], refetch } = useMyAppointments();
   const { data: dataMyDoctors = [] } = useMyDoctors();
 
@@ -272,7 +274,7 @@ const AppointmentsScreen = () => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 800);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -302,8 +304,9 @@ const AppointmentsScreen = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-[#0D1117] justify-center items-center">
-        <ActivityIndicator size="large" color="#00AEEF" />
+      <View className="flex-1 bg-black justify-center items-center">
+        <StatusBar barStyle="light-content" />
+        <ActivityIndicator size="large" color="#4A90E2" />
         <Text className="text-white mt-4">Đang tải danh sách lịch hẹn...</Text>
       </View>
     );
@@ -314,66 +317,67 @@ const AppointmentsScreen = () => {
   };
 
   return (
-    <View className="flex-1 bg-[#0D1117]">
+    <SafeAreaView className="flex-1 bg-black">
+      <StatusBar barStyle="light-content" />
       <Header title="Lịch hẹn" />
-      
+
       {/* Header with Filters */}
       <Animated.View
         entering={FadeInDown.delay(200).duration(400)}
-        className="mx-4 mt-2"
+        className="mx-6 mt-2"
       >
         {/* Page Title */}
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
             <LinearGradient
-              colors={['#00AEEF', '#0078FF']}
+              colors={['#4A90E2', '#0078FF']}
               className="w-1 h-6 rounded-full mr-2"
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
             />
-            <Text className="text-xl font-bold text-white">
+            <Text className="text-lg font-bold text-white">
               Danh sách lịch hẹn
             </Text>
           </View>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             onPress={onRefresh}
             className="bg-[#21262D] rounded-full p-2"
           >
-            <Feather name="refresh-cw" size={18} color="#8B949E" />
+            <Feather name="refresh-cw" size={18} color="gray" />
           </TouchableOpacity>
         </View>
-        
+
         {/* Filter Options */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
           className="pb-2"
         >
           <View className="flex-row mb-4">
-            <FilterOption 
-              label="Tất cả" 
-              active={filter === 'ALL'} 
-              onPress={() => setFilter('ALL')} 
+            <FilterOption
+              label="Tất cả"
+              active={filter === 'ALL'}
+              onPress={() => setFilter('ALL')}
             />
-            <FilterOption 
-              label="Đã xác nhận" 
-              active={filter === 'CONFIRMED'} 
-              onPress={() => setFilter('CONFIRMED')} 
+            <FilterOption
+              label="Đã xác nhận"
+              active={filter === 'CONFIRMED'}
+              onPress={() => setFilter('CONFIRMED')}
               color={STATUS_CONFIG.CONFIRMED.color}
               emoji={STATUS_CONFIG.CONFIRMED.emoji}
             />
-            <FilterOption 
-              label="Chờ xác nhận" 
-              active={filter === 'PENDING'} 
-              onPress={() => setFilter('PENDING')} 
+            <FilterOption
+              label="Chờ xác nhận"
+              active={filter === 'PENDING'}
+              onPress={() => setFilter('PENDING')}
               color={STATUS_CONFIG.PENDING.color}
               emoji={STATUS_CONFIG.PENDING.emoji}
             />
-            <FilterOption 
-              label="Đã hủy" 
-              active={filter === 'CANCELLED'} 
-              onPress={() => setFilter('CANCELLED')} 
+            <FilterOption
+              label="Đã hủy"
+              active={filter === 'CANCELLED'}
+              onPress={() => setFilter('CANCELLED')}
               color={STATUS_CONFIG.CANCELLED.color}
               emoji={STATUS_CONFIG.CANCELLED.emoji}
             />
@@ -397,22 +401,22 @@ const AppointmentsScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#00AEEF"
-            colors={["#00AEEF"]}
+            tintColor="#4A90E2"
+            colors={["#4A90E2"]}
           />
         }
         ListEmptyComponent={
-          <EmptyState 
+          <EmptyState
             message={
               filter === 'ALL'
                 ? "Bạn chưa có lịch hẹn nào. Hãy tạo lịch hẹn mới để được khám bệnh."
                 : `Không có lịch hẹn nào ở trạng thái ${STATUS_CONFIG[filter].label}.`
-            } 
+            }
             onCreatePress={handleCreateAppointment}
           />
         }
       />
-      
+
       {/* FAB - Create Appointment */}
       <Animated.View
         className="absolute bottom-6 right-6"
@@ -423,20 +427,20 @@ const AppointmentsScreen = () => {
           onPress={handleCreateAppointment}
           activeOpacity={0.8}
           style={{
-            backgroundColor: "#00AEEF",
-            shadowColor: "#00AEEF",
+            backgroundColor: "#4A90E2",
+            shadowColor: "#4A90E2",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 5,
             elevation: 5,
-            width: 58,
-            height: 58,
+            width: 56,
+            height: 56,
           }}
         >
-          <AntDesign name="plus" size={28} color="white" />
+          <AntDesign name="plus" size={26} color="white" />
         </TouchableOpacity>
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 };
 

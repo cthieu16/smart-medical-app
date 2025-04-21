@@ -2,7 +2,6 @@ import { MaterialIcons, Ionicons, FontAwesome5, AntDesign, MaterialCommunityIcon
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Pressable,
   Text,
   TextInput,
   View,
@@ -12,6 +11,8 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  StatusBar,
+  SafeAreaView
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Picker } from "@react-native-picker/picker";
@@ -41,13 +42,13 @@ const timeSlots = [
 ];
 
 const FIELD_COLORS = {
-  iconBg: "rgba(0, 174, 239, 0.15)",
+  iconBg: "rgba(74, 144, 226, 0.15)",
   border: "#30363D",
   inputBg: "#161B22",
-  placeholder: "#8B949E",
-  highlight: "#00AEEF",
+  placeholder: "gray",
+  highlight: "#4A90E2",
   text: "#FFFFFF",
-  note: "#8B949E"
+  note: "gray"
 };
 
 const InputLabel = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
@@ -138,35 +139,36 @@ const AppointmentsCreateScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View className="flex-1 bg-[#0D1117]">
+      <SafeAreaView className="flex-1 bg-black">
+        <StatusBar barStyle="light-content" />
         <Header title="Tạo lịch hẹn" />
-        
+
         <ScrollView className="flex-1">
-          <View className="p-4">
-            <Animated.View 
-              className="bg-[#161B22]/50 rounded-2xl border border-[#30363D] p-4 mb-6 overflow-hidden" 
+          <View className="p-6">
+            <Animated.View
+              className="bg-[#161B22]/50 rounded-xl border border-[#30363D] p-4 mb-6 overflow-hidden"
               entering={FadeInDown.delay(100).duration(400)}
             >
-              <LinearGradient 
-                colors={['rgba(0, 174, 239, 0.05)', 'rgba(0, 174, 239, 0)']} 
-                start={{ x: 0, y: 0 }} 
-                end={{ x: 1, y: 1 }} 
+              <LinearGradient
+                colors={['rgba(74, 144, 226, 0.05)', 'rgba(74, 144, 226, 0)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 className="absolute top-0 left-0 right-0 bottom-0"
               />
               <View className="flex-row items-center mb-2">
-                <MaterialCommunityIcons name="calendar-clock" size={20} color={FIELD_COLORS.highlight} />
+                <MaterialCommunityIcons name="calendar-clock" size={18} color={FIELD_COLORS.highlight} />
                 <Text className="text-white font-bold ml-2 text-lg">Thông tin lịch hẹn</Text>
               </View>
-              <Text className="text-[#8B949E] text-sm">
+              <Text className="text-gray-400 text-sm">
                 Vui lòng điền đầy đủ thông tin bên dưới để đặt lịch hẹn
               </Text>
             </Animated.View>
-            
+
             <Animated.View entering={FadeInDown.delay(200).duration(400)}>
               <FormField>
-                <InputLabel 
-                  icon={<FontAwesome5 name="user-md" size={18} color={FIELD_COLORS.highlight} />} 
-                  label="Chọn bác sĩ" 
+                <InputLabel
+                  icon={<FontAwesome5 name="user-md" size={16} color={FIELD_COLORS.highlight} />}
+                  label="Chọn bác sĩ"
                 />
                 <View className="bg-[#161B22] rounded-xl overflow-hidden shadow-sm" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
                   <Picker
@@ -176,10 +178,10 @@ const AppointmentsCreateScreen = () => {
                     dropdownIconColor={FIELD_COLORS.highlight}
                     mode="dropdown"
                   >
-                    <Picker.Item 
-                      label="-- Chọn bác sĩ --" 
-                      value="" 
-                      style={{ color: FIELD_COLORS.placeholder }} 
+                    <Picker.Item
+                      label="-- Chọn bác sĩ --"
+                      value=""
+                      style={{ color: FIELD_COLORS.placeholder }}
                     />
                     {doctors.map((doctor) => (
                       <Picker.Item
@@ -194,28 +196,28 @@ const AppointmentsCreateScreen = () => {
               </FormField>
 
               <FormField>
-                <InputLabel 
-                  icon={<AntDesign name="calendar" size={18} color={FIELD_COLORS.highlight} />} 
-                  label="Chọn ngày khám" 
+                <InputLabel
+                  icon={<AntDesign name="calendar" size={16} color={FIELD_COLORS.highlight} />}
+                  label="Chọn ngày khám"
                 />
                 <TouchableOpacity
                   onPress={() => setDatePickerVisibility(true)}
                   className="bg-[#161B22] p-4 rounded-xl flex-row items-center justify-between shadow-sm"
                   style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}
                 >
-                  <Text className={`${selectedDate ? 'text-white' : 'text-[#8B949E]'} text-base`}>
+                  <Text className={`${selectedDate ? 'text-white' : 'text-gray-400'} text-base`}>
                     {selectedDate
                       ? dayjs(selectedDate).format("DD/MM/YYYY")
                       : "Chọn ngày khám"}
                   </Text>
-                  <MaterialIcons name="date-range" size={22} color={FIELD_COLORS.highlight} />
+                  <MaterialIcons name="date-range" size={20} color={FIELD_COLORS.highlight} />
                 </TouchableOpacity>
               </FormField>
 
               <FormField>
-                <InputLabel 
-                  icon={<Ionicons name="time-outline" size={18} color={FIELD_COLORS.highlight} />} 
-                  label="Chọn giờ khám" 
+                <InputLabel
+                  icon={<Ionicons name="time-outline" size={16} color={FIELD_COLORS.highlight} />}
+                  label="Chọn giờ khám"
                 />
                 <View className="bg-[#161B22] rounded-xl overflow-hidden shadow-sm" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
                   <Picker
@@ -233,9 +235,9 @@ const AppointmentsCreateScreen = () => {
               </FormField>
 
               <FormField>
-                <InputLabel 
-                  icon={<MaterialIcons name="note-alt" size={18} color={FIELD_COLORS.highlight} />} 
-                  label="Ghi chú" 
+                <InputLabel
+                  icon={<MaterialIcons name="note-alt" size={16} color={FIELD_COLORS.highlight} />}
+                  label="Ghi chú"
                 />
                 <TextInput
                   className="bg-[#161B22] text-white p-4 rounded-xl h-32 text-base shadow-sm"
@@ -264,27 +266,27 @@ const AppointmentsCreateScreen = () => {
                 </View>
               </View>
             </Animated.View>
-            
-            <Animated.View 
+
+            <Animated.View
               className="mt-8 bg-[#161B22]/70 p-5 rounded-xl border border-[#30363D]"
               entering={FadeInDown.delay(300).duration(400)}
             >
               <View className="flex-row items-start mb-3">
-                <Animated.View 
-                  className="bg-[rgba(0,174,239,0.15)] p-2 rounded-full mr-3 mt-0.5"
+                <Animated.View
+                  className="bg-[rgba(74,144,226,0.15)] p-2 rounded-full mr-3 mt-0.5"
                   entering={FadeInRight.delay(400).duration(300)}
                 >
-                  <MaterialIcons name="info-outline" size={20} color={FIELD_COLORS.highlight} />
+                  <MaterialIcons name="info-outline" size={18} color={FIELD_COLORS.highlight} />
                 </Animated.View>
                 <View className="flex-1">
                   <Text className="text-white font-bold text-base mb-2">Lưu ý khi đặt lịch</Text>
-                  <Text className="text-[#8B949E] text-sm leading-5 mb-1">
+                  <Text className="text-gray-400 text-sm leading-5 mb-1">
                     1. Đến trước giờ hẹn 15 phút để làm thủ tục
                   </Text>
-                  <Text className="text-[#8B949E] text-sm leading-5 mb-1">
+                  <Text className="text-gray-400 text-sm leading-5 mb-1">
                     2. Mang theo giấy tờ cần thiết (nếu có)
                   </Text>
-                  <Text className="text-[#8B949E] text-sm leading-5">
+                  <Text className="text-gray-400 text-sm leading-5">
                     3. Nếu có thay đổi, vui lòng hủy lịch trước 24 giờ
                   </Text>
                 </View>
@@ -301,7 +303,7 @@ const AppointmentsCreateScreen = () => {
           minimumDate={new Date()}
           buttonTextColorIOS={FIELD_COLORS.highlight}
         />
-      </View>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 };
