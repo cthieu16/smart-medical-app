@@ -5,11 +5,12 @@ import {
   ScrollView,
   Text,
   View,
-  Pressable,
   ActivityIndicator,
   Alert,
   TouchableOpacity,
-  Share
+  Share,
+  SafeAreaView,
+  StatusBar
 } from "react-native";
 import dayjs from "dayjs";
 import { useMedicalRecordDetail } from "@/src/hooks/useMedicalRecords";
@@ -24,19 +25,24 @@ interface DetailItemProps {
   iconColor?: string;
 }
 
-const DetailItem = ({ icon, label, value, iconColor = "#8B949E" }: DetailItemProps) => {
+const DetailItem = ({ icon, label, value, iconColor = "gray" }: DetailItemProps) => {
   return (
     <Animated.View
-      className="mt-3"
+      className="mt-4"
       entering={FadeInDown.duration(400)}
     >
       <View className="flex-row items-start">
-        <View className="w-8 h-8 bg-[#21262D] rounded-full items-center justify-center">
+        <LinearGradient
+          colors={['#21262D', '#2D333B']}
+          className="w-10 h-10 rounded-full items-center justify-center"
+        >
           {icon}
-        </View>
-        <View className="ml-3 flex-1">
+        </LinearGradient>
+        <View className="ml-4 flex-1">
           <Text className="text-gray-400 text-sm">{label}</Text>
-          <Text className="text-white text-base mt-1">{value || "Không có"}</Text>
+          <View className="bg-[#161B2280] p-3 rounded-xl mt-2 border border-[#30363D40]">
+            <Text className="text-white text-base">{value || "Không có"}</Text>
+          </View>
         </View>
       </View>
     </Animated.View>
@@ -87,47 +93,54 @@ const MedicalRecordDetailScreen = () => {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#0D1117]">
-        <ActivityIndicator size="large" color="#4ADE80" />
-        <Text className="text-gray-400 mt-4">Đang tải hồ sơ bệnh án...</Text>
+      <View className="flex-1 items-center justify-center bg-black">
+        <StatusBar barStyle="light-content" />
+        <ActivityIndicator size="large" color="#4A90E2" />
+        <Text className="text-gray-300 mt-4">Đang tải hồ sơ bệnh án...</Text>
       </View>
     );
   }
 
   if (isError || !record) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#0D1117]">
+      <View className="flex-1 items-center justify-center bg-black">
+        <StatusBar barStyle="light-content" />
         <Ionicons name="alert-circle-outline" size={60} color="#F87171" />
-        <Text className="text-gray-400 mt-4 text-center px-6">
+        <Text className="text-white text-center px-6 mt-4">
           Hồ sơ bệnh án không tồn tại hoặc xảy ra lỗi.
         </Text>
         <TouchableOpacity
-          className="mt-6 bg-[#21262D] px-6 py-3 rounded-full"
+          className="mt-6 bg-[#21262D] px-6 py-3 rounded-full border border-[#30363D]"
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
-          <Text className="text-white">Quay lại</Text>
+          <Text className="text-white font-medium">Quay lại</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-[#0D1117]">
+    <SafeAreaView className="flex-1 bg-black">
+      <StatusBar barStyle="light-content" />
       <Header title="Chi tiết bệnh án" />
 
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Hero Section */}
         <Animated.View
-          className="mb-4"
+          className="mt-2 mb-4"
           entering={FadeInDown.duration(400)}
         >
           <LinearGradient
-            colors={["rgba(74, 222, 128, 0.2)", "rgba(74, 222, 128, 0.05)"]}
-            className="px-5 pt-4 pb-6 mb-2"
+            colors={["rgba(74, 144, 226, 0.2)", "rgba(74, 144, 226, 0.05)"]}
+            className="px-6 pt-5 pb-6"
           >
-            <View className="flex-row items-center">
-              <View className="w-12 h-12 bg-[#21262D] rounded-full items-center justify-center">
-                <FontAwesome5 name="file-medical" size={24} color="#4ADE80" />
+            <View className="flex-row items-center px-6 pt-2">
+              <View className="w-14 h-14 bg-[#21262D] rounded-full items-center justify-center border border-[#30363D]">
+                <FontAwesome5 name="file-medical" size={28} color="#4A90E2" />
               </View>
               <View className="ml-4 flex-1">
                 <Text className="text-xs text-gray-400">Chẩn đoán</Text>
@@ -137,17 +150,17 @@ const MedicalRecordDetailScreen = () => {
               </View>
             </View>
 
-            <View className="mt-4 flex-row justify-between">
-              <View className="bg-[#21262D] px-3 py-2 rounded-xl flex-row items-center">
-                <Feather name="calendar" size={14} color="#8B949E" />
-                <Text className="text-gray-300 ml-2 text-sm">
+            <View className="mt-5 flex-row justify-between px-6 pb-2">
+              <View className="bg-[#21262D] px-4 py-2.5 rounded-xl flex-row items-center border border-[#30363D60]">
+                <Feather name="calendar" size={16} color="#4A90E2" />
+                <Text className="text-white ml-2 text-sm font-medium">
                   {dayjs(record.examinationDate).format("DD/MM/YYYY")}
                 </Text>
               </View>
 
-              <View className="bg-[#21262D] px-3 py-2 rounded-xl flex-row items-center">
-                <Feather name="hash" size={14} color="#8B949E" />
-                <Text className="text-gray-300 ml-2 text-sm">
+              <View className="bg-[#21262D] px-4 py-2.5 rounded-xl flex-row items-center border border-[#30363D60]">
+                <Feather name="hash" size={16} color="#4A90E2" />
+                <Text className="text-white ml-2 text-sm font-medium">
                   {record.code}
                 </Text>
               </View>
@@ -156,30 +169,30 @@ const MedicalRecordDetailScreen = () => {
         </Animated.View>
 
         {/* Details Content */}
-        <View className="px-5 pb-10">
+        <View className="px-6 pb-10">
           <DetailItem
-            icon={<MaterialIcons name="error-outline" size={18} color="#F59E0B" />}
+            icon={<MaterialIcons name="error-outline" size={22} color="#F59E0B" />}
             label="Triệu chứng"
             value={record.symptoms}
             iconColor="#F59E0B"
           />
 
           <DetailItem
-            icon={<MaterialIcons name="history" size={18} color="#3B82F6" />}
+            icon={<MaterialIcons name="history" size={22} color="#3B82F6" />}
             label="Tiền sử bệnh"
             value={record.medicalHistory}
             iconColor="#3B82F6"
           />
 
           <DetailItem
-            icon={<MaterialIcons name="science" size={18} color="#EC4899" />}
+            icon={<MaterialIcons name="science" size={22} color="#EC4899" />}
             label="Xét nghiệm"
             value={record.testResults}
             iconColor="#EC4899"
           />
 
           <DetailItem
-            icon={<MaterialIcons name="person" size={18} color="#8B5CF6" />}
+            icon={<MaterialIcons name="person" size={22} color="#8B5CF6" />}
             label="Bệnh nhân"
             value={record.patientName || "Không có thông tin"}
             iconColor="#8B5CF6"
@@ -187,43 +200,45 @@ const MedicalRecordDetailScreen = () => {
 
           {/* Time Stamps */}
           <Animated.View
-            className="mt-6 border-t border-gray-700 pt-4"
+            className="mt-8 border-t border-gray-800 pt-4"
             entering={FadeInDown.delay(200).duration(400)}
           >
-            <View className="flex-row justify-between">
-              <View className="flex-row items-center">
-                <Ionicons name="time-outline" size={14} color="#8B949E" />
-                <Text className="text-gray-500 text-xs ml-1">
-                  Ngày tạo: {dayjs(record.createdAt).format("DD/MM/YYYY HH:mm")}
-                </Text>
-              </View>
+            <View className="bg-[#161B2280] p-3 rounded-xl border border-[#30363D40]">
+              <View className="flex-row justify-between">
+                <View className="flex-row items-center">
+                  <Ionicons name="time-outline" size={14} color="#4A90E2" />
+                  <Text className="text-gray-400 text-xs ml-1">
+                    Ngày tạo: {dayjs(record.createdAt).format("DD/MM/YYYY HH:mm")}
+                  </Text>
+                </View>
 
-              <View className="flex-row items-center">
-                <Ionicons name="refresh-outline" size={14} color="#8B949E" />
-                <Text className="text-gray-500 text-xs ml-1">
-                  Cập nhật: {dayjs(record.updatedAt).format("DD/MM/YYYY HH:mm")}
-                </Text>
+                <View className="flex-row items-center">
+                  <Ionicons name="refresh-outline" size={14} color="#4A90E2" />
+                  <Text className="text-gray-400 text-xs ml-1">
+                    Cập nhật: {dayjs(record.updatedAt).format("DD/MM/YYYY HH:mm")}
+                  </Text>
+                </View>
               </View>
             </View>
           </Animated.View>
 
           {/* Action Buttons */}
           <Animated.View
-            className="flex-row justify-between mt-6"
+            className="flex-row justify-between mt-8"
             entering={FadeInDown.delay(300).duration(400)}
           >
             <TouchableOpacity
               onPress={handleShare}
-              className="flex-row items-center bg-[#21262D] px-4 py-3 rounded-xl flex-1 mr-2 justify-center"
+              className="flex-row items-center bg-[#21262D] px-4 py-3.5 rounded-xl flex-1 mr-2.5 justify-center border border-[#30363D]"
               activeOpacity={0.7}
             >
-              <Ionicons name="share-social-outline" size={18} color="white" />
-              <Text className="text-white font-medium ml-2">Chia sẻ</Text>
+              <Ionicons name="share-social-outline" size={20} color="white" />
+              <Text className="text-white font-medium ml-2.5">Chia sẻ</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleDownload}
-              className="flex-row items-center bg-green-600 px-4 py-3 rounded-xl flex-1 ml-2 justify-center"
+              className="flex-row items-center bg-[#4A90E2] px-4 py-3.5 rounded-xl flex-1 ml-2.5 justify-center"
               activeOpacity={0.7}
               disabled={isDownloading}
             >
@@ -231,15 +246,15 @@ const MedicalRecordDetailScreen = () => {
                 <ActivityIndicator size="small" color="white" />
               ) : (
                 <>
-                  <AntDesign name="download" size={18} color="white" />
-                  <Text className="text-white font-medium ml-2">Tải xuống</Text>
+                  <AntDesign name="download" size={20} color="white" />
+                  <Text className="text-white font-medium ml-2.5">Tải xuống</Text>
                 </>
               )}
             </TouchableOpacity>
           </Animated.View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
