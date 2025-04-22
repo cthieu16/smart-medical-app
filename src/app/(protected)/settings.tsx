@@ -39,6 +39,11 @@ const SettingsScreen = () => {
     fullName: "",
     username: "",
     email: "",
+    phone: "",
+    address: "",
+    dateOfBirth: "",
+    gender: "",
+    patientCode: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -49,10 +54,20 @@ const SettingsScreen = () => {
 
   useEffect(() => {
     if (user) {
+      // Use nullish coalescing to ensure we have fallback values
+      const patientInfo = (user as any).patientInfo || {};
+
       setFormData({
         fullName: user.fullName ?? "",
         username: user.username ?? "",
         email: user.email ?? "",
+        phone: (user as any).phoneNumber ?? "",
+        address: patientInfo.address ?? "",
+        dateOfBirth: patientInfo.dateOfBirth
+          ? new Date(patientInfo.dateOfBirth).toLocaleDateString()
+          : "",
+        gender: patientInfo.gender === 1 ? "Nam" : "Nữ",
+        patientCode: patientInfo.code ?? "",
       });
     }
   }, [user]);
@@ -66,7 +81,7 @@ const SettingsScreen = () => {
   };
 
   const handleSubmit = () => {
-    const updatedData: Partial<typeof user> = {
+    const updatedData = {
       fullName: formData.fullName,
       username: formData.username,
       email: formData.email,
@@ -158,6 +173,15 @@ const SettingsScreen = () => {
 
           <View style={styles.inputGroup}>
             <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Mã bệnh nhân</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: '#242832' }]}
+                value={formData.patientCode}
+                editable={false}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Họ và tên</Text>
               <TextInput
                 style={styles.input}
@@ -171,11 +195,9 @@ const SettingsScreen = () => {
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Tên người dùng</Text>
               <TextInput
-                style={styles.input}
-                placeholder="Tên người dùng"
-                placeholderTextColor="#666"
+                style={[styles.input, { backgroundColor: '#242832' }]}
                 value={formData.username}
-                onChangeText={(value) => handleChange("username", value)}
+                editable={false}
               />
             </View>
 
@@ -189,6 +211,46 @@ const SettingsScreen = () => {
                 onChangeText={(value) => handleChange("email", value)}
                 keyboardType="email-address"
               />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Số điện thoại</Text>
+              <TextInput
+                style={[styles.input, styles.disabledInput]}
+                placeholder="Chưa cập nhật"
+                placeholderTextColor="#666"
+                value={formData.phone}
+                editable={false}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Địa chỉ</Text>
+              <TextInput
+                style={[styles.input, styles.disabledInput]}
+                value={formData.address}
+                editable={false}
+              />
+            </View>
+
+            <View style={styles.rowContainer}>
+              <View style={[styles.inputContainer, styles.halfWidth]}>
+                <Text style={styles.inputLabel}>Ngày sinh</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  value={formData.dateOfBirth}
+                  editable={false}
+                />
+              </View>
+
+              <View style={[styles.inputContainer, styles.halfWidth]}>
+                <Text style={styles.inputLabel}>Giới tính</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  value={formData.gender}
+                  editable={false}
+                />
+              </View>
             </View>
           </View>
 
@@ -413,6 +475,13 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: spacing.md,
   },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  halfWidth: {
+    width: '48%',
+  },
   inputLabel: {
     color: '#A1A1AA',
     marginBottom: 8,
@@ -427,6 +496,10 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: spacing.borderRadius.lg,
     fontSize: 15,
+  },
+  disabledInput: {
+    backgroundColor: '#242832',
+    color: '#999',
   },
   primaryButton: {
     backgroundColor: '#4A90E2',
