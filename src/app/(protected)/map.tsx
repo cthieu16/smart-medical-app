@@ -3,12 +3,58 @@ import { StyleSheet, View, TouchableOpacity, Text, Linking, Platform, ActivityIn
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Header } from '@/src/components/Header/Header';
+import { useLocalSearchParams } from 'expo-router';
+import { useAppointmentDetail, Appointment } from '@/src/hooks/useAppointments';
+
+// Interfaces for clinic data
+interface Clinic {
+  id: string;
+  name: string;
+  address: string;
+  code: string;
+  hours: string;
+  latitude: string;
+  longitude: string;
+  phone: string;
+  location: string | null;
+}
+
+// Extend the Appointment type for our use case
+interface AppointmentWithClinic extends Appointment {
+  clinic: Clinic;
+  doctor: {
+    id: string;
+    fullName: string;
+    address: string;
+    phone: string;
+    code: string;
+    specialtyId: string;
+    specialty: string | null;
+  };
+}
+
+interface ClinicMarker {
+  id: string | number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+  phone: string;
+  hours: string;
+  code?: string;
+}
 
 const MapScreen = () => {
+  const { id } = useLocalSearchParams();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [selectedClinic, setSelectedClinic] = useState<any>(null);
+  const [selectedClinic, setSelectedClinic] = useState<ClinicMarker | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Only fetch appointment data if an ID is provided
+  const { data: appointment } = useAppointmentDetail(id as string) as {
+    data: AppointmentWithClinic | undefined
+  };
 
   // Tọa độ trung tâm Hà Nội
   const HANOI_CENTER = {
@@ -41,62 +87,59 @@ const MapScreen = () => {
     })();
   }, []);
 
-  const clinics = [
+  // Update selected clinic when appointment data changes
+  useEffect(() => {
+    if (appointment?.clinic) {
+      setSelectedClinic({
+        id: appointment.clinic.id,
+        name: appointment.clinic.name,
+        latitude: parseFloat(appointment.clinic.latitude),
+        longitude: parseFloat(appointment.clinic.longitude),
+        address: appointment.clinic.address,
+        phone: appointment.clinic.phone,
+        hours: appointment.clinic.hours,
+        code: appointment.clinic.code,
+      });
+    }
+  }, [appointment]);
+
+  // Danh sách phòng khám mặc định khi không có lịch hẹn
+  const defaultClinics: ClinicMarker[] = [
     {
       id: 1,
-      name: "Bệnh viện Đa khoa Quốc tế Vinmec Times City",
-      latitude: 20.9955,
-      longitude: 105.8544,
-      address: "458 Minh Khai, Vĩnh Tuy, Hai Bà Trưng, Hà Nội",
-      phone: "024 3974 3556",
-      hours: "24/7",
-    },
-    {
-      id: 2,
-      name: "Bệnh viện Đa khoa Tâm Anh Hà Nội",
-      latitude: 21.0368,
-      longitude: 105.8342,
-      address: "108 Hoàng Như Tiếp, Bồ Đề, Long Biên, Hà Nội",
-      phone: "1800 6858",
-      hours: "24/7",
-    },
-    {
-      id: 3,
-      name: "Bệnh viện Bạch Mai",
-      latitude: 20.9964,
-      longitude: 105.8443,
-      address: "78 Giải Phóng, Phương Mai, Đống Đa, Hà Nội",
-      phone: "024 3869 3731",
-      hours: "24/7",
-    },
-    {
-      id: 4,
-      name: "Bệnh viện Việt Đức",
-      latitude: 21.0245,
-      longitude: 105.8417,
-      address: "40 Tràng Thi, Hàng Bông, Hoàn Kiếm, Hà Nội",
-      phone: "024 3825 3531",
+      name: "Bệnh viện Đại học Y Hà Nội",
+      latitude: 21.0023,
+      longitude: 105.8302,
+      address: "1 Tôn Thất Tùng, Kim Liên, Đống Đa, Hà Nội",
+      phone: "024 3825 3798",
       hours: "24/7",
     },
   ];
 
-  const handleClinicPress = (clinic: any) => {
+  // Sử dụng clinics từ lịch hẹn hoặc mặc định
+  const clinics = appointment?.clinic && selectedClinic
+    ? [selectedClinic] as ClinicMarker[]
+    : defaultClinics;
+
+  const handleClinicPress = (clinic: ClinicMarker) => {
     setSelectedClinic(clinic);
   };
+
+  console.log("selectedClinic", selectedClinic);
 
   const handleDirections = async () => {
     if (!location || !selectedClinic) return;
 
     const origin = `${location.coords.latitude},${location.coords.longitude}`;
     const destination = `${selectedClinic.latitude},${selectedClinic.longitude}`;
-    
+
     let url = '';
     if (Platform.OS === 'ios') {
       url = `maps://?saddr=${origin}&daddr=${destination}`;
     } else {
       url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
     }
-    
+
     try {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
@@ -133,6 +176,9 @@ const MapScreen = () => {
             Location.requestForegroundPermissionsAsync().then(({ status }) => {
               if (status === 'granted') {
                 Location.getCurrentPositionAsync({}).then(setLocation).finally(() => setIsLoading(false));
+              } else {
+                setErrorMsg('Quyền truy cập vị trí bị từ chối');
+                setIsLoading(false);
               }
             });
           }}
@@ -143,28 +189,33 @@ const MapScreen = () => {
     );
   }
 
+  const title = appointment?.clinic
+    ? `Vị trí phòng khám ${appointment.clinic.name}`
+    : "Bản đồ phòng khám";
+
   return (
     <View className="flex-1 bg-[#0D1117]">
-      <Header title="Bản đồ phòng khám" />
+      <Header title={title} />
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: location?.coords.latitude || HANOI_CENTER.latitude,
-          longitude: location?.coords.longitude || HANOI_CENTER.longitude,
-          latitudeDelta: HANOI_CENTER.latitudeDelta,
-          longitudeDelta: HANOI_CENTER.longitudeDelta,
+          latitude: selectedClinic?.latitude || (location?.coords.latitude || HANOI_CENTER.latitude),
+          longitude: selectedClinic?.longitude || (location?.coords.longitude || HANOI_CENTER.longitude),
+          latitudeDelta: 0.01, // Zoom in more when showing a specific clinic
+          longitudeDelta: 0.01,
         }}
         showsUserLocation={true}
         followsUserLocation={true}
       >
         {clinics.map((clinic) => (
           <Marker
-            key={clinic.id}
+            key={clinic.id.toString()}
             coordinate={{
               latitude: clinic.latitude,
               longitude: clinic.longitude,
             }}
             title={clinic.name}
+            description={clinic.address}
             onPress={() => handleClinicPress(clinic)}
           />
         ))}
@@ -173,10 +224,13 @@ const MapScreen = () => {
       {selectedClinic && (
         <View className="absolute bottom-4 left-4 right-4 bg-[#161B22] p-4 rounded-xl">
           <Text className="text-white text-lg font-semibold">{selectedClinic.name}</Text>
+          {selectedClinic.code && (
+            <Text className="text-[#4A90E2] text-sm">Mã phòng: {selectedClinic.code}</Text>
+          )}
           <Text className="text-gray-400 text-sm mt-1">{selectedClinic.address}</Text>
           <Text className="text-gray-400 text-sm">Điện thoại: {selectedClinic.phone}</Text>
           <Text className="text-gray-400 text-sm">Giờ làm việc: {selectedClinic.hours}</Text>
-          
+
           <View className="flex-row mt-2 space-x-2 gap-2">
             <TouchableOpacity
               className="flex-1 bg-[#4A90E2] py-2 px-4 rounded-lg"
@@ -203,4 +257,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MapScreen; 
+export default MapScreen;

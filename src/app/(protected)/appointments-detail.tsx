@@ -98,6 +98,9 @@ const AppointmentsDetailScreen = () => {
 
   const doctor = doctors.find((doc) => doc.id === appointment?.doctorId);
 
+  console.log("appointment", appointment);
+
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
@@ -404,7 +407,7 @@ const AppointmentsDetailScreen = () => {
           >
             <TouchableOpacity
               className="bg-[#4A90E2] p-4 rounded-xl flex-row justify-center items-center"
-              onPress={() => router.push("/map")}
+              onPress={() => router.push(`/map?id=${appointment.id}`)}
               activeOpacity={0.7}
               style={{
                 shadowColor: "#4A90E2",
