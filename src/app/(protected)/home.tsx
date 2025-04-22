@@ -21,6 +21,8 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
+  Linking,
+  Platform,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -98,6 +100,26 @@ const Home = () => {
 
   const upcomingAppointment = getUpcomingAppointment(rawAppointments);
 
+  const openTelegram = async () => {
+    const telegramUrl = "https://t.me/SmartMedicalSupport";
+    const telegramAppUrl = Platform.OS === 'ios' ? 'tg://' : 'org.telegram.messenger://';
+
+    try {
+      const canOpenTelegram = await Linking.canOpenURL(telegramAppUrl);
+      if (canOpenTelegram) {
+        // Open Telegram app if installed
+        await Linking.openURL(telegramUrl);
+      } else {
+        // Open Telegram in browser if app not installed
+        await Linking.openURL(telegramUrl);
+      }
+    } catch (error) {
+      console.error('Không thể mở Telegram:', error);
+      // Fallback to browser version
+      await Linking.openURL(telegramUrl);
+    }
+  };
+
   useEffect(() => {
     // Simulate loading time
     const timer = setTimeout(() => {
@@ -135,7 +157,7 @@ const Home = () => {
     {
       icon: <Feather name="message-circle" size={24} color="#fff" />,
       text: "Tư vấn",
-      route: "/appointments",
+      route: "telegram",
       color: "#F6AD55",
     },
   ];
@@ -232,7 +254,11 @@ const Home = () => {
                 key={index}
                 className={`mb-4 items-center justify-center w-[48%] py-4 rounded-xl`}
                 style={{ backgroundColor: `${action.color}15` }}
-                onPress={() => router.push(action.route as any)}
+                onPress={() =>
+                  action.route === "telegram"
+                    ? openTelegram()
+                    : router.push(action.route as any)
+                }
               >
                 <View
                   className="w-12 h-12 rounded-full items-center justify-center mb-2"
