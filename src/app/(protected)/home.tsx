@@ -117,7 +117,7 @@ const Home = () => {
     {
       icon: <Ionicons name="calendar" size={24} color="#fff" />,
       text: "Đặt lịch",
-      route: "/appointments",
+      route: "/appointments-create",
       color: "#4A90E2",
     },
     {
@@ -311,7 +311,7 @@ const Home = () => {
                 </Text>
                 <PrimaryButton
                   title="Đặt lịch ngay"
-                  onPress={() => router.push("/appointments")}
+                  onPress={() => router.push("/appointments-create")}
                   loading={false}
                 />
               </View>
