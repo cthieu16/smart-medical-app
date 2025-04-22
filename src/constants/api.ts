@@ -7,7 +7,7 @@ export const ENDPOINTS = {
     LOGOUT: '/auth/logout',
     ME: '/auth/me',
     FORGOT_PASSWORD: '/auth/forgot-password',
-    CHANGE_PASSWORD: '/auth/change-password',
+    CHANGE_PASSWORD: '/auth/my-profile/change-password',
   },
   USERS: {
     BASE: '/users',
@@ -35,4 +35,4 @@ export const ENDPOINTS = {
   NOTIFICATIONS: {
     BASE: '/notifications',
   },
-}; 
+};

@@ -41,14 +41,42 @@ const apiRequest = async <T>(
 
     // Handle API errors
     if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
+      const errorText = await response.text();
+      let errorData = null;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (parseError: unknown) {
+        // If the response isn't valid JSON, use the text directly
+        throw new Error(
+          `API request failed with status ${response.status}: ${errorText.slice(0, 100)}`
+        );
+      }
       throw new Error(
         errorData?.message || `API request failed with status ${response.status}`
       );
     }
 
-    // Parse response as JSON
-    const result = await response.json();
+    // Special handling for change password endpoint which returns text response
+    if (endpoint.includes('change-password')) {
+      const responseText = await response.text();
+      // Return a success object for password change
+      return { success: true, message: responseText } as unknown as T;
+    }
+
+    // Parse response as JSON for all other endpoints
+    const responseText = await response.text();
+    // If response is empty, return an empty object
+    if (!responseText.trim()) {
+      return {} as T;
+    }
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError: unknown) {
+      console.error('JSON Parse error:', parseError, 'Response text:', responseText.slice(0, 100));
+      throw new Error(`Failed to parse response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
     return result as T;
   } catch (error) {
     console.error('API request error:', error);
@@ -93,4 +121,4 @@ export const del = <T>(
   requiresAuth: boolean = true
 ): Promise<T> => {
   return apiRequest<T>(endpoint, 'DELETE', undefined, requiresAuth);
-}; 
+};
