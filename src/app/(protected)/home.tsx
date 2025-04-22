@@ -1,6 +1,7 @@
 import { PrimaryButton } from "@/src/components/Buttons/PrimaryButton";
 import { useAuth } from "@/src/context/AuthContext";
 import { useMyAppointments } from "@/src/hooks/useAppointments";
+import { useMedicalRecords } from "@/src/hooks/useMedicalRecords";
 import {
   FontAwesome5,
   MaterialIcons,
@@ -93,12 +94,24 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const { data: rawAppointments = [], refetch } = useMyAppointments() as {
+  const { data: rawAppointments = [], refetch: refetchAppointments } = useMyAppointments() as {
     data: Appointment[];
     refetch: () => Promise<any>;
   };
 
+  const { data: medicalRecords = [], refetch: refetchMedicalRecords } = useMedicalRecords() as {
+    data: any[];
+    refetch: () => Promise<any>;
+  };
+
   const upcomingAppointment = getUpcomingAppointment(rawAppointments);
+
+  // Get the 2 most recent medical records
+  const recentMedicalRecords = React.useMemo(() => {
+    return [...medicalRecords]
+      .sort((a, b) => new Date(b.examinationDate).getTime() - new Date(a.examinationDate).getTime())
+      .slice(0, 2);
+  }, [medicalRecords]);
 
   const openTelegram = async () => {
     const telegramUrl = "https://t.me/SmartMedicalSupport";
@@ -131,7 +144,7 @@ const Home = () => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetchAppointments(), refetchMedicalRecords()]);
     setRefreshing(false);
   };
 
@@ -388,47 +401,47 @@ const Home = () => {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            className="bg-[#161B22] p-5 rounded-xl border border-[#30363D] mb-4"
-            onPress={() => router.push("/medical-records")}
-          >
-            <View className="flex-row justify-between">
-              <View className="flex-row items-center">
-                <FontAwesome5 name="file-medical" size={16} color="#68D391" />
-                <Text className="ml-2 text-white font-semibold">Khám tổng quát</Text>
-              </View>
-              <Text className="text-gray-400 text-sm">10/05/2023</Text>
-            </View>
-            <Text className="text-gray-400 mt-2">
-              Bác sĩ: Nguyễn Văn A
-            </Text>
-            <View className="mt-2 bg-[#21262D] rounded-lg px-3 py-2">
-              <Text className="text-gray-400 text-sm">
-                Chẩn đoán: Sức khỏe bình thường, cần tăng cường thể dục...
+          {recentMedicalRecords.length > 0 ? (
+            recentMedicalRecords.map((record, index) => (
+              <TouchableOpacity
+                key={record.id}
+                className="bg-[#161B22] p-5 rounded-xl border border-[#30363D] mb-4"
+                onPress={() => router.push(`/medical-records-detail?id=${record.id}`)}
+              >
+                <View className="flex-row justify-between">
+                  <View className="flex-row items-center">
+                    <FontAwesome5 name="file-medical" size={16} color={index === 0 ? "#68D391" : "#F6AD55"} />
+                    <Text className="ml-2 text-white font-semibold">
+                      {record.code || "Khám bệnh"}
+                    </Text>
+                  </View>
+                  <Text className="text-gray-400 text-sm">
+                    {formatDate(record.examinationDate)}
+                  </Text>
+                </View>
+                <Text className="text-gray-400 mt-2">
+                  Bác sĩ: {record.doctorName || "Chưa xác định"}
+                </Text>
+                <View className="mt-2 bg-[#21262D] rounded-lg px-3 py-2">
+                  <Text className="text-gray-400 text-sm" numberOfLines={2}>
+                    Chẩn đoán: {record.diagnosis}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View className="items-center py-5 bg-[#161B22] rounded-xl border border-[#30363D]">
+              <FontAwesome5 name="file-medical-alt" size={40} color="#8B949E" />
+              <Text className="text-gray-400 mt-2 text-center mb-4">
+                Bạn chưa có bệnh án nào
               </Text>
+              <PrimaryButton
+                title="Đặt lịch khám"
+                onPress={() => router.push("/appointments-create")}
+                loading={false}
+              />
             </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-[#161B22] p-5 rounded-xl border border-[#30363D]"
-            onPress={() => router.push("/medical-records")}
-          >
-            <View className="flex-row justify-between">
-              <View className="flex-row items-center">
-                <FontAwesome5 name="file-medical" size={16} color="#F6AD55" />
-                <Text className="ml-2 text-white font-semibold">Khám chuyên khoa</Text>
-              </View>
-              <Text className="text-gray-400 text-sm">15/04/2023</Text>
-            </View>
-            <Text className="text-gray-400 mt-2">
-              Bác sĩ: Trần Thị B
-            </Text>
-            <View className="mt-2 bg-[#21262D] rounded-lg px-3 py-2">
-              <Text className="text-gray-400 text-sm">
-                Chẩn đoán: Viêm họng cấp tính, cần nghỉ ngơi và uống thuốc...
-              </Text>
-            </View>
-          </TouchableOpacity>
+          )}
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
