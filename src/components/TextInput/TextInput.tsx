@@ -15,8 +15,9 @@ const TextInput = ({ label, ...props }: CustomTextInputProps) => {
     <View>
       <Text className="mb-2 text-base text-white">{label}</Text>
       <RNTextInput
-        className="bg-[#0D1117] text-white px-4 py-3 rounded-xl"
+        className="bg-[#0D1117] text-white px-4 py-4 rounded-xl"
         placeholderTextColor="#666"
+        style={{ textAlign: 'left' }}
         {...props}
       />
     </View>
