@@ -163,20 +163,6 @@ const EmptyState = () => (
     <Text className="text-gray-400 text-center mt-2 text-sm px-10 leading-5">
       Hồ sơ bệnh án sẽ được hiển thị ở đây sau khi bạn khám bệnh
     </Text>
-
-    <LinearGradient
-      colors={['#4A90E2', '#366DAF']}
-      className="mt-6 rounded-xl overflow-hidden"
-      start={{x: 0, y: 0}}
-      end={{x: 1, y: 0}}
-    >
-      <TouchableOpacity
-        className="px-6 py-3"
-        activeOpacity={0.8}
-      >
-        <Text className="text-white font-medium">Đặt lịch khám</Text>
-      </TouchableOpacity>
-    </LinearGradient>
   </Animated.View>
 );
 

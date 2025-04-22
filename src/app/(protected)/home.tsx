@@ -59,16 +59,24 @@ interface QuickAction {
 const getUpcomingAppointment = (
   appointments: Appointment[]
 ): Appointment | null => {
+  if (!appointments || appointments.length === 0) return null;
+
   const now = new Date();
-  return (
-    appointments
-      .filter((appt) => appt.status !== "CANCELLED")
-      .filter((appt) => new Date(appt.startTime) >= now)
-      .sort(
-        (a, b) =>
-          new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-      )[0] || null
-  );
+
+  // Filter valid appointments (not cancelled and in the future)
+  const validAppointments = appointments
+    .filter((appt) => appt.status !== "CANCELLED")
+    .filter((appt) => {
+      const apptDate = new Date(appt.startTime);
+      return apptDate >= now;
+    });
+
+  if (validAppointments.length === 0) return null;
+
+  // Sort by start time (ascending) to get the closest upcoming appointment
+  return validAppointments.sort(
+    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+  )[0];
 };
 
 const formatDate = (dateString: string) => {
@@ -86,6 +94,23 @@ const formatTime = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+};
+
+// Calculate time remaining until appointment
+const getTimeUntilAppointment = (appointmentDate: string): string => {
+  const now = new Date();
+  const apptDate = new Date(appointmentDate);
+  const diffMs = apptDate.getTime() - now.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+  if (diffDays > 0) {
+    return `còn ${diffDays} ngày ${diffHours} giờ`;
+  } else if (diffHours > 0) {
+    return `còn ${diffHours} giờ`;
+  } else {
+    return "sắp diễn ra";
+  }
 };
 
 const Home = () => {
@@ -297,7 +322,11 @@ const Home = () => {
           </Text>
           <TouchableOpacity
             className="bg-[#161B22] p-5 rounded-xl border border-[#30363D]"
-            onPress={() => router.push("/appointments")}
+            onPress={() =>
+              upcomingAppointment
+                ? router.push(`/(protected)/appointments-detail?id=${upcomingAppointment.id}`)
+                : router.push("/appointments")
+            }
           >
             {upcomingAppointment ? (
               <View>
@@ -306,7 +335,15 @@ const Home = () => {
                   <Text className="text-white font-semibold ml-2">
                     {formatDate(upcomingAppointment.startTime)}
                   </Text>
-                  <View className="ml-auto bg-blue-500 rounded-full px-3 py-1">
+                  <View
+                    className={`ml-auto rounded-full px-3 py-1 ${
+                      upcomingAppointment.status === "CONFIRMED"
+                        ? "bg-green-500"
+                        : upcomingAppointment.status === "PENDING"
+                        ? "bg-yellow-500"
+                        : "bg-red-500"
+                    }`}
+                  >
                     <Text className="text-white text-xs font-medium">
                       {upcomingAppointment.status === "CONFIRMED"
                         ? "Đã xác nhận"
@@ -322,6 +359,7 @@ const Home = () => {
                   <View className="flex-1">
                     <Text className="text-lg font-bold text-white">
                       Lịch khám
+                      <Text className="text-sm font-normal text-[#4A90E2]"> ({getTimeUntilAppointment(upcomingAppointment.startTime)})</Text>
                     </Text>
                     <Text className="text-gray-400">
                       {formatTime(upcomingAppointment.startTime)} - {formatTime(upcomingAppointment.endTime)}
@@ -334,10 +372,16 @@ const Home = () => {
                   </View>
                 </View>
 
-                {upcomingAppointment.note && (
+                {upcomingAppointment.note ? (
                   <View className="mt-3 bg-[#21262D] p-3 rounded-lg">
                     <Text className="text-gray-400">
                       Ghi chú: {upcomingAppointment.note}
+                    </Text>
+                  </View>
+                ) : (
+                  <View className="mt-3 bg-[#21262D] p-3 rounded-lg">
+                    <Text className="text-gray-400">
+                      Lời khuyên: Hãy đến sớm 15 phút để hoàn thành các thủ tục cần thiết.
                     </Text>
                   </View>
                 )}
