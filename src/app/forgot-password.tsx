@@ -1,7 +1,7 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, Text, View, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { Text, View, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
@@ -21,6 +21,11 @@ interface ResetPasswordResponse {
   success: boolean;
   message: string;
 }
+
+// Safe icon rendering helper
+const renderIcon = (Component: typeof AntDesign | typeof Feather, name: string, size: number, color: string) => {
+  return <Component name={name as any} size={size} color={color} />;
+};
 
 const ForgotPassword = () => {
   const router = useRouter();
@@ -166,18 +171,22 @@ const ForgotPassword = () => {
     >
       <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
         <View className="flex-1 px-8 pt-12 pb-6">
-          <Pressable onPress={() => router.back()} className="mb-10">
-            <AntDesign name="arrowleft" size={24} color="white" />
-          </Pressable>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            {renderIcon(AntDesign, "arrowleft", 24, "white")}
+          </TouchableOpacity>
 
           <Animated.View entering={FadeIn.duration(1000)} className="flex-1 justify-center">
             {!resetToken ? renderRequestForm() : renderResetForm()}
 
-            <Pressable className="py-4 mt-4" onPress={() => router.push("/login")}>
+            <TouchableOpacity className="py-4 mt-4" onPress={() => router.push("/login")} activeOpacity={0.7}>
               <Text className="text-[#4A90E2] text-center text-base">
                 Quay lại đăng nhập
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           </Animated.View>
 
           <Animated.Text
@@ -192,5 +201,18 @@ const ForgotPassword = () => {
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  backButton: {
+    marginBottom: 32,
+    padding: 4,
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#161B22',
+  }
+});
 
 export default ForgotPassword;
