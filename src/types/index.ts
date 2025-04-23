@@ -57,4 +57,4 @@ export type AuthContextType = {
     newPassword: string,
     newPasswordConfirm: string
   ) => Promise<void>;
-}; 
+};

@@ -57,9 +57,9 @@ const apiRequest = async <T>(
     }
 
     // Special handling for change password endpoint which returns text response
-    if (endpoint.includes('change-password')) {
+    if (endpoint.includes('change-password') || endpoint.includes('forgot-password') || endpoint.includes('reset-password')) {
       const responseText = await response.text();
-      // Return a success object for password change
+      // Return a success object for password change or forgot password
       return { success: true, message: responseText } as unknown as T;
     }
 

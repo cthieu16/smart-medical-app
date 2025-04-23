@@ -7,42 +7,157 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { PrimaryButton } from "../components/Buttons/PrimaryButton";
 import { FormTitle } from "../components/Form/FormTitle";
 import { TextInput } from "../components/TextInput/TextInput";
-import { useAuth } from "../context/AuthContext";
+import { post } from "../utils/api";
+import { ENDPOINTS } from "../constants/api";
+
+// Define the type for the forgot password response
+interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+// Define the type for the reset password response
+interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
 
 const ForgotPassword = () => {
   const router = useRouter();
-  const { forgotPassword } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [resetToken, setResetToken] = useState<string | null>(null);
 
-  const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      return Alert.alert("Lỗi", "Vui lòng nhập email của bạn.");
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return Alert.alert(
-        "Lỗi",
-        "Email không hợp lệ. Vui lòng nhập đúng định dạng."
-      );
+  const handleRequestReset = async () => {
+    if (!username.trim()) {
+      return Alert.alert("Lỗi", "Vui lòng nhập tên đăng nhập của bạn.");
     }
 
     try {
       setIsLoading(true);
-      await forgotPassword(email);
-      Alert.alert(
-        "Thành công",
-        "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.",
-        [{ text: "OK", onPress: () => router.push("/login") }]
-      );
+      const result = await post<ForgotPasswordResponse>(ENDPOINTS.AUTH.FORGOT_PASSWORD, { userName: username }, false);
+
+      // Extract token from the response message
+      const token = result.message;
+      if (token) {
+        setResetToken(token);
+        Alert.alert("Thành công", "Mã xác nhận đã được tạo. Vui lòng nhập mật khẩu mới để tiếp tục.");
+      } else {
+        Alert.alert("Lỗi", "Không nhận được mã xác nhận từ máy chủ.");
+      }
     } catch (err) {
-      Alert.alert("Lỗi", "Có lỗi xảy ra khi gửi email. Vui lòng thử lại.");
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra khi xử lý yêu cầu";
+      Alert.alert("Lỗi", errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleResetPassword = async () => {
+    if (!newPassword.trim()) {
+      return Alert.alert("Lỗi", "Vui lòng nhập mật khẩu mới.");
+    }
+
+    if (newPassword !== confirmPassword) {
+      return Alert.alert("Lỗi", "Mật khẩu xác nhận không khớp.");
+    }
+
+    if (newPassword.length < 6) {
+      return Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 6 ký tự.");
+    }
+
+    try {
+      setIsLoading(true);
+
+      const result = await post<ResetPasswordResponse>(
+        ENDPOINTS.AUTH.RESET_PASSWORD,
+        {
+          userName: username,
+          token: resetToken,
+          newPassword: newPassword
+        },
+        false
+      );
+
+      Alert.alert(
+        "Thành công",
+        "Mật khẩu đã được đặt lại thành công.",
+        [{ text: "Đăng nhập", onPress: () => router.push("/login") }]
+      );
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra khi đặt lại mật khẩu";
+      Alert.alert("Lỗi", errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderRequestForm = () => (
+    <>
+      <View className="mb-10">
+        <FormTitle title="Quên mật khẩu" />
+        <Text className="text-gray-400 text-base mt-2">
+          Nhập tên đăng nhập của bạn và chúng tôi sẽ gửi mã xác nhận để thiết lập lại mật khẩu
+        </Text>
+      </View>
+
+      <View className="gap-5 mb-8">
+        <TextInput
+          label="Tên đăng nhập"
+          placeholder="Nhập tên đăng nhập"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+        />
+      </View>
+
+      <PrimaryButton
+        title="Gửi yêu cầu"
+        onPress={handleRequestReset}
+        loading={isLoading}
+      />
+    </>
+  );
+
+  const renderResetForm = () => (
+    <>
+      <View className="mb-10">
+        <FormTitle title="Đặt lại mật khẩu" />
+        <Text className="text-gray-400 text-base mt-2">
+          Vui lòng nhập mật khẩu mới của bạn
+        </Text>
+      </View>
+
+      <View className="gap-5 mb-8">
+        <TextInput
+          label="Mật khẩu mới"
+          placeholder="Nhập mật khẩu mới"
+          value={newPassword}
+          onChangeText={setNewPassword}
+          secureTextEntry
+          autoCapitalize="none"
+        />
+
+        <TextInput
+          label="Xác nhận mật khẩu"
+          placeholder="Nhập lại mật khẩu mới"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          autoCapitalize="none"
+        />
+      </View>
+
+      <PrimaryButton
+        title="Đặt lại mật khẩu"
+        onPress={handleResetPassword}
+        loading={isLoading}
+      />
+    </>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -56,30 +171,7 @@ const ForgotPassword = () => {
           </Pressable>
 
           <Animated.View entering={FadeIn.duration(1000)} className="flex-1 justify-center">
-            <View className="mb-10">
-              <FormTitle title="Quên mật khẩu" />
-              <Text className="text-gray-400 text-base mt-2">
-                Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn để bạn thiết lập lại
-                mật khẩu
-              </Text>
-            </View>
-
-            <View className="gap-5 mb-8">
-              <TextInput
-                label="Email"
-                placeholder="example@email.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <PrimaryButton
-              title="Gửi"
-              onPress={handleForgotPassword}
-              loading={isLoading}
-            />
+            {!resetToken ? renderRequestForm() : renderResetForm()}
 
             <Pressable className="py-4 mt-4" onPress={() => router.push("/login")}>
               <Text className="text-[#4A90E2] text-center text-base">
