@@ -48,37 +48,37 @@ const NOTIFICATION_CONFIG: Record<string, {
   iconColor: string;
 }> = {
   "CREATE_APPOINTMENT": {
-    icon: <Ionicons name="calendar" size={20} color="#4A90E2" />,
+    icon: <Ionicons key="calendar-icon" name="calendar" size={20} color="#4A90E2" />,
     label: "Lịch hẹn mới",
     bgColor: "rgba(74, 144, 226, 0.1)",
     iconColor: "#4A90E2"
   },
   "APPOINTMENT_UPDATED": {
-    icon: <Ionicons name="time-outline" size={20} color="#F59E0B" />,
+    icon: <Ionicons key="time-icon" name="time-outline" size={20} color="#F59E0B" />,
     label: "Cập nhật lịch hẹn",
     bgColor: "rgba(245, 158, 11, 0.1)",
     iconColor: "#F59E0B"
   },
   "APPOINTMENT_REMINDER": {
-    icon: <Ionicons name="notifications-outline" size={20} color="#8B5CF6" />,
+    icon: <Ionicons key="notification-icon" name="notifications-outline" size={20} color="#8B5CF6" />,
     label: "Nhắc nhở lịch hẹn",
     bgColor: "rgba(139, 92, 246, 0.1)",
     iconColor: "#8B5CF6"
   },
   "CHAT_MESSAGE": {
-    icon: <Ionicons name="chatbubble-outline" size={20} color="#EC4899" />,
+    icon: <Ionicons key="chat-icon" name="chatbubble-outline" size={20} color="#EC4899" />,
     label: "Tin nhắn mới",
     bgColor: "rgba(236, 72, 153, 0.1)",
     iconColor: "#EC4899"
   },
   "PRESCRIPTION": {
-    icon: <FontAwesome5 name="pills" size={18} color="#10B981" />,
+    icon: <FontAwesome5 key="pills-icon" name="pills" size={18} color="#10B981" />,
     label: "Đơn thuốc mới",
     bgColor: "rgba(16, 185, 129, 0.1)",
     iconColor: "#10B981"
   },
   "DEFAULT": {
-    icon: <Ionicons name="alert-circle-outline" size={20} color="#4A90E2" />,
+    icon: <Ionicons key="alert-icon" name="alert-circle-outline" size={20} color="#4A90E2" />,
     label: "Thông báo",
     bgColor: "rgba(74, 144, 226, 0.1)",
     iconColor: "#4A90E2"
@@ -116,7 +116,6 @@ const NotificationItem = ({
 
   return (
     <Animated.View
-      key={`notification-${id}`}
       entering={FadeInRight.delay(index * 100).duration(400)}
       className="mx-6 my-3"
     >
@@ -132,7 +131,7 @@ const NotificationItem = ({
             colors={['#161B22', '#161B22']}
             className="w-10 h-10 rounded-full items-center justify-center mr-3"
           >
-            {React.cloneElement(config.icon as React.ReactElement, { key: `icon-${id}` })}
+            {React.cloneElement(config.icon as React.ReactElement, { key: `notification-icon-${id}` })}
           </LinearGradient>
 
           {/* Content */}
@@ -176,7 +175,7 @@ const EmptyNotifications = () => (
       colors={['#21262D', '#161B22']}
       className="w-20 h-20 rounded-full items-center justify-center mb-4"
     >
-      <Ionicons name="notifications-off-outline" size={50} color="#4A90E2" />
+      <Ionicons key="empty-notification-icon" name="notifications-off-outline" size={50} color="#4A90E2" />
     </LinearGradient>
     <Text className="text-white text-center mt-4 text-lg font-medium">
       Không có thông báo nào
@@ -251,7 +250,6 @@ const NotificationsScreen = () => {
 
   const renderNotificationItem = ({ item, index }: { item: Notification, index: number }) => (
     <NotificationItem
-      key={item.id}
       {...item}
       index={index}
       onRead={handleMarkAsRead}
@@ -305,7 +303,7 @@ const NotificationsScreen = () => {
 
       <FlatList
         data={visibleNotifications}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `notification-${item.id}`}
         renderItem={renderNotificationItem}
         contentContainerStyle={{ paddingVertical: 10, paddingBottom: 100 }}
         refreshControl={

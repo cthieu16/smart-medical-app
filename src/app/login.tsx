@@ -34,7 +34,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (username.trim().length < 3) {
+    if (username.trim().length < 1) {
       return Alert.alert("Lỗi", "Tên đăng nhập phải có ít nhất 3 ký tự.");
     }
 
@@ -118,6 +118,7 @@ const Login = () => {
                 </TouchableOpacity>
               </Link>
 
+              {/* Ẩn phần đăng ký 
               <View style={styles.registerContainer}>
                 <Text style={styles.registerText}>Chưa có tài khoản? </Text>
                 <Link href="/register" asChild>
@@ -126,6 +127,7 @@ const Login = () => {
                   </TouchableOpacity>
                 </Link>
               </View>
+              */}
             </Animated.View>
 
             <Animated.Text

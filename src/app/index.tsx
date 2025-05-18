@@ -86,10 +86,12 @@ const Index = () => {
             {/* Buttons Animation */}
             <Animated.View style={[styles.buttonsContainer, contentStyle]}>
               <View style={styles.buttonsWrapper}>
+                {/* Ẩn nút đăng ký 
                 <PrimaryButton
                   title="Đăng ký"
                   onPress={() => handleNavigation("/register")}
                 />
+                */}
 
                 <SocialButton
                   title="Google"
@@ -103,7 +105,7 @@ const Index = () => {
                   onPress={handleFacebookLogin}
                 />
 
-                <SecondaryButton
+                <PrimaryButton
                   title="Đăng nhập"
                   onPress={() => handleNavigation("/login")}
                 />
