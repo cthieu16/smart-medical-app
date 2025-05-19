@@ -51,7 +51,6 @@ export const removeData = async (key: string): Promise<void> => {
 export const clearAll = async (): Promise<void> => {
   try {
     await AsyncStorage.clear();
-    console.log('All storage cleared successfully');
   } catch (error) {
     console.error('Error clearing storage:', error);
   }
@@ -70,7 +69,6 @@ export const clearAuthData = async (): Promise<void> => {
   try {
     // Thay vì xóa từng key riêng lẻ, xóa toàn bộ AsyncStorage để đảm bảo không còn dữ liệu nào
     await clearAll();
-    console.log('Auth data and all local storage cleared successfully');
   } catch (error) {
     console.error('Error clearing auth data:', error);
     // Fallback approach: try to remove individual keys if clearing all fails

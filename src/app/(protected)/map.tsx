@@ -125,8 +125,6 @@ const MapScreen = () => {
     setSelectedClinic(clinic);
   };
 
-  console.log("selectedClinic", selectedClinic);
-
   const handleDirections = async () => {
     if (!location || !selectedClinic) return;
 

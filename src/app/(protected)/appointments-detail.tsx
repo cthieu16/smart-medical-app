@@ -98,9 +98,6 @@ const AppointmentsDetailScreen = () => {
 
   const doctor = doctors.find((doc) => doc.id === appointment?.doctorId);
 
-  console.log("appointment", appointment);
-
-
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);

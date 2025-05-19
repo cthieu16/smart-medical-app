@@ -110,8 +110,6 @@ const NotificationItem = ({
       setReaded(true);
       onRead(id);
     }
-    // Handle navigation or action based on notification type
-    console.log(`Clicked notification: ${title}`);
   };
 
   return (
@@ -201,8 +199,6 @@ const NotificationsScreen = () => {
   // Mark notification as read
   const handleMarkAsRead = useCallback((id: string) => {
     setReadIds(prev => new Set([...prev, id]));
-    // Here you would typically call an API to update the read status
-    console.log(`Marked notification ${id} as read`);
   }, []);
 
   // Mark all as read
@@ -303,7 +299,7 @@ const NotificationsScreen = () => {
 
       <FlatList
         data={visibleNotifications}
-        keyExtractor={(item) => `notification-${item.id}`}
+        keyExtractor={(item, index) => item.id ? `notification-${item.id}` : `notification-index-${index}`}
         renderItem={renderNotificationItem}
         contentContainerStyle={{ paddingVertical: 10, paddingBottom: 100 }}
         refreshControl={

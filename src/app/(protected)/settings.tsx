@@ -32,18 +32,22 @@ const SettingsScreen = () => {
   const router = useRouter();
   const { user, updateUser, isUpdating } = useUser();
   const { logout, changePassword } = useAuth();
+
+  const convertRole = (role: string) => {
+    if (role === 'patient') return 'Bệnh nhân';
+    return role;
+  };
+
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
-    username: "",
     email: "",
-    phone: "",
-    address: "",
-    dateOfBirth: "",
-    gender: "",
-    patientCode: "",
+    id: "",
+    phoneNumber: "",
+    roles: "",
+    userName: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -54,20 +58,14 @@ const SettingsScreen = () => {
 
   useEffect(() => {
     if (user) {
-      // Use nullish coalescing to ensure we have fallback values
-      const patientInfo = (user as any).patientInfo || {};
-
+      const userData = user as any;
       setFormData({
         fullName: user.fullName ?? "",
-        username: user.username ?? "",
         email: user.email ?? "",
-        phone: (user as any).phoneNumber ?? "",
-        address: patientInfo.address ?? "",
-        dateOfBirth: patientInfo.dateOfBirth
-          ? new Date(patientInfo.dateOfBirth).toLocaleDateString()
-          : "",
-        gender: patientInfo.gender === 1 ? "Nam" : "Nữ",
-        patientCode: patientInfo.code ?? "",
+        id: userData.id ?? "",
+        phoneNumber: userData.phoneNumber ?? "",
+        roles: userData.roles ?? "",
+        userName: userData.userName ?? "",
       });
     }
   }, [user]);
@@ -82,11 +80,11 @@ const SettingsScreen = () => {
 
   const handleSubmit = () => {
     const updatedData = {
-      fullName: formData.fullName,
-      username: formData.username,
       email: formData.email,
+      fullName: formData.fullName,
+      phoneNumber: formData.phoneNumber,
     };
-    updateUser(updatedData);
+    updateUser(updatedData, formData.id);
   };
 
   const handlePasswordChange = async () => {
@@ -173,10 +171,10 @@ const SettingsScreen = () => {
 
           <View style={styles.inputGroup}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Mã bệnh nhân</Text>
+              <Text style={styles.inputLabel}>ID</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: '#242832' }]}
-                value={formData.patientCode}
+                value={formData.id}
                 editable={false}
               />
             </View>
@@ -196,7 +194,7 @@ const SettingsScreen = () => {
               <Text style={styles.inputLabel}>Tên người dùng</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: '#242832' }]}
-                value={formData.username}
+                value={formData.userName}
                 editable={false}
               />
             </View>
@@ -216,41 +214,22 @@ const SettingsScreen = () => {
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Số điện thoại</Text>
               <TextInput
-                style={[styles.input, styles.disabledInput]}
-                placeholder="Chưa cập nhật"
+                style={styles.input}
+                placeholder="Số điện thoại"
                 placeholderTextColor="#666"
-                value={formData.phone}
-                editable={false}
+                value={formData.phoneNumber}
+                onChangeText={(value) => handleChange("phoneNumber", value)}
+                keyboardType="phone-pad"
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Địa chỉ</Text>
+              <Text style={styles.inputLabel}>Vai trò</Text>
               <TextInput
-                style={[styles.input, styles.disabledInput]}
-                value={formData.address}
+                style={[styles.input, { backgroundColor: '#242832' }]}
+                value={convertRole(formData.roles)}
                 editable={false}
               />
-            </View>
-
-            <View style={styles.rowContainer}>
-              <View style={[styles.inputContainer, styles.halfWidth]}>
-                <Text style={styles.inputLabel}>Ngày sinh</Text>
-                <TextInput
-                  style={[styles.input, styles.disabledInput]}
-                  value={formData.dateOfBirth}
-                  editable={false}
-                />
-              </View>
-
-              <View style={[styles.inputContainer, styles.halfWidth]}>
-                <Text style={styles.inputLabel}>Giới tính</Text>
-                <TextInput
-                  style={[styles.input, styles.disabledInput]}
-                  value={formData.gender}
-                  editable={false}
-                />
-              </View>
             </View>
           </View>
 

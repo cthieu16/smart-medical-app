@@ -27,10 +27,10 @@ const ApiURL = process.env.EXPO_PUBLIC_API_BACKEND_URL;
 
 export const useUser = () => {
   const { user, accessToken } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient();  
 
-  const updateUser = async (data: UpdateUserData): Promise<User> => {
-    const response = await fetch(`${ApiURL}/api/users`, {
+  const updateUser = async (data: UpdateUserData, userId: string): Promise<User> => {
+    const response = await fetch(`${ApiURL}/users/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -44,8 +44,8 @@ export const useUser = () => {
     return response.json();
   };
 
-  const mutation: UseMutationResult<User, Error, UpdateUserData> = useMutation({
-    mutationFn: updateUser,
+  const mutation: UseMutationResult<User, Error, { data: UpdateUserData; userId: string }> = useMutation({
+    mutationFn: ({ data, userId }) => updateUser(data, userId),
     onSuccess: (data) => {
       queryClient.setQueryData(["user"], data);
     },
@@ -53,7 +53,7 @@ export const useUser = () => {
 
   return {
     user,
-    updateUser: mutation.mutate,
+    updateUser: (data: UpdateUserData, userId: string) => mutation.mutate({ data, userId }),
     isUpdating: mutation.isPending,
     updateError: mutation.error,
   };

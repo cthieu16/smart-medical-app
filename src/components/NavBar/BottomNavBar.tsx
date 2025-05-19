@@ -70,9 +70,6 @@ export const BottomNavBar = () => {
   useEffect(() => {
     // Xử lý cập nhật active tab mỗi khi pathname thay đổi
     const currentTab = getActiveTabFromPath(pathname);
-    // Console log để debug
-    console.log("Current pathname:", pathname);
-    console.log("Detected active tab:", currentTab);
     setActiveTab(currentTab);
   }, [pathname]);
 
@@ -85,17 +82,14 @@ export const BottomNavBar = () => {
     path = path.split('?')[0].split('#')[0];
 
     // Thêm log chi tiết hơn để xác định vấn đề
-    console.log("Clean path for tab detection:", path);
 
     // Xử lý đường dẫn "/profile" trước tiên
     if (path === "/(protected)/profile" || path.endsWith("/profile")) {
-      console.log("Matched profile path directly");
       return "profile";
     }
 
     // Kiểm tra các đường dẫn đặc biệt trước (thứ tự quan trọng)
     if (path.includes("settings") || path.includes("map")) {
-      console.log("Matched profile path via settings/map");
       return "profile";
     }
 
@@ -113,7 +107,6 @@ export const BottomNavBar = () => {
 
     // Kiểm tra cụ thể cho profile (thêm một lần nữa để đảm bảo)
     if (path.includes("profile")) {
-      console.log("Matched profile path via includes");
       return "profile";
     }
 
