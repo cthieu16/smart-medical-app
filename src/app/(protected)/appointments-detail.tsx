@@ -156,12 +156,21 @@ const AppointmentsDetailScreen = () => {
 
   // Format các thông tin thời gian
   const appointmentDate = dayjs(appointment.startTime).format("DD/MM/YYYY");
-  const dayOfWeek = dayjs(appointment.startTime).format("dddd");
+  const dayOfWeek = dayjs(appointment.startTime).day();
   const startTime = dayjs(appointment.startTime).format("HH:mm");
   const endTime = dayjs(appointment.endTime).format("HH:mm");
 
   // Format lại ngày giờ hiển thị đẹp hơn
-  const formattedDay = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+  const vietnameseDays = [
+    'Chủ nhật',
+    'Thứ hai',
+    'Thứ ba',
+    'Thứ tư',
+    'Thứ năm',
+    'Thứ sáu',
+    'Thứ bảy'
+  ];
+  const formattedDay = vietnameseDays[dayOfWeek];
   const formattedDate = `${formattedDay}, ${appointmentDate}`;
   const formattedTime = `${startTime} - ${endTime}`;
 

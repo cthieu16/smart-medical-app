@@ -87,8 +87,17 @@ const formatDay = (date: string) => {
   } else if (d.isSame(tomorrow, 'day')) {
     return 'Ngày mai';
   } else {
-    const dayOfWeek = d.format('dddd');
-    return dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+    const dayOfWeek = d.day();
+    const vietnameseDays = [
+      'Chủ nhật',
+      'Thứ hai',
+      'Thứ ba',
+      'Thứ tư',
+      'Thứ năm',
+      'Thứ sáu',
+      'Thứ bảy'
+    ];
+    return vietnameseDays[dayOfWeek];
   }
 };
 

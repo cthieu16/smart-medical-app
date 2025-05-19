@@ -22,10 +22,12 @@ import {
 } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/vi";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 dayjs.extend(relativeTime);
+dayjs.locale('vi');
 
 interface Notification {
   id: string;
@@ -287,14 +289,14 @@ const NotificationsScreen = () => {
           )} */}
         </View>
 
-        {unreadCount > 0 && (
+        {/* {unreadCount > 0 && (
           <View className="bg-[#161B2280] rounded-xl p-3 mt-3 flex-row items-center border border-[#30363D40]">
             <View className="w-2 h-2 bg-[#4A90E2] rounded-full mr-2" />
             <Text className="text-white text-sm">
               Bạn có <Text className="text-[#4A90E2] font-bold">{unreadCount}</Text> thông báo chưa đọc
             </Text>
           </View>
-        )}
+        )} */}
       </Animated.View>
 
       <FlatList
