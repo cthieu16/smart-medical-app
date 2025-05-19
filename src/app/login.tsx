@@ -88,7 +88,7 @@ const Login = () => {
 
               <View style={styles.inputsContainer}>
                 <TextInput
-                  label="Tài khoản"
+                  label="Tài khoản (Hoặc Email)"
                   placeholder="Nhập tên đăng nhập"
                   value={username}
                   onChangeText={setUsername}

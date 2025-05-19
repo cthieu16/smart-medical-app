@@ -27,31 +27,36 @@ const renderIcon = (Component: typeof AntDesign | typeof Feather, name: string, 
   return <Component name={name as any} size={size} color={color} />;
 };
 
-const ForgotPassword = () => {
+export default function ForgotPassword() {
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [resetToken, setResetToken] = useState<string | null>(null);
+  const [step, setStep] = useState<'request' | 'reset'>('request');
 
   const handleRequestReset = async () => {
-    if (!username.trim()) {
-      return Alert.alert("Lỗi", "Vui lòng nhập tên đăng nhập của bạn.");
+    if (!email.trim()) {
+      return Alert.alert("Lỗi", "Vui lòng nhập email của bạn.");
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return Alert.alert("Lỗi", "Vui lòng nhập email hợp lệ.");
     }
 
     try {
       setIsLoading(true);
-      const result = await post<ForgotPasswordResponse>(ENDPOINTS.AUTH.FORGOT_PASSWORD, { userName: username }, false);
+      const result = await post<ForgotPasswordResponse>(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email }, false);
 
-      // Extract token from the response message
-      const token = result.message;
-      if (token) {
-        setResetToken(token);
-        Alert.alert("Thành công", "Mã xác nhận đã được tạo. Vui lòng nhập mật khẩu mới để tiếp tục.");
+      if (result.success) {
+        setStep('reset');
+        Alert.alert("Thành công", "Mã xác nhận đã được gửi đến email của bạn. Vui lòng kiểm tra email và nhập mã xác nhận cùng mật khẩu mới.");
       } else {
-        Alert.alert("Lỗi", "Không nhận được mã xác nhận từ máy chủ.");
+        Alert.alert("Lỗi", result.message || "Có lỗi xảy ra khi gửi mã xác nhận.");
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra khi xử lý yêu cầu";
@@ -62,6 +67,10 @@ const ForgotPassword = () => {
   };
 
   const handleResetPassword = async () => {
+    if (!token.trim()) {
+      return Alert.alert("Lỗi", "Vui lòng nhập mã xác nhận.");
+    }
+
     if (!newPassword.trim()) {
       return Alert.alert("Lỗi", "Vui lòng nhập mật khẩu mới.");
     }
@@ -80,18 +89,22 @@ const ForgotPassword = () => {
       const result = await post<ResetPasswordResponse>(
         ENDPOINTS.AUTH.RESET_PASSWORD,
         {
-          userName: username,
-          token: resetToken,
-          newPassword: newPassword
+          email,
+          token,
+          newPassword
         },
         false
       );
 
-      Alert.alert(
-        "Thành công",
-        "Mật khẩu đã được đặt lại thành công.",
-        [{ text: "Đăng nhập", onPress: () => router.push("/login") }]
-      );
+      if (result.success) {
+        Alert.alert(
+          "Thành công",
+          "Mật khẩu đã được đặt lại thành công.",
+          [{ text: "Đăng nhập", onPress: () => router.push("/login") }]
+        );
+      } else {
+        Alert.alert("Lỗi", result.message || "Có lỗi xảy ra khi đặt lại mật khẩu.");
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra khi đặt lại mật khẩu";
       Alert.alert("Lỗi", errorMessage);
@@ -105,22 +118,23 @@ const ForgotPassword = () => {
       <View className="mb-10">
         <FormTitle title="Quên mật khẩu" />
         <Text className="text-gray-400 text-base mt-2">
-          Nhập tên đăng nhập của bạn và chúng tôi sẽ gửi mã xác nhận để thiết lập lại mật khẩu
+          Nhập email của bạn và chúng tôi sẽ gửi mã xác nhận để thiết lập lại mật khẩu
         </Text>
       </View>
 
       <View className="gap-5 mb-8">
         <TextInput
-          label="Tên đăng nhập"
-          placeholder="Nhập tên đăng nhập"
-          value={username}
-          onChangeText={setUsername}
+          label="Email"
+          placeholder="Nhập email của bạn"
+          value={email}
+          onChangeText={setEmail}
           autoCapitalize="none"
+          keyboardType="email-address"
         />
       </View>
 
       <PrimaryButton
-        title="Gửi yêu cầu"
+        title="Gửi mã xác nhận"
         onPress={handleRequestReset}
         loading={isLoading}
       />
@@ -132,11 +146,20 @@ const ForgotPassword = () => {
       <View className="mb-10">
         <FormTitle title="Đặt lại mật khẩu" />
         <Text className="text-gray-400 text-base mt-2">
-          Vui lòng nhập mật khẩu mới của bạn
+          Vui lòng nhập mã xác nhận đã được gửi đến email của bạn và mật khẩu mới
         </Text>
       </View>
 
       <View className="gap-5 mb-8">
+        <TextInput
+          label="Mã xác nhận"
+          placeholder="Nhập mã xác nhận"
+          value={token}
+          onChangeText={setToken}
+          autoCapitalize="none"
+          keyboardType="number-pad"
+        />
+
         <TextInput
           label="Mật khẩu mới"
           placeholder="Nhập mật khẩu mới"
@@ -180,7 +203,8 @@ const ForgotPassword = () => {
           </TouchableOpacity>
 
           <Animated.View entering={FadeIn.duration(1000)} className="flex-1 justify-center">
-            {!resetToken ? renderRequestForm() : renderResetForm()}
+            {step === 'request' && renderRequestForm()}
+            {step === 'reset' && renderResetForm()}
 
             <TouchableOpacity className="py-4 mt-4" onPress={() => router.push("/login")} activeOpacity={0.7}>
               <Text className="text-[#4A90E2] text-center text-base">
@@ -200,7 +224,7 @@ const ForgotPassword = () => {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   backButton: {
@@ -214,5 +238,3 @@ const styles = StyleSheet.create({
     backgroundColor: '#161B22',
   }
 });
-
-export default ForgotPassword;
