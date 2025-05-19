@@ -118,7 +118,7 @@ const MedicalRecordDetailScreen = () => {
     } catch (error) {
       setIsDownloading(false);
       Alert.alert("Lỗi", "Không thể tải xuống hồ sơ bệnh án.");
-      console.error("Download error:", error);
+      console.log("Download error:", error);
     }
   };
 

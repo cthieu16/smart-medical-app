@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return true;
       } catch (error) {
-        console.error("Failed to logout:", error);
+        console.log("Failed to logout:", error);
         // Force xóa dữ liệu nếu có lỗi
         await clearAuthData();
         throw error;
@@ -217,7 +217,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await logoutMutation.mutateAsync();
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.log("Logout failed:", error);
       // Trong trường hợp xảy ra lỗi, vẫn đảm bảo dữ liệu local được xóa
       await clearAuthData();
     }

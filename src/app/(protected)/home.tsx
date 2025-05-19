@@ -152,7 +152,7 @@ const Home = () => {
         await Linking.openURL(telegramUrl);
       }
     } catch (error) {
-      console.error('Không thể mở Telegram:', error);
+      console.log('Không thể mở Telegram:', error);
       // Fallback to browser version
       await Linking.openURL(telegramUrl);
     }

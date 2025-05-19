@@ -74,12 +74,12 @@ const apiRequest = async <T>(
     try {
       result = JSON.parse(responseText);
     } catch (parseError: unknown) {
-      console.error('JSON Parse error:', parseError, 'Response text:', responseText.slice(0, 100));
+      console.log('JSON Parse error:', parseError, 'Response text:', responseText.slice(0, 100));
       throw new Error(`Failed to parse response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
     }
     return result as T;
   } catch (error) {
-    console.error('API request error:', error);
+    console.log('API request error:', error);
     throw error;
   }
 };

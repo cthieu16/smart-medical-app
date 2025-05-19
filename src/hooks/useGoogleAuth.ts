@@ -34,7 +34,7 @@ export const useGoogleAuth = () => {
       await authenticateWithGoogle(token);
       router.replace("/home");
     } catch (error) {
-      console.error("Error en la autenticación con Google:", error);
+      console.log("Error en la autenticación con Google:", error);
     }
   };
 

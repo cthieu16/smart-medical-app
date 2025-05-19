@@ -32,7 +32,7 @@ export const useFacebookAuth = () => {
       await authenticateWithFacebook(token);
       router.replace("/home");
     } catch (error) {
-      console.error("Error en la autenticación con Facebook:", error);
+      console.log("Error en la autenticación con Facebook:", error);
     }
   };
 

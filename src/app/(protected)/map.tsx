@@ -80,7 +80,7 @@ const MapScreen = () => {
         setLocation(location);
       } catch (error) {
         setErrorMsg('Không thể lấy vị trí hiện tại');
-        console.error('Lỗi khi lấy vị trí:', error);
+        console.log('Lỗi khi lấy vị trí:', error);
       } finally {
         setIsLoading(false);
       }
@@ -148,7 +148,7 @@ const MapScreen = () => {
         await Linking.openURL(webUrl);
       }
     } catch (error) {
-      console.error('Không thể mở chỉ đường:', error);
+      console.log('Không thể mở chỉ đường:', error);
     }
   };
 

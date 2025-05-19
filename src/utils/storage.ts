@@ -19,7 +19,7 @@ export const storeData = async (key: string, value: any): Promise<void> => {
     const jsonValue = typeof value === 'string' ? value : JSON.stringify(value);
     await AsyncStorage.setItem(key, jsonValue);
   } catch (error) {
-    console.error('Error storing data:', error);
+    console.log('Error storing data:', error);
   }
 };
 
@@ -35,7 +35,7 @@ export const getData = async (key: string): Promise<any> => {
     }
     return null;
   } catch (error) {
-    console.error('Error retrieving data:', error);
+    console.log('Error retrieving data:', error);
     return null;
   }
 };
@@ -44,7 +44,7 @@ export const removeData = async (key: string): Promise<void> => {
   try {
     await AsyncStorage.removeItem(key);
   } catch (error) {
-    console.error('Error removing data:', error);
+    console.log('Error removing data:', error);
   }
 };
 
@@ -52,7 +52,7 @@ export const clearAll = async (): Promise<void> => {
   try {
     await AsyncStorage.clear();
   } catch (error) {
-    console.error('Error clearing storage:', error);
+    console.log('Error clearing storage:', error);
   }
 };
 
@@ -70,7 +70,7 @@ export const clearAuthData = async (): Promise<void> => {
     // Thay vì xóa từng key riêng lẻ, xóa toàn bộ AsyncStorage để đảm bảo không còn dữ liệu nào
     await clearAll();
   } catch (error) {
-    console.error('Error clearing auth data:', error);
+    console.log('Error clearing auth data:', error);
     // Fallback approach: try to remove individual keys if clearing all fails
     await Promise.all([
       removeData(STORAGE_KEYS.ACCESS_TOKEN),

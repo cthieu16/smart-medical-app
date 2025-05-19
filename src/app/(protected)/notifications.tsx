@@ -276,7 +276,7 @@ const NotificationsScreen = () => {
             </Text>
           </View>
 
-          {dataNotifications.length > 0 && (
+          {/* {dataNotifications.length > 0 && (
             <TouchableOpacity
               onPress={handleMarkAllAsRead}
               className="bg-[#21262D] px-3 py-2 rounded-full border border-[#30363D]"
@@ -284,7 +284,7 @@ const NotificationsScreen = () => {
             >
               <Text className="text-[#4A90E2] text-xs font-medium">Đánh dấu tất cả đã đọc</Text>
             </TouchableOpacity>
-          )}
+          )} */}
         </View>
 
         {unreadCount > 0 && (
