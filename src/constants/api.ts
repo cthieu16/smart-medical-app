@@ -8,7 +8,7 @@ export const ENDPOINTS = {
     ME: '/auth/me',
     FORGOT_PASSWORD: '/auth/forgot-password',
     VERIFY_TOKEN: '/auth/verify-token',
-    RESET_PASSWORD: '/auth/reset-password',
+    RESET_PASSWORD: '/auth/verify-otp',
     CHANGE_PASSWORD: '/auth/my-profile/change-password',
   },
   USERS: {

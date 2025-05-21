@@ -90,7 +90,7 @@ export default function ForgotPassword() {
         ENDPOINTS.AUTH.RESET_PASSWORD,
         {
           email,
-          token,
+          otp: token,
           newPassword
         },
         false
