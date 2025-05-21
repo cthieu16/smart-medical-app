@@ -14,41 +14,53 @@ import {
   StatusBar,
   SafeAreaView,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useUser } from "../../hooks/useUser";
 import { useAuth } from "@/src/context/AuthContext";
 import { Header } from "@/src/components/Header/Header";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { spacing } from "@/src/theme/spacing";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-// Safe icon rendering helpers
+// Safe icon rendering helper
 const renderFeatherIcon = (name: string, size: number, color: string) => {
   return <Feather name={name as any} size={size} color={color} />;
 };
 
 const ANIMATION_DELAY_BASE = 50;
 
+const genderOptions = [
+  { value: 0, label: "Nam" },
+  { value: 1, label: "Nữ" },
+  { value: 2, label: "Khác" },
+];
+
 const SettingsScreen = () => {
   const router = useRouter();
-  const { user, updateUser, isUpdating } = useUser();
+  const { user, updatePatientProfile, isUpdatingPatientProfile } = useUser();
   const { logout, changePassword } = useAuth();
-
-  const convertRole = (role: string) => {
-    if (role === 'patient') return 'Bệnh nhân';
-    return role;
-  };
 
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  
+  const [patientInfo, setPatientInfo] = useState({
     id: "",
-    phoneNumber: "",
-    roles: "",
-    userName: "",
+    userId: "",
+    name: "",
+    age: 0,
+    dateOfBirth: new Date(),
+    gender: 0,
+    address: "",
+    chanelNumber: "",
+    email: "",
+    code: "",
   });
+
+  // For iOS: Keep track of temporary date selection
+  const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -59,19 +71,35 @@ const SettingsScreen = () => {
   useEffect(() => {
     if (user) {
       const userData = user as any;
-      setFormData({
-        fullName: user.fullName ?? "",
-        email: user.email ?? "",
-        id: userData.id ?? "",
-        phoneNumber: userData.phoneNumber ?? "",
-        roles: userData.roles ?? "",
-        userName: userData.userName ?? "",
-      });
+      if (userData.patientInfo) {
+        setPatientInfo({
+          id: userData.patientInfo.id ?? "",
+          userId: userData.id ?? "",
+          name: userData.patientInfo.name ?? "",
+          age: userData.patientInfo.age ?? 0,
+          dateOfBirth: userData.patientInfo.dateOfBirth ? new Date(userData.patientInfo.dateOfBirth) : new Date(),
+          gender: userData.patientInfo.gender ?? 0,
+          address: userData.patientInfo.address ?? "",
+          chanelNumber: userData.patientInfo.chanelNumber ?? "",
+          email: userData.patientInfo.email ?? "",
+          code: userData.patientInfo.code ?? "",
+        });
+      }
     }
   }, [user]);
 
-  const handleChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // Reset temp date when opening the picker
+  useEffect(() => {
+    if (showDatePicker) {
+      setTempSelectedDate(patientInfo.dateOfBirth);
+    }
+  }, [showDatePicker]);
+
+  const handlePatientInfoChange = (name: string, value: any) => {
+    setPatientInfo((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handlePasswordInputChange = (name: string, value: string) => {
@@ -80,11 +108,18 @@ const SettingsScreen = () => {
 
   const handleSubmit = () => {
     const updatedData = {
-      email: formData.email,
-      fullName: formData.fullName,
-      phoneNumber: formData.phoneNumber,
+      id: patientInfo.id,
+      userId: patientInfo.userId,
+      name: patientInfo.name || null,
+      age: patientInfo.age || 0,
+      dateOfBirth: patientInfo.dateOfBirth ? patientInfo.dateOfBirth.toISOString() : null,
+      gender: patientInfo.gender !== undefined ? Number(patientInfo.gender) : null,
+      address: patientInfo.address || null,
+      chanelNumber: patientInfo.chanelNumber || null,
+      email: patientInfo.email || null,
+      code: patientInfo.code || null,
     };
-    updateUser(updatedData, formData.id);
+    updatePatientProfile(updatedData as any);
   };
 
   const handlePasswordChange = async () => {
@@ -127,9 +162,7 @@ const SettingsScreen = () => {
     try {
       setIsLoggingOut(true);
       setShowLogoutConfirm(false);
-
       await logout();
-
       router.replace("/");
     } catch (error: any) {
       Alert.alert(
@@ -139,6 +172,39 @@ const SettingsScreen = () => {
     } finally {
       setIsLoggingOut(false);
     }
+  };
+
+  // Handle date change based on platform
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+      if (selectedDate) {
+        handlePatientInfoChange("dateOfBirth", selectedDate);
+      }
+    } else {
+      // For iOS - just update the temporary state without closing
+      if (selectedDate) {
+        setTempSelectedDate(selectedDate);
+      }
+    }
+  };
+
+  // Confirm date selection on iOS
+  const confirmIOSDateSelection = () => {
+    if (tempSelectedDate) {
+      handlePatientInfoChange("dateOfBirth", tempSelectedDate);
+    }
+    setShowDatePicker(false);
+  };
+
+  // Cancel date selection on iOS
+  const cancelIOSDateSelection = () => {
+    setShowDatePicker(false);
+  };
+
+  const formatDate = (date: Date) => {
+    if (!date) return "";
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
 
   if (!user) {
@@ -165,70 +231,112 @@ const SettingsScreen = () => {
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleContainer}>
               <View style={styles.sectionAccent} />
-              <Text style={styles.sectionTitle}>Thông tin cá nhân</Text>
+              <Text style={styles.sectionTitle}>Thông tin bệnh nhân</Text>
             </View>
           </View>
 
           <View style={styles.inputGroup}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>ID</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: '#242832' }]}
-                value={formData.id}
-                editable={false}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Họ và tên</Text>
+              <Text style={styles.inputLabel}>Họ tên</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Họ và tên"
+                placeholder="Họ tên"
                 placeholderTextColor="#666"
-                value={formData.fullName}
-                onChangeText={(value) => handleChange("fullName", value)}
+                value={patientInfo.name}
+                onChangeText={(value) => handlePatientInfoChange("name", value)}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Tên người dùng</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: '#242832' }]}
-                value={formData.userName}
-                editable={false}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
+              <Text style={styles.inputLabel}>Tuổi</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder="Tuổi"
                 placeholderTextColor="#666"
-                value={formData.email}
-                onChangeText={(value) => handleChange("email", value)}
+                value={String(patientInfo.age)}
+                onChangeText={(value) => handlePatientInfoChange("age", value)}
+                keyboardType="number-pad"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Ngày sinh</Text>
+              <TouchableOpacity 
+                style={styles.input} 
+                onPress={() => setShowDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.dateText}>
+                  {patientInfo.dateOfBirth ? formatDate(patientInfo.dateOfBirth) : "Chọn ngày sinh"}
+                </Text>
+              </TouchableOpacity>
+              
+              {Platform.OS === 'android' && showDatePicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={patientInfo.dateOfBirth || new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={handleDateChange}
+                  maximumDate={new Date()}
+                />
+              )}
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Giới tính</Text>
+              <View style={styles.genderContainer}>
+                {genderOptions.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.genderOption,
+                      Number(patientInfo.gender) === option.value && styles.genderOptionSelected
+                    ]}
+                    onPress={() => handlePatientInfoChange("gender", option.value)}
+                  >
+                    <Text style={[
+                      styles.genderText,
+                      Number(patientInfo.gender) === option.value && styles.genderTextSelected
+                    ]}>
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Địa chỉ</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Địa chỉ"
+                placeholderTextColor="#666"
+                value={patientInfo.address}
+                onChangeText={(value) => handlePatientInfoChange("address", value)}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Số kênh</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Số kênh"
+                placeholderTextColor="#666"
+                value={patientInfo.chanelNumber}
+                onChangeText={(value) => handlePatientInfoChange("chanelNumber", value)}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email bệnh nhân</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Email bệnh nhân"
+                placeholderTextColor="#666"
+                value={patientInfo.email}
+                onChangeText={(value) => handlePatientInfoChange("email", value)}
                 keyboardType="email-address"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Số điện thoại</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Số điện thoại"
-                placeholderTextColor="#666"
-                value={formData.phoneNumber}
-                onChangeText={(value) => handleChange("phoneNumber", value)}
-                keyboardType="phone-pad"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Vai trò</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: '#242832' }]}
-                value={convertRole(formData.roles)}
-                editable={false}
               />
             </View>
           </View>
@@ -236,11 +344,11 @@ const SettingsScreen = () => {
           <TouchableOpacity
             style={styles.primaryButton}
             onPress={handleSubmit}
-            disabled={isUpdating}
+            disabled={isUpdatingPatientProfile}
             activeOpacity={0.8}
           >
             <Text style={styles.buttonText}>
-              {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
+              {isUpdatingPatientProfile ? "Đang lưu..." : "Lưu thay đổi"}
             </Text>
           </TouchableOpacity>
 
@@ -276,6 +384,40 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
+
+      {/* iOS Date Picker Modal */}
+      {Platform.OS === 'ios' && showDatePicker && (
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop}>
+            <View style={styles.datePickerContainer}>
+              <View style={styles.datePickerHeader}>
+                <TouchableOpacity 
+                  onPress={cancelIOSDateSelection}
+                  style={styles.datePickerButton}
+                >
+                  <Text style={styles.datePickerCancelText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={confirmIOSDateSelection}
+                  style={styles.datePickerButton}
+                >
+                  <Text style={styles.datePickerDoneText}>Xong</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                testID="dateTimePickerIOS"
+                value={tempSelectedDate || patientInfo.dateOfBirth || new Date()}
+                mode="date"
+                display="spinner"
+                onChange={handleDateChange}
+                maximumDate={new Date()}
+                style={styles.iosDatePicker}
+                textColor="white"
+              />
+            </View>
+          </Pressable>
+        </View>
+      )}
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
@@ -479,6 +621,65 @@ const styles = StyleSheet.create({
   disabledInput: {
     backgroundColor: '#242832',
     color: '#999',
+  },
+  dateText: {
+    color: 'white',
+  },
+  datePickerContainer: {
+    backgroundColor: '#161B22',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderWidth: 1,
+    borderColor: '#30363D',
+    paddingBottom: Platform.OS === 'ios' ? 36 : 0,
+  },
+  datePickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#30363D',
+  },
+  datePickerButton: {
+    paddingHorizontal: 12,
+  },
+  datePickerCancelText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  datePickerDoneText: {
+    color: '#4A90E2',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  iosDatePicker: {
+    height: 200,
+    width: '100%',
+  },
+  genderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  genderOption: {
+    flex: 1,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: '#30363D',
+    borderRadius: spacing.borderRadius.lg,
+    alignItems: 'center',
+    marginHorizontal: 4,
+    backgroundColor: '#161B22',
+  },
+  genderOptionSelected: {
+    borderColor: '#4A90E2',
+    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+  },
+  genderText: {
+    color: 'white',
+  },
+  genderTextSelected: {
+    color: '#4A90E2',
+    fontWeight: '600',
   },
   primaryButton: {
     backgroundColor: '#4A90E2',
