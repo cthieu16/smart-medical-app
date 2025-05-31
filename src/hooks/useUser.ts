@@ -85,6 +85,7 @@ export const useUser = () => {
     mutationFn: (data) => updatePatientProfile(data),
     onSuccess: (data) => {
       queryClient.setQueryData(["patientProfile"], data);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 

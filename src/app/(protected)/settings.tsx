@@ -1,4 +1,4 @@
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,8 +19,8 @@ import {
 import { useUser } from "../../hooks/useUser";
 import { useAuth } from "@/src/context/AuthContext";
 import { Header } from "@/src/components/Header/Header";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { spacing } from "@/src/theme/spacing";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 // Safe icon rendering helper
@@ -29,12 +29,54 @@ const renderFeatherIcon = (name: string, size: number, color: string) => {
 };
 
 const ANIMATION_DELAY_BASE = 50;
+const COLORS = {
+  primary: "#4A90E2",
+  background: "black",
+  cardBg: "#161B22",
+  borderColor: "#30363D",
+  textPrimary: "#FFFFFF",
+  textSecondary: "#A1A1AA",
+  placeholder: "#666",
+  danger: "#F87171",
+  success: "#10B981",
+  iconBg: "rgba(74, 144, 226, 0.15)",
+};
 
 const genderOptions = [
   { value: 0, label: "Nam" },
   { value: 1, label: "Nữ" },
   { value: 2, label: "Khác" },
 ];
+
+const InputField = ({ 
+  label, 
+  value, 
+  onChangeText, 
+  placeholder, 
+  keyboardType = "default",
+  icon,
+  editable = true 
+}: any) => (
+  <Animated.View style={styles.inputContainer} entering={FadeInDown.duration(300)}>
+    <View style={styles.inputLabelContainer}>
+      {icon && (
+        <View style={styles.inputIconContainer}>
+          {icon}
+        </View>
+      )}
+      <Text style={styles.inputLabel}>{label}</Text>
+    </View>
+    <TextInput
+      style={[styles.input, !editable && styles.disabledInput]}
+      placeholder={placeholder}
+      placeholderTextColor={COLORS.placeholder}
+      value={value}
+      onChangeText={onChangeText}
+      keyboardType={keyboardType}
+      editable={editable}
+    />
+  </Animated.View>
+);
 
 const SettingsScreen = () => {
   const router = useRouter();
@@ -210,180 +252,219 @@ const SettingsScreen = () => {
   if (!user) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Đang chờ...</Text>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Đang tải...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <Header title="Cài đặt" accentColor="#4A90E2" />
+      <SafeAreaView style={styles.safeArea}>
+        <Header title="Cài đặt" />
 
-      <ScrollView
-        style={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View
-          entering={FadeInDown.delay(ANIMATION_DELAY_BASE).duration(400)}
-          style={styles.formContainer}
+        <ScrollView
+          style={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
         >
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <View style={styles.sectionAccent} />
-              <Text style={styles.sectionTitle}>Thông tin bệnh nhân</Text>
+          {/* Header Info Card */}
+          <Animated.View
+            style={styles.headerCard}
+            entering={FadeInDown.delay(100).duration(400)}
+          >
+            <LinearGradient
+              colors={['rgba(74, 144, 226, 0.08)', 'rgba(74, 144, 226, 0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientOverlay}
+            />
+            <View style={styles.headerCardContent}>
+              <MaterialCommunityIcons name="account-cog" size={20} color={COLORS.primary} />
+              <Text style={styles.headerTitle}>Thông tin cá nhân</Text>
             </View>
-          </View>
+            <Text style={styles.headerSubtitle}>
+              Quản lý thông tin tài khoản và bảo mật
+            </Text>
+          </Animated.View>
 
-          <View style={styles.inputGroup}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Họ tên</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Họ tên"
-                placeholderTextColor="#666"
-                value={patientInfo.name}
-                onChangeText={(value) => handlePatientInfoChange("name", value)}
-              />
-            </View>
+          <View style={styles.formContainer}>
+            {/* Patient Information Section */}
+            <Animated.View 
+              style={styles.sectionCard}
+              entering={FadeInDown.delay(200).duration(400)}
+            >
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleContainer}>
+                  <View style={styles.sectionAccent} />
+                  <Text style={styles.sectionTitle}>Thông tin bệnh nhân</Text>
+                </View>
+              </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Tuổi</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Tuổi"
-                placeholderTextColor="#666"
-                value={String(patientInfo.age)}
-                onChangeText={(value) => handlePatientInfoChange("age", value)}
-                keyboardType="number-pad"
-              />
-            </View>
+              <View style={styles.inputGroup}>
+                <InputField
+                  label="Họ tên"
+                  value={patientInfo.name}
+                  onChangeText={(value: string) => handlePatientInfoChange("name", value)}
+                  placeholder="Nhập họ tên"
+                  icon={<MaterialIcons name="person" size={16} color={COLORS.primary} />}
+                />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Ngày sinh</Text>
-              <TouchableOpacity 
-                style={styles.input} 
-                onPress={() => setShowDatePicker(true)}
-                activeOpacity={0.7}
+                <View style={styles.rowContainer}>
+                  <View style={styles.halfWidth}>
+                    <InputField
+                      label="Tuổi"
+                      value={String(patientInfo.age)}
+                      onChangeText={(value: string) => handlePatientInfoChange("age", value)}
+                      placeholder="Tuổi"
+                      keyboardType="number-pad"
+                      icon={<MaterialIcons name="cake" size={16} color={COLORS.primary} />}
+                    />
+                  </View>
+                  
+                  <View style={styles.halfWidth}>
+                    <Animated.View style={styles.inputContainer} entering={FadeInDown.duration(300)}>
+                      <View style={styles.inputLabelContainer}>
+                        <View style={styles.inputIconContainer}>
+                          <MaterialIcons name="event" size={16} color={COLORS.primary} />
+                        </View>
+                        <Text style={styles.inputLabel}>Ngày sinh</Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={styles.input} 
+                        onPress={() => setShowDatePicker(true)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.dateText}>
+                          {patientInfo.dateOfBirth ? formatDate(patientInfo.dateOfBirth) : "Chọn ngày"}
+                        </Text>
+                      </TouchableOpacity>
+                    </Animated.View>
+                  </View>
+                </View>
+
+                <Animated.View style={styles.inputContainer} entering={FadeInDown.duration(300)}>
+                  <View style={styles.inputLabelContainer}>
+                    <View style={styles.inputIconContainer}>
+                      <MaterialIcons name="wc" size={16} color={COLORS.primary} />
+                    </View>
+                    <Text style={styles.inputLabel}>Giới tính</Text>
+                  </View>
+                  <View style={styles.genderContainer}>
+                    {genderOptions.map((option) => (
+                      <TouchableOpacity
+                        key={option.value}
+                        style={[
+                          styles.genderOption,
+                          Number(patientInfo.gender) === option.value && styles.genderOptionSelected
+                        ]}
+                        onPress={() => handlePatientInfoChange("gender", option.value)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[
+                          styles.genderText,
+                          Number(patientInfo.gender) === option.value && styles.genderTextSelected
+                        ]}>
+                          {option.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </Animated.View>
+
+                <InputField
+                  label="Địa chỉ"
+                  value={patientInfo.address}
+                  onChangeText={(value: string) => handlePatientInfoChange("address", value)}
+                  placeholder="Nhập địa chỉ"
+                  icon={<MaterialIcons name="location-on" size={16} color={COLORS.primary} />}
+                />
+
+                <InputField
+                  label="Số kênh"
+                  value={patientInfo.chanelNumber}
+                  onChangeText={(value: string) => handlePatientInfoChange("chanelNumber", value)}
+                  placeholder="Nhập số kênh"
+                  icon={<MaterialIcons name="phone" size={16} color={COLORS.primary} />}
+                />
+
+                <InputField
+                  label="Email"
+                  value={patientInfo.email}
+                  onChangeText={(value: string) => handlePatientInfoChange("email", value)}
+                  placeholder="Nhập email"
+                  keyboardType="email-address"
+                  icon={<MaterialIcons name="email" size={16} color={COLORS.primary} />}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.primaryButton, isUpdatingPatientProfile && styles.disabledButton]}
+                onPress={handleSubmit}
+                disabled={isUpdatingPatientProfile}
+                activeOpacity={0.8}
               >
-                <Text style={styles.dateText}>
-                  {patientInfo.dateOfBirth ? formatDate(patientInfo.dateOfBirth) : "Chọn ngày sinh"}
+                {isUpdatingPatientProfile ? (
+                  <View style={styles.loadingButtonContent}>
+                    <ActivityIndicator size="small" color="white" style={styles.buttonLoader} />
+                    <Text style={styles.buttonText}>Đang lưu...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.buttonText}>Lưu thay đổi</Text>
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+
+            {/* Action Buttons */}
+            <Animated.View
+              style={styles.actionButtonsContainer}
+              entering={FadeInDown.delay(300).duration(400)}
+            >
+              <TouchableOpacity
+                style={styles.outlineButton}
+                onPress={() => setIsPasswordModalVisible(true)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.buttonIcon}>
+                  <MaterialIcons name="lock" size={20} color={COLORS.primary} />
+                </View>
+                <Text style={styles.outlineButtonText}>Đổi mật khẩu</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.dangerButton}
+                onPress={() => setShowLogoutConfirm(true)}
+                activeOpacity={0.8}
+                disabled={isLoggingOut}
+              >
+                <View style={styles.buttonIcon}>
+                  {isLoggingOut ? (
+                    <ActivityIndicator size="small" color={COLORS.danger} />
+                  ) : (
+                    <MaterialIcons name="logout" size={20} color={COLORS.danger} />
+                  )}
+                </View>
+                <Text style={styles.dangerButtonText}>
+                  {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
                 </Text>
               </TouchableOpacity>
-              
-              {Platform.OS === 'android' && showDatePicker && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={patientInfo.dateOfBirth || new Date()}
-                  mode="date"
-                  display="default"
-                  onChange={handleDateChange}
-                  maximumDate={new Date()}
-                />
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Giới tính</Text>
-              <View style={styles.genderContainer}>
-                {genderOptions.map((option) => (
-                  <TouchableOpacity
-                    key={option.value}
-                    style={[
-                      styles.genderOption,
-                      Number(patientInfo.gender) === option.value && styles.genderOptionSelected
-                    ]}
-                    onPress={() => handlePatientInfoChange("gender", option.value)}
-                  >
-                    <Text style={[
-                      styles.genderText,
-                      Number(patientInfo.gender) === option.value && styles.genderTextSelected
-                    ]}>
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Địa chỉ</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Địa chỉ"
-                placeholderTextColor="#666"
-                value={patientInfo.address}
-                onChangeText={(value) => handlePatientInfoChange("address", value)}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Số kênh</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Số kênh"
-                placeholderTextColor="#666"
-                value={patientInfo.chanelNumber}
-                onChangeText={(value) => handlePatientInfoChange("chanelNumber", value)}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email bệnh nhân</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Email bệnh nhân"
-                placeholderTextColor="#666"
-                value={patientInfo.email}
-                onChangeText={(value) => handlePatientInfoChange("email", value)}
-                keyboardType="email-address"
-              />
-            </View>
+            </Animated.View>
           </View>
+        </ScrollView>
 
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handleSubmit}
-            disabled={isUpdatingPatientProfile}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.buttonText}>
-              {isUpdatingPatientProfile ? "Đang lưu..." : "Lưu thay đổi"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.outlineButton}
-            onPress={() => setIsPasswordModalVisible(true)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.buttonIcon}>
-              {renderFeatherIcon("lock", 20, "#4A90E2")}
-            </View>
-            <Text style={styles.outlineButtonText}>
-              Đổi mật khẩu
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.dangerButton}
-            onPress={() => setShowLogoutConfirm(true)}
-            activeOpacity={0.8}
-            disabled={isLoggingOut}
-          >
-            <View style={styles.buttonIcon}>
-              {isLoggingOut ? (
-                <ActivityIndicator size="small" color="#F87171" />
-              ) : (
-                renderFeatherIcon("log-out", 20, "#F87171")
-              )}
-            </View>
-            <Text style={styles.dangerButtonText}>
-              {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </ScrollView>
+        {/* Date Picker for Android */}
+        {Platform.OS === 'android' && showDatePicker && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={patientInfo.dateOfBirth || new Date()}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+            maximumDate={new Date()}
+          />
+        )}
+      </SafeAreaView>
 
       {/* iOS Date Picker Modal */}
       {Platform.OS === 'ios' && showDatePicker && (
@@ -428,9 +509,10 @@ const SettingsScreen = () => {
           >
             <Pressable onPress={(e) => e.stopPropagation()}>
               <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>
-                  Đăng xuất
-                </Text>
+                <View style={styles.modalIconContainer}>
+                  <MaterialIcons name="logout" size={24} color={COLORS.danger} />
+                </View>
+                <Text style={styles.modalTitle}>Đăng xuất</Text>
                 <Text style={styles.modalMessage}>
                   Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?
                 </Text>
@@ -445,7 +527,7 @@ const SettingsScreen = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.modalSaveButton, { backgroundColor: '#F87171' }]}
+                    style={[styles.modalSaveButton, { backgroundColor: COLORS.danger }]}
                     onPress={handleLogout}
                     activeOpacity={0.8}
                     disabled={isLoggingOut}
@@ -477,16 +559,17 @@ const SettingsScreen = () => {
           >
             <Pressable onPress={(e) => e.stopPropagation()}>
               <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>
-                  Đổi mật khẩu
-                </Text>
+                <View style={styles.modalIconContainer}>
+                  <MaterialIcons name="lock" size={24} color={COLORS.primary} />
+                </View>
+                <Text style={styles.modalTitle}>Đổi mật khẩu</Text>
 
                 <View style={styles.modalInputContainer}>
                   <Text style={styles.inputLabel}>Mật khẩu hiện tại</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="Nhập mật khẩu hiện tại"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={COLORS.placeholder}
                     secureTextEntry
                     value={passwordData.currentPassword}
                     onChangeText={(value) =>
@@ -500,7 +583,7 @@ const SettingsScreen = () => {
                   <TextInput
                     style={styles.input}
                     placeholder="Nhập mật khẩu mới"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={COLORS.placeholder}
                     secureTextEntry
                     value={passwordData.newPassword}
                     onChangeText={(value) =>
@@ -514,7 +597,7 @@ const SettingsScreen = () => {
                   <TextInput
                     style={styles.input}
                     placeholder="Nhập lại mật khẩu mới"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={COLORS.placeholder}
                     secureTextEntry
                     value={passwordData.confirmNewPassword}
                     onChangeText={(value) =>
@@ -545,33 +628,79 @@ const SettingsScreen = () => {
           </Pressable>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: COLORS.background,
+  },
+  safeArea: {
+    flex: 1,
   },
   scrollContainer: {
     flex: 1,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: COLORS.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
     fontSize: 16,
-    color: 'white',
+    color: COLORS.textPrimary,
+    marginTop: 12,
+  },
+  headerCard: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 24,
+    backgroundColor: `${COLORS.cardBg}99`,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
+    padding: 20,
+    overflow: 'hidden',
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  headerCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginLeft: 12,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
   },
   formContainer: {
-    padding: spacing.screenMargin,
+    paddingHorizontal: 16,
+  },
+  sectionCard: {
+    backgroundColor: `${COLORS.cardBg}CC`,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
+    padding: 20,
+    marginBottom: 16,
   },
   sectionHeader: {
-    marginBottom: spacing.md,
+    marginBottom: 20,
   },
   sectionTitleContainer: {
     flexDirection: 'row',
@@ -580,21 +709,34 @@ const styles = StyleSheet.create({
   sectionAccent: {
     width: 4,
     height: 20,
-    backgroundColor: '#4A90E2',
+    backgroundColor: COLORS.primary,
     borderRadius: 2,
-    marginRight: spacing.xs,
+    marginRight: 12,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: 'white',
+    color: COLORS.textPrimary,
   },
   inputGroup: {
-    marginTop: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: 20,
   },
   inputContainer: {
-    marginBottom: spacing.md,
+    marginBottom: 16,
+  },
+  inputLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  inputIconContainer: {
+    width: 32,
+    height: 32,
+    backgroundColor: COLORS.iconBg,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   rowContainer: {
     flexDirection: 'row',
@@ -604,18 +746,17 @@ const styles = StyleSheet.create({
     width: '48%',
   },
   inputLabel: {
-    color: '#A1A1AA',
-    marginBottom: 8,
+    color: COLORS.textSecondary,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   input: {
-    backgroundColor: '#161B22',
+    backgroundColor: COLORS.cardBg,
     borderWidth: 1,
-    borderColor: '#30363D',
-    color: 'white',
-    padding: spacing.md,
-    borderRadius: spacing.borderRadius.lg,
+    borderColor: COLORS.borderColor,
+    color: COLORS.textPrimary,
+    padding: 16,
+    borderRadius: 12,
     fontSize: 15,
   },
   disabledInput: {
@@ -623,38 +764,8 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   dateText: {
-    color: 'white',
-  },
-  datePickerContainer: {
-    backgroundColor: '#161B22',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderWidth: 1,
-    borderColor: '#30363D',
-    paddingBottom: Platform.OS === 'ios' ? 36 : 0,
-  },
-  datePickerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#30363D',
-  },
-  datePickerButton: {
-    paddingHorizontal: 12,
-  },
-  datePickerCancelText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  datePickerDoneText: {
-    color: '#4A90E2',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  iosDatePicker: {
-    height: 200,
-    width: '100%',
+    color: COLORS.textPrimary,
+    fontSize: 15,
   },
   genderContainer: {
     flexDirection: 'row',
@@ -662,67 +773,83 @@ const styles = StyleSheet.create({
   },
   genderOption: {
     flex: 1,
-    padding: spacing.md,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#30363D',
-    borderRadius: spacing.borderRadius.lg,
+    borderColor: COLORS.borderColor,
+    borderRadius: 12,
     alignItems: 'center',
     marginHorizontal: 4,
-    backgroundColor: '#161B22',
+    backgroundColor: COLORS.cardBg,
   },
   genderOptionSelected: {
-    borderColor: '#4A90E2',
-    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.iconBg,
   },
   genderText: {
-    color: 'white',
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '500',
   },
   genderTextSelected: {
-    color: '#4A90E2',
+    color: COLORS.primary,
     fontWeight: '600',
   },
   primaryButton: {
-    backgroundColor: '#4A90E2',
-    padding: spacing.md,
-    borderRadius: spacing.borderRadius.lg,
+    backgroundColor: COLORS.primary,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: spacing.md,
+    justifyContent: 'center',
+    minHeight: 56,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  loadingButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  buttonLoader: {
+    marginRight: 8,
   },
   buttonText: {
-    color: 'white',
+    color: COLORS.textPrimary,
     fontWeight: '600',
     fontSize: 16,
   },
+  actionButtonsContainer: {
+    gap: 12,
+  },
   outlineButton: {
     borderWidth: 1,
-    borderColor: '#4A90E2',
-    padding: spacing.md,
-    borderRadius: spacing.borderRadius.lg,
+    borderColor: COLORS.primary,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: spacing.md,
     flexDirection: 'row',
     justifyContent: 'center',
+    backgroundColor: `${COLORS.primary}08`,
   },
   buttonIcon: {
-    marginRight: spacing.xs,
+    marginRight: 8,
   },
   outlineButtonText: {
-    color: '#4A90E2',
+    color: COLORS.primary,
     fontWeight: '600',
     fontSize: 16,
   },
   dangerButton: {
     borderWidth: 1,
-    borderColor: '#F87171',
-    padding: spacing.md,
-    borderRadius: spacing.borderRadius.lg,
+    borderColor: COLORS.danger,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: spacing.md,
     flexDirection: 'row',
     justifyContent: 'center',
+    backgroundColor: `${COLORS.danger}08`,
   },
   dangerButtonText: {
-    color: '#F87171',
+    color: COLORS.danger,
     fontWeight: '600',
     fontSize: 16,
   },
@@ -736,63 +863,104 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#161B22',
+    backgroundColor: COLORS.cardBg,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
+    padding: 24,
+    paddingTop: 32,
     borderWidth: 1,
-    borderColor: '#30363D',
+    borderColor: COLORS.borderColor,
+  },
+  modalIconContainer: {
+    width: 56,
+    height: 56,
+    backgroundColor: COLORS.iconBg,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 16,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: 'white',
-    marginBottom: spacing.lg,
+    color: COLORS.textPrimary,
+    marginBottom: 24,
     textAlign: 'center',
   },
   modalMessage: {
-    color: '#A1A1AA',
+    color: COLORS.textSecondary,
     fontSize: 16,
-    marginBottom: spacing.lg,
+    marginBottom: 32,
     textAlign: 'center',
     lineHeight: 22,
   },
   modalInputContainer: {
-    marginBottom: spacing.md,
+    marginBottom: 16,
   },
   modalButtonContainer: {
     flexDirection: 'row',
-    marginTop: spacing.md,
+    marginTop: 24,
   },
   modalCancelButton: {
     flex: 1,
     backgroundColor: '#21262D',
-    padding: spacing.md,
-    borderRadius: spacing.borderRadius.lg,
-    marginRight: spacing.xs,
+    padding: 16,
+    borderRadius: 12,
+    marginRight: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#30363D',
+    borderColor: COLORS.borderColor,
   },
   modalCancelButtonText: {
-    color: 'white',
+    color: COLORS.textPrimary,
     fontWeight: '600',
     fontSize: 16,
   },
   modalSaveButton: {
     flex: 1,
-    backgroundColor: '#4A90E2',
-    padding: spacing.md,
-    borderRadius: spacing.borderRadius.lg,
-    marginLeft: spacing.xs,
+    backgroundColor: COLORS.primary,
+    padding: 16,
+    borderRadius: 12,
+    marginLeft: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalSaveButtonText: {
-    color: 'white',
+    color: COLORS.textPrimary,
     fontWeight: '600',
     fontSize: 16,
+  },
+  datePickerContainer: {
+    backgroundColor: COLORS.cardBg,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 0,
+  },
+  datePickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderColor,
+  },
+  datePickerButton: {
+    paddingHorizontal: 12,
+  },
+  datePickerCancelText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+  },
+  datePickerDoneText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  iosDatePicker: {
+    height: 200,
+    width: '100%',
   },
 });
 
