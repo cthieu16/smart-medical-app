@@ -279,22 +279,6 @@ const MedicalRecordDetailScreen = () => {
               <Ionicons name="share-social-outline" size={20} color="white" />
               <Text className="text-white font-medium ml-2.5">Chia sẻ</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleDownload}
-              className="flex-row items-center bg-[#4A90E2] px-4 py-3.5 rounded-xl flex-1 ml-2.5 justify-center"
-              activeOpacity={0.7}
-              disabled={isDownloading}
-            >
-              {isDownloading ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : (
-                <>
-                  <AntDesign name="download" size={20} color="white" />
-                  <Text className="text-white font-medium ml-2.5">Tải PDF</Text>
-                </>
-              )}
-            </TouchableOpacity>
           </Animated.View>
         </View>
       </ScrollView>
