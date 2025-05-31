@@ -229,10 +229,8 @@ const ProfileScreen = () => {
                   {user?.fullName || "Người dùng"}
                 </Text>
                 <Text style={styles.userEmail}>
-                  Email: {user?.email || "Chưa có"}
-                </Text>
-                <Text style={styles.userEmail}>
-                  Giới tính: {user?.patientInfo?.gender === 1 ? "Nam" : "Nữ"}
+                  {/* @ts-ignore */}
+                  Email: {user?.patientInfo?.email || "Chưa có"}
                 </Text>
               </View>
 
