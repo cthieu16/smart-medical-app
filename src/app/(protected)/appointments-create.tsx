@@ -26,6 +26,8 @@ import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 const timeSlots = [
+  "07:00 - 07:30",
+  "08:00 - 08:30",
   "09:00 - 09:30",
   "09:30 - 10:00",
   "10:00 - 10:30",
