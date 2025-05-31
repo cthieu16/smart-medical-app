@@ -386,7 +386,7 @@ const SettingsScreen = () => {
                   value={patientInfo.chanelNumber}
                   onChangeText={(value: string) => handlePatientInfoChange("chanelNumber", value)}
                   placeholder="Nhập số kênh"
-                  icon={<MaterialIcons name="phone" size={16} color={COLORS.primary} />}
+                  icon={<MaterialIcons name="numbers" size={16} color={COLORS.primary} />}
                 />
 
                 <InputField

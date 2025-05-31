@@ -223,24 +223,24 @@ const MedicalRecordDetailScreen = () => {
 
           <DetailItem
             icon={<MaterialIcons name="history" size={22} color="#3B82F6" />}
-            label="Tiền sử bệnh"
+            label="Kế hoạch điều trị"
             value={record.medicalHistory}
             iconColor="#3B82F6"
           />
 
-          <DetailItem
+          {/* <DetailItem
             icon={<MaterialIcons name="science" size={22} color="#EC4899" />}
             label="Xét nghiệm"
             value={record.testResults}
             iconColor="#EC4899"
-          />
+          /> */}
 
-          <DetailItem
+          {/* <DetailItem
             icon={<MaterialIcons name="person" size={22} color="#8B5CF6" />}
             label="Bệnh nhân"
             value={record.patientName || "Không có thông tin"}
             iconColor="#8B5CF6"
-          />
+          /> */}
 
           {/* Time Stamps */}
           <Animated.View

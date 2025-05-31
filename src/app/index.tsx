@@ -77,7 +77,7 @@ const Index = () => {
 
             {/* Text Animation */}
             <Animated.View style={[styles.textContainer, contentStyle]}>
-              <Text style={styles.title}>Medic</Text>
+              <Text style={styles.title}>BVĐK Bắc Giang</Text>
               <Text style={styles.subtitle}>
                 Phục vụ sức khỏe cộng đồng
               </Text>
