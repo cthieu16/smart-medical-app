@@ -52,18 +52,18 @@ const FIELD_COLORS = {
 };
 
 const InputLabel = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
-  <View className="flex-row items-center mb-2">
-    <View className="mr-2 p-1.5 rounded-full" style={{ backgroundColor: FIELD_COLORS.iconBg }}>
+  <View className="flex-row items-center mb-3">
+    <View className="mr-3 p-2 rounded-full" style={{ backgroundColor: FIELD_COLORS.iconBg }}>
       {icon}
     </View>
-    <Text className="text-white font-medium text-base">{label}</Text>
+    <Text className="text-white font-semibold text-base">{label}</Text>
   </View>
 );
 
 const FormField = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <View className={`mb-6 ${className}`}>
+  <Animated.View className={`mb-5 ${className}`} entering={FadeInDown.duration(300)}>
     {children}
-  </View>
+  </Animated.View>
 );
 
 const AppointmentsCreateScreen = () => {
@@ -138,39 +138,46 @@ const AppointmentsCreateScreen = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <SafeAreaView className="flex-1 bg-black">
-        <StatusBar barStyle="light-content" />
+    <View className="flex-1 bg-black">
+      <StatusBar barStyle="light-content" />
+      <SafeAreaView className="flex-1">
         <Header title="Tạo lịch hẹn" />
-
-        <ScrollView className="flex-1">
-          <View className="p-6">
+        
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView 
+            className="flex-1" 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Header Info Card */}
             <Animated.View
-              className="bg-[#161B22]/50 rounded-xl border border-[#30363D] p-4 mb-6 overflow-hidden"
+              className="mx-4 mt-4 mb-6 bg-[#161B22]/60 rounded-2xl border border-[#30363D] p-5 overflow-hidden"
               entering={FadeInDown.delay(100).duration(400)}
             >
               <LinearGradient
-                colors={['rgba(74, 144, 226, 0.05)', 'rgba(74, 144, 226, 0)']}
+                colors={['rgba(74, 144, 226, 0.08)', 'rgba(74, 144, 226, 0)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className="absolute top-0 left-0 right-0 bottom-0"
               />
               <View className="flex-row items-center mb-2">
-                <MaterialCommunityIcons name="calendar-clock" size={18} color={FIELD_COLORS.highlight} />
-                <Text className="text-white font-bold ml-2 text-lg">Thông tin lịch hẹn</Text>
+                <MaterialCommunityIcons name="calendar-clock" size={20} color={FIELD_COLORS.highlight} />
+                <Text className="text-white font-bold ml-3 text-lg">Thông tin lịch hẹn</Text>
               </View>
-              <Text className="text-gray-400 text-sm">
+              <Text className="text-gray-400 text-sm leading-5">
                 Vui lòng điền đầy đủ thông tin bên dưới để đặt lịch hẹn
               </Text>
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+            {/* Form Fields */}
+            <View className="px-4">
               <FormField>
                 <InputLabel
                   icon={<FontAwesome5 name="user-md" size={16} color={FIELD_COLORS.highlight} />}
                   label="Chọn bác sĩ"
                 />
-                <View className="bg-[#161B22] rounded-xl overflow-hidden shadow-sm" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
+                <View className="bg-[#161B22] rounded-xl overflow-hidden" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
                   <Picker
                     selectedValue={doctorId}
                     onValueChange={setDoctorId}
@@ -202,7 +209,7 @@ const AppointmentsCreateScreen = () => {
                 />
                 <TouchableOpacity
                   onPress={() => setDatePickerVisibility(true)}
-                  className="bg-[#161B22] p-4 rounded-xl flex-row items-center justify-between shadow-sm"
+                  className="bg-[#161B22] p-4 rounded-xl flex-row items-center justify-between"
                   style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}
                 >
                   <Text className={`${selectedDate ? 'text-white' : 'text-gray-400'} text-base`}>
@@ -219,7 +226,7 @@ const AppointmentsCreateScreen = () => {
                   icon={<Ionicons name="time-outline" size={16} color={FIELD_COLORS.highlight} />}
                   label="Chọn giờ khám"
                 />
-                <View className="bg-[#161B22] rounded-xl overflow-hidden shadow-sm" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
+                <View className="bg-[#161B22] rounded-xl overflow-hidden" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
                   <Picker
                     selectedValue={selectedTime}
                     onValueChange={setSelectedTime}
@@ -240,60 +247,70 @@ const AppointmentsCreateScreen = () => {
                   label="Ghi chú"
                 />
                 <TextInput
-                  className="bg-[#161B22] text-white p-4 rounded-xl h-32 text-base shadow-sm"
+                  className="bg-[#161B22] text-white p-4 rounded-xl text-base"
                   placeholder="Nhập triệu chứng hoặc yêu cầu khám..."
                   placeholderTextColor={FIELD_COLORS.placeholder}
                   multiline
+                  numberOfLines={4}
                   value={note}
                   onChangeText={setNote}
-                  style={{ textAlignVertical: 'top', borderWidth: 1, borderColor: FIELD_COLORS.border }}
+                  style={{ 
+                    textAlignVertical: 'top', 
+                    borderWidth: 1, 
+                    borderColor: FIELD_COLORS.border,
+                    minHeight: 100
+                  }}
                 />
               </FormField>
 
-              <View className="flex-row justify-between mt-6">
-                <View className="flex-1 mr-3">
-                  <SecondaryButton
-                    title="Hủy"
-                    onPress={() => router.back()}
-                  />
+              {/* Action Buttons */}
+              <FormField className="mt-2">
+                <View className="flex-row justify-between space-x-3">
+                  <View className="flex-1">
+                    <SecondaryButton
+                      title="Hủy"
+                      onPress={() => router.back()}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <PrimaryButton
+                      title="Đặt lịch"
+                      onPress={handleCreateAppointment}
+                      loading={loading}
+                    />
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <PrimaryButton
-                    title="Đặt lịch"
-                    onPress={handleCreateAppointment}
-                    loading={loading}
-                  />
-                </View>
-              </View>
-            </Animated.View>
+              </FormField>
 
-            <Animated.View
-              className="mt-8 bg-[#161B22]/70 p-5 rounded-xl border border-[#30363D]"
-              entering={FadeInDown.delay(300).duration(400)}
-            >
-              <View className="flex-row items-start mb-3">
-                <Animated.View
-                  className="bg-[rgba(74,144,226,0.15)] p-2 rounded-full mr-3 mt-0.5"
-                  entering={FadeInRight.delay(400).duration(300)}
-                >
-                  <MaterialIcons name="info-outline" size={18} color={FIELD_COLORS.highlight} />
-                </Animated.View>
-                <View className="flex-1">
-                  <Text className="text-white font-bold text-base mb-2">Lưu ý khi đặt lịch</Text>
-                  <Text className="text-gray-400 text-sm leading-5 mb-1">
-                    1. Đến trước giờ hẹn 15 phút để làm thủ tục
-                  </Text>
-                  <Text className="text-gray-400 text-sm leading-5 mb-1">
-                    2. Mang theo giấy tờ cần thiết (nếu có)
-                  </Text>
-                  <Text className="text-gray-400 text-sm leading-5">
-                    3. Nếu có thay đổi, vui lòng hủy lịch trước 24 giờ
-                  </Text>
+              {/* Info Notes */}
+              <Animated.View
+                className="mt-4 bg-[#161B22]/50 p-4 rounded-xl border border-[#30363D]"
+                entering={FadeInDown.delay(300).duration(400)}
+              >
+                <View className="flex-row items-start">
+                  <Animated.View
+                    className="bg-[rgba(74,144,226,0.15)] p-2 rounded-full mr-3 mt-0.5"
+                    entering={FadeInRight.delay(400).duration(300)}
+                  >
+                    <MaterialIcons name="info-outline" size={16} color={FIELD_COLORS.highlight} />
+                  </Animated.View>
+                  <View className="flex-1">
+                    <Text className="text-white font-semibold text-base mb-2">Lưu ý khi đặt lịch</Text>
+                    <Text className="text-gray-400 text-sm leading-5 mb-1">
+                      • Đến trước giờ hẹn 15 phút để làm thủ tục
+                    </Text>
+                    <Text className="text-gray-400 text-sm leading-5 mb-1">
+                      • Mang theo giấy tờ cần thiết (nếu có)
+                    </Text>
+                    <Text className="text-gray-400 text-sm leading-5">
+                      • Nếu có thay đổi, vui lòng hủy lịch trước 24 giờ
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </Animated.View>
-          </View>
-        </ScrollView>
+              </Animated.View>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
 
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
@@ -304,7 +321,7 @@ const AppointmentsCreateScreen = () => {
           buttonTextColorIOS={FIELD_COLORS.highlight}
         />
       </SafeAreaView>
-    </TouchableWithoutFeedback>
+    </View>
   );
 };
 
