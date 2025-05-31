@@ -462,6 +462,7 @@ const SettingsScreen = () => {
             display="default"
             onChange={handleDateChange}
             maximumDate={new Date()}
+            locale="vi-VN"
           />
         )}
       </SafeAreaView>
@@ -494,6 +495,7 @@ const SettingsScreen = () => {
                 maximumDate={new Date()}
                 style={styles.iosDatePicker}
                 textColor="white"
+                locale="vi-VN"
               />
             </View>
           </Pressable>
