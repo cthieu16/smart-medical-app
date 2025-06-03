@@ -5,7 +5,7 @@ import { View, Text, TouchableOpacity, Alert, ScrollView, ActivityIndicator, Sta
 import dayjs from "dayjs";
 import {
   useAppointmentDetail,
-  useUpdateAppointmentStatus,
+  useCancelAppointment,
 } from "@/src/hooks/useAppointments";
 import { useMyDoctors } from "@/src/hooks/useDoctors";
 import { Header } from "@/src/components/Header/Header";
@@ -94,7 +94,7 @@ const AppointmentsDetailScreen = () => {
 
   const { data: appointment, refetch } = useAppointmentDetail(id as string);
   const { data: doctors = [] } = useMyDoctors();
-  const { mutate: updateStatus } = useUpdateAppointmentStatus();
+  const { mutate: cancelAppointment } = useCancelAppointment();
 
   const doctor = doctors.find((doc) => doc.id === appointment?.doctorId);
 
@@ -116,10 +116,9 @@ const AppointmentsDetailScreen = () => {
             if (!appointment) return;
 
             setIsUpdating(true);
-            updateStatus(
+            cancelAppointment(
               {
                 id: appointment.id,
-                status: "CANCELLED",
               },
               {
                 onSuccess: () => {
@@ -127,9 +126,10 @@ const AppointmentsDetailScreen = () => {
                   Alert.alert("Thành công", "Lịch hẹn đã được hủy thành công.");
                   refetch();
                 },
-                onError: () => {
+                onError: (error) => {
                   setIsUpdating(false);
                   Alert.alert("Lỗi", "Không thể hủy lịch hẹn. Vui lòng thử lại sau.");
+                  console.error("Cancel appointment error:", error);
                 },
               }
             );

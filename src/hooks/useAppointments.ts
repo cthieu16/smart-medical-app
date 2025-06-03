@@ -29,6 +29,10 @@ export type UpdateAppointmentStatusData = {
   note?: string;
 };
 
+export type CancelAppointmentData = {
+  id: string;
+};
+
 const fetcher = async (url: string, accessToken: string, options = {}) => {
   const response = await fetch(`${ApiURL}${url}`, {
     headers: {
@@ -71,6 +75,15 @@ const updateAppointmentStatus = (
   fetcher("/appointments/update-status", accessToken, {
     method: "PUT",
     body: JSON.stringify(updateData),
+  });
+
+const cancelAppointment = (
+  accessToken: string,
+  cancelData: CancelAppointmentData
+) =>
+  fetcher("/appointments/cancel", accessToken, {
+    method: "POST",
+    body: JSON.stringify(cancelData),
   });
 
 export const useMyAppointments = () => {
@@ -117,6 +130,20 @@ export const useUpdateAppointmentStatus = () => {
       updateAppointmentStatus(accessToken as string, updateData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
+    },
+  });
+};
+
+export const useCancelAppointment = () => {
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (cancelData: CancelAppointmentData) =>
+      cancelAppointment(accessToken as string, cancelData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["appointment-detail"] });
     },
   });
 };
