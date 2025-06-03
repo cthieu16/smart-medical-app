@@ -1,6 +1,6 @@
 import { MaterialIcons, Ionicons, FontAwesome5, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   TextInput,
@@ -18,7 +18,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Picker } from "@react-native-picker/picker";
 import dayjs from "dayjs";
 import { Header } from "@/src/components/Header/Header";
-import { useMyDoctors } from "@/src/hooks/useDoctors";
+import { useSpecialties, useDoctorsBySpecialty } from "@/src/hooks/useSpecialties";
 import { useCreateAppointment } from "@/src/hooks/useAppointments";
 import { PrimaryButton } from "@/src/components/Buttons/PrimaryButton";
 import { SecondaryButton } from "@/src/components/Buttons/SecondaryButton";
@@ -70,15 +70,24 @@ const FormField = ({ children, className = "" }: { children: React.ReactNode; cl
 
 const AppointmentsCreateScreen = () => {
   const router = useRouter();
-  const { data: doctors = [] } = useMyDoctors();
+  const { data: specialties = [] } = useSpecialties();
   const createAppointment = useCreateAppointment();
 
-  const [doctorId, setDoctorId] = useState(doctors[0]?.id || "");
+  const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
+  const [doctorId, setDoctorId] = useState("");
   const [note, setNote] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(timeSlots[0]);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Fetch doctors by selected specialty
+  const { data: filteredDoctors = [], isLoading: isDoctorsLoading } = useDoctorsBySpecialty(selectedSpecialtyId);
+
+  // Reset doctor selection when specialty changes
+  useEffect(() => {
+    setDoctorId("");
+  }, [selectedSpecialtyId]);
 
   const handleConfirmDate = (date: any) => {
     setSelectedDate(date);
@@ -86,6 +95,14 @@ const AppointmentsCreateScreen = () => {
   };
 
   const handleCreateAppointment = async () => {
+    if (!selectedSpecialtyId) {
+      return Alert.alert("Thông báo", "Vui lòng chọn chuyên khoa!");
+    }
+
+    if (filteredDoctors.length === 0) {
+      return Alert.alert("Thông báo", "Chuyên khoa này hiện chưa có bác sĩ khả dụng. Vui lòng chọn chuyên khoa khác!");
+    }
+
     if (!doctorId) {
       return Alert.alert("Thông báo", "Vui lòng chọn bác sĩ!");
     }
@@ -176,23 +193,68 @@ const AppointmentsCreateScreen = () => {
             <View className="px-4">
               <FormField>
                 <InputLabel
-                  icon={<FontAwesome5 name="user-md" size={16} color={FIELD_COLORS.highlight} />}
-                  label="Chọn bác sĩ"
+                  icon={<MaterialCommunityIcons name="medical-bag" size={16} color={FIELD_COLORS.highlight} />}
+                  label="Chọn chuyên khoa"
                 />
                 <View className="bg-[#161B22] rounded-xl overflow-hidden" style={{ borderWidth: 1, borderColor: FIELD_COLORS.border }}>
                   <Picker
-                    selectedValue={doctorId}
-                    onValueChange={setDoctorId}
+                    selectedValue={selectedSpecialtyId}
+                    onValueChange={setSelectedSpecialtyId}
                     style={{ color: FIELD_COLORS.text }}
                     dropdownIconColor={FIELD_COLORS.highlight}
                     mode="dropdown"
                   >
                     <Picker.Item
-                      label="-- Chọn bác sĩ --"
+                      label="-- Chọn chuyên khoa --"
                       value=""
                       style={{ color: FIELD_COLORS.placeholder }}
                     />
-                    {doctors.map((doctor) => (
+                    {specialties.map((specialty) => (
+                      <Picker.Item
+                        key={specialty.id}
+                        label={specialty.name}
+                        value={specialty.id}
+                        color={FIELD_COLORS.text}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </FormField>
+
+              <FormField>
+                <InputLabel
+                  icon={<FontAwesome5 name="user-md" size={16} color={selectedSpecialtyId ? FIELD_COLORS.highlight : FIELD_COLORS.placeholder} />}
+                  label="Chọn bác sĩ"
+                />
+                <View 
+                  className="rounded-xl overflow-hidden" 
+                  style={{ 
+                    backgroundColor: selectedSpecialtyId ? '#161B22' : '#0D1117',
+                    borderWidth: 1, 
+                    borderColor: selectedSpecialtyId ? FIELD_COLORS.border : FIELD_COLORS.placeholder,
+                    opacity: selectedSpecialtyId ? 1 : 0.5
+                  }}
+                >
+                  <Picker
+                    selectedValue={doctorId}
+                    onValueChange={setDoctorId}
+                    style={{ color: selectedSpecialtyId ? FIELD_COLORS.text : FIELD_COLORS.placeholder }}
+                    dropdownIconColor={selectedSpecialtyId ? FIELD_COLORS.highlight : FIELD_COLORS.placeholder}
+                    mode="dropdown"
+                    enabled={!!selectedSpecialtyId && !isDoctorsLoading}
+                  >
+                    <Picker.Item
+                      label={
+                        !selectedSpecialtyId 
+                          ? "Vui lòng chọn chuyên khoa trước"
+                          : isDoctorsLoading 
+                            ? "Đang tải danh sách bác sĩ..."
+                            : "-- Chọn bác sĩ --"
+                      }
+                      value=""
+                      style={{ color: FIELD_COLORS.placeholder }}
+                    />
+                    {filteredDoctors.map((doctor) => (
                       <Picker.Item
                         key={doctor.id}
                         label={doctor.fullName}
@@ -202,6 +264,29 @@ const AppointmentsCreateScreen = () => {
                     ))}
                   </Picker>
                 </View>
+                {!selectedSpecialtyId && (
+                  <Text className="text-gray-500 text-xs mt-2 ml-1">
+                    * Chọn chuyên khoa để xem danh sách bác sĩ
+                  </Text>
+                )}
+                {selectedSpecialtyId && isDoctorsLoading && (
+                  <View className="flex-row items-center mt-2 ml-1">
+                    <ActivityIndicator size="small" color={FIELD_COLORS.highlight} />
+                    <Text className="text-blue-400 text-xs ml-2">
+                      Đang tải danh sách bác sĩ...
+                    </Text>
+                  </View>
+                )}
+                {selectedSpecialtyId && !isDoctorsLoading && filteredDoctors.length === 0 && (
+                  <Text className="text-yellow-500 text-xs mt-2 ml-1">
+                    ⚠️ Chuyên khoa này hiện chưa có bác sĩ khả dụng
+                  </Text>
+                )}
+                {selectedSpecialtyId && !isDoctorsLoading && filteredDoctors.length > 0 && (
+                  <Text className="text-green-500 text-xs mt-2 ml-1">
+                    ✓ Có {filteredDoctors.length} bác sĩ khả dụng
+                  </Text>
+                )}
               </FormField>
 
               <FormField>

@@ -11,4 +11,5 @@ export * from './useMedicalRecords';
 export * from './useNotifications';
 export * from './useOrders';
 export * from './useProducts';
+export * from './useSpecialties';
 export * from './useUser'; 
